@@ -10,7 +10,7 @@ export class FieldTraining {
     if (this.complete || station !== this.target) return 'Sigue el objetivo señalado en tu visor.';
     if (station === 'suit') {
       this.checks++;
-      if (this.checks === 3) { this.stage++; return 'Traje verificado. Dirígete a ARED, a la izquierda.'; }
+      if (this.checks === 3) { this.stage++; return 'Traje verificado. Cruza la puerta hacia el entrenamiento físico.'; }
       return ['Presión estable. Confirma la reserva de agua.', 'Agua confirmada. Verifica el enlace de telemetría.'][this.checks - 1];
     }
     if (station === 'ared') {
@@ -18,7 +18,7 @@ export class FieldTraining {
       this.lastRep = this.elapsed;
       if (this.gauge < .35 || this.gauge > .65) { this.errors++; return 'Fuera de ritmo. Pulsa E cuando el indicador entre en la zona verde.'; }
       this.reps++;
-      if (this.reps === 6) { this.stage++; return 'Coordinación completada. Acude a la consola ECLSS, a la derecha.'; }
+      if (this.reps === 6) { this.stage++; return 'Coordinación completada. Cruza la puerta hacia control de misión.'; }
       return `Repetición ${this.reps} de 6. Mantén el ritmo.`;
     }
     if (answer !== 'atmosphere') { this.errors++; return 'Prioridad incorrecta: la pérdida de presión afecta al soporte vital. Reintenta.'; }
