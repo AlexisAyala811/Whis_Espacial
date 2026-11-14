@@ -12,6 +12,12 @@ localmente cuando el navegador lo permite. Reiniciar restaura la partida.
 Esta versión requiere teclado y está diseñada para escritorio; no incluye controles táctiles.
 La coordinación ARED es una mecánica de juego, no un modelo fisiológico.
 
+La base usa geometría y materiales originales generados en código: suelo modular con
+textura procedural, paredes paneladas, iluminación de techo, monitores operativos,
+trajes, equipo ARED y cinta T2. El objetivo visual actual es una sala técnica creíble
+sin depender de modelos descargados. Los detalles aún son estilizados; el render no es
+una reconstrucción fotográfica de instalaciones reales.
+
 Demo jugable de navegador para entrenamiento ASCAN terrestre, construida con HTML,
 CSS, JavaScript y Three.js. La fase actual se rige por la
 [Constitución](.specify/memory/constitution.md) y mantiene separadas la simulación,
