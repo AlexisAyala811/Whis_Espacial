@@ -1,13 +1,15 @@
 // Browser-independent rules for the first-person training route.
+import { OutpostTraining } from './outpost-training.js';
 export class FieldTraining {
   constructor() {
     this.stage = 0; this.checks = 0; this.reps = 0; this.errors = 0; this.elapsed = 0; this.lastRep = -1;
     this.evaLinks = new Set();
     this.resources = { oxygen: 60, water: 40, energy: 90 };
     this.powerBuses = [false, true, false]; this.powerMoves = 0;
+    this.outpost = new OutpostTraining();
   }
-  get complete() { return this.stage === 6; }
-  get target() { return ['suit', 'ared', 'mental', 'eva', 'habitat', 'vab'][this.stage] ?? null; }
+  get complete() { return this.stage === 7; }
+  get target() { return ['suit', 'ared', 'mental', 'eva', 'habitat', 'vab', 'ship'][this.stage] ?? null; }
   get score() { return Math.max(0, 100 - this.errors * 10); }
   get gauge() { return (Math.sin(this.elapsed * 2) + 1) / 2; }
   advance(seconds) { if (!this.complete) this.elapsed += Math.min(Math.max(seconds, 0), .1); }
@@ -56,9 +58,17 @@ export class FieldTraining {
       if (!Number.isInteger(switchIndex) || switchIndex < 0 || switchIndex > 2) return 'Selecciona un bus de distribución.';
       for (let i = Math.max(0, switchIndex - 1); i <= Math.min(2, switchIndex + 1); i++) this.powerBuses[i] = !this.powerBuses[i];
       this.powerMoves++;
-      if (this.powerBuses.every(Boolean)) { this.stage++; return 'Buses estables. Preparación completada; vehículo listo para revisión final.'; }
+      if (this.powerBuses.every(Boolean)) { this.stage++; return 'Buses estables. Cruza la puerta a la cabina de la nave.'; }
       if (this.powerMoves > 4) this.errors++;
       return 'Distribución modificada. Verifica los tres buses antes de continuar.';
+    }
+    if (station === 'ship') {
+      if (answer?.retry) { this.outpost = new OutpostTraining(); return 'Simulación del puesto marciano reiniciada. Revisa los costos de cada decisión.'; }
+      const result = this.outpost.choose(answer?.choice);
+      if (!result) return 'Selecciona una de las tres decisiones de misión.';
+      if (!result.correct) this.errors++;
+      if (result.complete) { this.stage++; return result.why + ' Misión marciana completada. Consulta el informe.'; }
+      return result.why + (result.failed ? ' El puesto perdió un recurso crítico. Reinicia este ejercicio.' : ' Continúa al siguiente sol.');
     }
     return 'Sigue el objetivo señalado en tu visor.';
   }

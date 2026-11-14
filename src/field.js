@@ -1,11 +1,12 @@
 import { FieldTraining } from './core/field-training.js';
 import { createScenarioWorld, STATIONS } from './rendering/scenario-world.js';
 import { SCENARIOS } from './core/scenario-route.js';
+import { OUTPOST_QUESTIONS } from './core/outpost-training.js';
 
 const $=id=>document.getElementById(id);
 let mission=new FieldTraining(),running=false,started=false,transitioning=false,pauseAfterTransition=false,selectedCable=null,world;
-const titles=['Verifica tu traje','Controla cada repetición','Prioriza el soporte vital','Conecta el módulo EVA','Equilibra los recursos','Restablece la energía'];
-const details=['Acércate a la consola 01. Confirma presión, agua y telemetría con E.','Completa seis repeticiones en ARED pulsando E en la zona verde.','Resuelve los avisos de la consola ECLSS.','En NBL, une cada línea con su puerto. Espacio y Ctrl ajustan la altura.','Ajusta oxígeno, agua y energía del hábitat.','Activa los tres buses eléctricos del cohete.'];
+const titles=['Verifica tu traje','Controla cada repetición','Prioriza el soporte vital','Conecta el módulo EVA','Equilibra los recursos','Restablece la energía','Dirige el puesto marciano'];
+const details=['Acércate a la consola 01. Confirma presión, agua y telemetría con E.','Completa seis repeticiones en ARED pulsando E en la zona verde.','Resuelve los avisos de la consola ECLSS.','En NBL, une cada línea con su puerto. Espacio y Ctrl ajustan la altura.','Ajusta oxígeno, agua y energía del hábitat.','Activa los tres buses eléctricos del cohete.','En la cabina, toma cinco decisiones sobre un puesto lunar y observa sus consecuencias.'];
 try { world=createScenarioWorld($('world')); }
 catch { $('fatal').hidden=false;$('fatal').textContent='No se pudo iniciar la escena 3D. Activa WebGL o abre esta página en un navegador de escritorio compatible.'; }
 function say(message){$('message').textContent=message;}
@@ -50,6 +51,26 @@ function renderTask(){
     $('task-instruction').textContent='Cada interruptor cambia su bus y los buses vecinos. Deja los tres en verde.';
     const section=taskSection(`BUS PRINCIPAL · PROPULSIÓN · SEGURIDAD  /  ${mission.powerMoves} ${mission.powerMoves===1?'maniobra':'maniobras'}`,true);
     for(let i=0;i<3;i++) section.append(taskButton(`${['PRINCIPAL','PROPULSIÓN','SEGURIDAD'][i]} · ${mission.powerBuses[i]?'ACTIVO':'INACTIVO'}`,()=>act({switch:i}),mission.powerBuses[i]?'done':''));
+  }else if(mission.stage===6){
+    const sim=mission.outpost,question=OUTPOST_QUESTIONS[sim.sol];
+    $('task-kicker').textContent='CABINA / SIMULACIÓN DE PUESTO MARCIANO';
+    $('task-title').textContent=sim.failed?'Puesto en estado crítico':question?.title??'Misión completada';
+    $('task-instruction').textContent=sim.failed?'Un recurso cayó por debajo del mínimo de juego. Repite los cinco soles con otra estrategia.':question?.question??'La tripulación completó la misión.';
+    const section=taskSection('RECURSOS SIMULADOS · MÍNIMO 20');
+    for(const [key,label] of Object.entries({air:'Aire',power:'Energía',shield:'Protección',food:'Alimentos'})){
+      const row=document.createElement('div');row.className='outpost-resource';
+      const name=document.createElement('span');name.textContent=label;
+      const meter=document.createElement('meter');meter.min=0;meter.max=100;meter.low=20;meter.value=sim.resources[key];meter.setAttribute('aria-label',label);
+      const value=document.createElement('strong');value.textContent=sim.resources[key]+' %';row.append(name,meter,value);section.append(row);
+    }
+    if(sim.failed){controls.append(taskButton('Reintentar misión marciana',()=>act({retry:true}),'task-confirm'));return;}
+    const choices=taskSection('ELIGE UNA ACCIÓN · CADA OPCIÓN TIENE COSTO');choices.classList.add('outpost-options');
+    question.options.forEach((option,index)=>{
+      const costs=Object.entries(option.delta).map(([key,value])=>`${{air:'aire',power:'energía',shield:'protección',food:'alimentos'}[key]} ${value>0?'+':''}${value}`).join(' · ');
+      choices.append(taskButton(`${index+1}. ${option.text}  /  ${costs}`,()=>act({choice:index})));
+    });
+    const source=document.createElement('a');source.href=question.url;source.target='_blank';source.rel='noopener noreferrer';source.textContent='Consultar recurso: '+question.source+' ↗';source.className='task-source';controls.append(source);
+    const note=document.createElement('p');note.className='task-note';note.textContent='Los porcentajes y resultados son mecánicas ficticias para aprender a comparar costos; no son datos de una misión real.';controls.append(note);
   }
 }
 function openTask(){selectedCable=null;$('task-feedback').textContent='Sigue el procedimiento para desbloquear la puerta.';$('task').hidden=false;world.release();renderTask();$('task-controls').querySelector('button')?.focus();}
@@ -88,7 +109,7 @@ function act(answer){
   }
   if(!near)return;
   if(near.id==='mental'&&mission.target==='mental'&&!answer){$('mental').hidden=false;world.release();$('answer-air').focus();return;}
-  if(['eva','habitat','vab'].includes(near.id)&&mission.target===near.id&&!answer){openTask();return;}
+  if(['eva','habitat','vab','ship'].includes(near.id)&&mission.target===near.id&&!answer){openTask();return;}
   const previousStage=mission.stage;
   const response=mission.interact(near.id,answer);
   say(response);
@@ -97,7 +118,7 @@ function act(answer){
   if(mission.complete){
     running=false;world.release();$('mental').hidden=true;$('task').hidden=true;$('results').hidden=false;
     $('score').textContent=mission.score+' / 100';
-    $('result-detail').textContent='Seis escenarios completados en '+Math.floor(mission.elapsed)+' segundos. '+mission.errors+' errores registrados. '+(mission.score>=70?'Apto para continuar entrenando.':'Repite el entrenamiento para afianzar el procedimiento.');
+    $('result-detail').textContent='Siete escenarios y cinco soles de misión completados en '+Math.floor(mission.elapsed)+' segundos. '+mission.errors+' errores registrados. '+(mission.score>=70?'Apto para continuar entrenando.':'Repite el entrenamiento para afianzar el procedimiento.');
     $('again').focus();
     try{localStorage.setItem('lunar-command-field-report',JSON.stringify({score:mission.score,errors:mission.errors,seconds:mission.elapsed}));}catch{say('Entrenamiento completado. El navegador no permite guardar el informe.');}
   }

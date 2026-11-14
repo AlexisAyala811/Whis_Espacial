@@ -29,6 +29,9 @@ test('route requires suit checks, six timed repetitions and the correct priority
   assert.equal(mission.stage,5);
   mission.interact('vab',{switch:0});
   mission.interact('vab',{switch:2});
+  assert.equal(mission.stage,6);
+  assert.equal(mission.complete,false);
+  for(const choice of [0,1,2,0,1]) mission.interact('ship',{choice});
   assert.equal(mission.complete,true);
   assert.equal(mission.score,90);
   const elapsed=mission.elapsed;

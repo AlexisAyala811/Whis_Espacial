@@ -8,6 +8,7 @@ export const STATIONS = [
   { id: 'eva', name: '04 / EVA', scene: 3, x: -3.7, z: -1.4, color: 0x7bd7e4 },
   { id: 'habitat', name: '05 / HÁBITAT', scene: 4, x: -3.7, z: -1.4, color: 0xb3d98b },
   { id: 'vab', name: '06 / VAB', scene: 5, x: -3.7, z: -1.4, color: 0xf0c37d },
+  { id: 'ship', name: '07 / CABINA', scene: 6, x: -3.7, z: -1.4, color: 0x9bbbe5 },
 ];
 
 const arrivalZ = 7.7;
@@ -47,7 +48,7 @@ export function createScenarioWorld(container) {
 
   function makeRoom(index) {
     const scene = new THREE.Scene();
-    const colors = [0x626e70, 0x666b68, 0x575f5e, 0x164e65, 0x747c79, 0x4c5658];
+    const colors = [0x626e70, 0x666b68, 0x575f5e, 0x164e65, 0x747c79, 0x4c5658, 0x36444d];
     scene.background = new THREE.Color(colors[index]);
     scene.fog = new THREE.FogExp2(colors[index], .008);
     scene.add(new THREE.HemisphereLight(index === 3 ? 0xa8e8f5 : 0xf2f4ec, index === 3 ? 0x24516b : 0x6d7774, index === 3 ? 2 : 1.55));
@@ -93,7 +94,7 @@ export function createScenarioWorld(container) {
         }
       } else {
         context.fillStyle = '#c9d8ca'; context.font = 'bold 21px monospace';
-        context.fillText(['SUIT / BIOPLOT', 'ARED / LOAD', 'ECLSS / AIR', 'EVA / UMBILICAL', 'HERA / RESOURCES', 'VAB / POWER'][seed % 6], 19, 33);
+        context.fillText(['SUIT / BIOPLOT', 'ARED / LOAD', 'ECLSS / AIR', 'EVA / UMBILICAL', 'HERA / RESOURCES', 'VAB / POWER', 'OUTPOST / SOL 01'][seed % 7], 19, 33);
         context.strokeStyle = '#345357'; context.lineWidth = 1;
         for (let x = 20; x < 505; x += 32) { context.beginPath(); context.moveTo(x, 45); context.lineTo(x, 229); context.stroke(); }
         for (let y = 48; y < 235; y += 24) { context.beginPath(); context.moveTo(17, y); context.lineTo(497, y); context.stroke(); }
@@ -144,7 +145,7 @@ export function createScenarioWorld(container) {
 
     // Each scenario owns its own room, geometry and textures; the next one is built on demand.
     box(0, -.16, 0, 20, .32, 20, 0x454d4c);
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({ color: [0x8b8d87, 0x777e7b, 0x85877e, 0x497a82, 0xb5b9ad, 0x727b76][index], metalness: .08, roughness: .95 }));
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({ color: [0x8b8d87, 0x777e7b, 0x85877e, 0x497a82, 0xb5b9ad, 0x727b76, 0x515b60][index], metalness: .08, roughness: .95 }));
     floor.rotation.x = -Math.PI / 2; floor.position.y = .005; scene.add(floor);
     for (let x = -9; x <= 9; x += 2) box(x, .02, 0, .025, .016, 19.5, 0x646e6a);
     for (let z = -9; z <= 9; z += 2) box(0, .02, z, 19.5, .016, .025, 0x646e6a);
@@ -257,20 +258,76 @@ export function createScenarioWorld(container) {
       }
       textPanel('HERA / HABITAT SYSTEMS', 2.7, 4.55, -9.28, 5.8);
       obstacles.push({ x: 4.8, z: -3.9, w: 4, d: 2.2 }, { x: 6.2, z: 2.8, w: 1.5, d: 4.5 });
-    } else {
+    } else if (index === 5) {
+      // A broad assembly bay, with the rocket and access platforms kept clear of the route.
+      for (const x of [-7.8, 7.8]) for (const z of [-7.5, -3, 1.5, 6]) {
+        box(x, 8.3, z, .23, 16.2, .24, 0x728080);
+        for (const y of [4.2, 8.5, 12.6]) box(x, y, z, .45, .15, 2.4, 0xd5a94d);
+      }
+      for (const x of [-7.8, 7.8]) for (const y of [4.2, 8.5, 12.6]) {
+        box(x, y, -1, 1.45, .18, 15, 0x9b752e);
+        for (const z of [-8,-4,0,4,8]) box(x + (x<0?.65:-.65), y+.55, z, .08, 1.1, .08, 0xd4b15d);
+      }
+      box(0, 16.55, 0, 18, .32, .55, 0x87918c);
+      box(0, 15.8, 0, 10, .24, .48, 0xe0ad4c);
+      for(const x of [-5,0,5]) box(x, 15.4, 0, .25, .8, .3, 0xd5a852);
+      for(const x of [-5.8,-2.9,0,2.9,5.8]) for(const z of [-6,1,7]) box(x, 16.75, z, 1.35, .06, .55, 0xf0f1df, true);
+      for(const x of [-8,8]) for(const z of [-6,0,6]) box(x, 2.4, z, .09, 4.4, .09, 0xf0bd56);
+      box(0, .04, -2.8, 17, .02, .12, 0xe4b04d);
       for (const x of [-8.5, 8.5]) for (const y of [6, 11, 16]) box(x, y, -1, .35, .26, 17, 0xe2b266);
       for (const z of [-7, -2, 3, 8]) for (const x of [-8.5, 8.5]) box(x, 8.5, z, .22, 17, .22, 0x657576);
       for (const y of [4.5, 8.5, 12.5]) {
         box(4.1, y, -2.8, 6.3, .18, .48, 0xdfad58);
         box(4.1, y, -2.8, .48, .18, 6.3, 0xdfad58);
       }
-      cylinder(4.1, 6, -2.8, 1.25, 1.25, 11, 0xc77f45);
+      cylinder(4.1, 6, -2.8, 1.25, 1.25, 11, 0xc47b3c);
+      for (const y of [2.2,4.4,7.4,10.2]) cylinder(4.1, y, -2.8, 1.27, 1.27, .045, 0x9e683c);
       for (const y of [2.4, 6.8, 10.8]) cylinder(4.1, y, -2.8, 1.27, 1.27, .16, 0xe2e5da);
       const nose = new THREE.Mesh(new THREE.ConeGeometry(1.25, 2.5, 24), material(0xe5e9df));
       nose.position.set(4.1, 12.75, -2.8); scene.add(nose);
-      for (const x of [2.3, 5.9]) cylinder(x, 3.2, -2.8, .44, .44, 6.2, 0xe3e7df);
+      for (const x of [2.3, 5.9]) {
+        cylinder(x, 3.2, -2.8, .44, .44, 6.2, 0xe3e7df);
+        const cap = new THREE.Mesh(new THREE.ConeGeometry(.44,.9,16),material(0xe3e7df));cap.position.set(x,6.65,-2.8);scene.add(cap);
+      }
+      for(const y of [3.5,7,10.5]) {
+        box(4.1,y,-5.6,5.1,.18,.6,0xb68c3e);
+        for(const x of [1.6,6.6]) box(x,y+.52,-5.6,.08,1.04,.08,0xe2bc66);
+      }
       textPanel('VAB / LAUNCH INTEGRATION', 2.8, 4.55, -9.28, 6);
       obstacles.push({ x: 4.1, z: -2.8, w: 4.6, d: 4.2 });
+    } else {
+      // Spacecraft cabin: instrument bays, restrained seats and a framed Earth view.
+      for(const x of [-8.4,8.4]){
+        box(x,3,0,.55,5.6,16,0x66767b);
+        for(const z of [-6,-2,2,6]){
+          box(x+(x<0?.32:-.32),3,z,.08,4.7,.13,0xb7c4c3);
+          box(x+(x<0?.33:-.33),4.6,z, .1,.08,3.5,0xb7c4c3);
+        }
+      }
+      for(const z of [-5,0,5]){
+        for(const x of [-6,-2,2,6]) box(x,5.45,z,3.5,.1,.08,0x78909a);
+        box(0,5.35,z,1.4,.08,.45,0xd8e7e5,true);
+      }
+      for(const x of [2.5,5.7]){
+        box(x,.42,-2.1,1.4,.55,1.8,0x5a6a70);
+        box(x,1.32,-2.55,1.35,1.5,.3,0x879698);
+        box(x,1.08,-1.6,1.3,.17,.8,0x9daaa9);
+        box(x,2.03,-2.68,1.22,.15,.11,0x394b52);
+        obstacles.push({x,z:-2.1,w:1.5,d:2});
+      }
+      for(const x of [2.4,5.5]) display(x,3.05,-9.35,2.5,1.2,6);
+      box(4.1,1.03,-5.8,5.8,1.6,1.1,0x586a71);
+      box(4.1,1.82,-5.23,5.75,.12,.52,0x9caeaa);
+      for(const x of [2.5,4.1,5.7]) display(x,2.45,-6.31,1.35,.64,6);
+      obstacles.push({x:4.1,z:-5.8,w:6,d:1.4});
+      const windowRing=new THREE.Mesh(new THREE.TorusGeometry(1.35,.18,12,40),material(0xc1d2d0));
+      windowRing.position.set(5.4,3.65,-9.15);scene.add(windowRing);
+      const voidDisc=new THREE.Mesh(new THREE.CircleGeometry(1.18,40),new THREE.MeshBasicMaterial({color:0x06142b}));
+      voidDisc.position.set(5.4,3.65,-9.22);scene.add(voidDisc);
+      const earth=new THREE.Mesh(new THREE.SphereGeometry(.68,32,20),new THREE.MeshStandardMaterial({color:0x3479a0,emissive:0x183a5a,emissiveIntensity:.5,roughness:.9}));
+      earth.position.set(5.65,3.43,-9.08);scene.add(earth);
+      for(const x of [-.23,.12,.33]) box(5.65+x,3.55,-8.5,.06,.26,.025,0xd9e5e0);
+      textPanel('CABIN / MARS OUTPOST SIM',2.5,4.55,-9.28,6.3);
     }
     scene.add(camera);
     return { scene, obstacles, beacon, forwardLeaves, backLeaves, doorLamp };

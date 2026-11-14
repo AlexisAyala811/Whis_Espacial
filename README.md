@@ -6,14 +6,17 @@ La página inicial ahora abre una base 3D a pantalla completa inspirada en la in
 de NightOps/GENIE, con geometría original. Pulsa **Entrar en la base**.
 Usa WASD para caminar, Shift para correr, ratón capturado o arrastre para mirar
 (flechas como alternativa), E para interactuar y Esc para abrir el menú.
-Recorre seis escenarios: preparación de traje → acondicionamiento físico (ARED y T2)
+Recorre siete escenarios: preparación de traje → acondicionamiento físico (ARED y T2)
 → control de misión (ECLSS) → entrenamiento EVA en NBL → hábitat de investigación
-→ preparación de lanzamiento en VAB. Completa el objetivo para abrir la puerta siguiente;
+→ preparación de lanzamiento en VAB → cabina de la nave. Completa el objetivo para abrir la puerta siguiente;
 atraviésala o pulsa E junto a ella. Una pantalla de carga aparece mientras se genera
 la nueva sala. Puedes volver por la puerta anterior sin perder progreso.
 El recorrido incluye tres verificaciones, seis repeticiones a tiempo, una decisión
 de prioridad y tres minijuegos originales de procedimientos: conectar umbilicales EVA,
-equilibrar recursos del hábitat y restablecer buses eléctricos. Los errores reducen
+equilibrar recursos del hábitat y restablecer buses eléctricos. En la cabina diriges
+un puesto marciano durante cinco soles con decisiones sobre aire, radiación, energía,
+alimentos y demora de comunicaciones. Todas las opciones tienen costos visibles.
+Los errores reducen
 la puntuación. El informe final se guarda
 localmente cuando el navegador lo permite. Reiniciar restaura la partida.
 Esta versión requiere teclado y está diseñada para escritorio; no incluye controles táctiles.
@@ -26,7 +29,17 @@ paneladas, iluminación de techo, monitores operativos, trajes, equipo ARED, cin
 módulo de entrenamiento EVA, literas y cultivos del hábitat, y cohete de entrenamiento.
 El objetivo visual actual es una instalación técnica creíble
 sin depender de modelos descargados. Los detalles aún son estilizados; el render no es
-una reconstrucción fotográfica de instalaciones reales.
+una reconstrucción fotográfica de instalaciones reales. La cabina y el cohete son
+diseños originales basados en las imágenes de referencia proporcionadas. Los valores
+de la misión lunar son ficticios y educativos, no datos NASA en vivo.
+
+Los objetivos y los siete recursos del reto
+[Build a Junior Astronaut Mission Trainer](https://www.spaceappschallenge.org/2026/challenges/junior-astronaut-mission-trainer/)
+están enlazados en [resources.html](resources.html), accesible desde la pantalla de
+inicio y el informe final. La página oficial no respondió a la lectura automatizada;
+el desglose se cotejó con la [página del evento local HackAthlone](https://hackathlone.com/challenges/junior-astronaut-mission-trainer),
+que reproduce el reto y sus enlaces. El juego atribuye cada pregunta a una fuente,
+pero todavía no consume sus datos.
 
 Demo jugable de navegador para entrenamiento ASCAN terrestre, construida con HTML,
 CSS, JavaScript y Three.js. La fase actual se rige por la
