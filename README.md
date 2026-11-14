@@ -1,5 +1,17 @@
 # Lunar Command 3D
 
+## Experiencia en primera persona
+
+La página inicial ahora abre una base 3D a pantalla completa inspirada en la interacción
+de NightOps/GENIE, con geometría original. Pulsa **Entrar en la base**.
+Usa WASD para caminar, Shift para correr, ratón capturado o arrastre para mirar
+(flechas como alternativa), E para interactuar y Esc para abrir el menú.
+Recorre traje → ARED → ECLSS: tres verificaciones, seis repeticiones a tiempo y una
+decisión de prioridad. Los errores reducen la puntuación. El informe final se guarda
+localmente cuando el navegador lo permite. Reiniciar restaura la partida.
+Esta versión requiere teclado y está diseñada para escritorio; no incluye controles táctiles.
+La coordinación ARED es una mecánica de juego, no un modelo fisiológico.
+
 Demo jugable de navegador para entrenamiento ASCAN terrestre, construida con HTML,
 CSS, JavaScript y Three.js. La fase actual se rige por la
 [Constitución](.specify/memory/constitution.md) y mantiene separadas la simulación,

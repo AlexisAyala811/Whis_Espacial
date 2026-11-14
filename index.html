@@ -1,43 +1,37 @@
 <!doctype html>
-<html lang="es">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="Demo de entrenamiento terrestre de Lunar Command 3D">
-    <title>Lunar Command 3D · Entrenamiento ASCAN</title>
-    <link rel="stylesheet" href="./src/styles.css">
-    <script type="importmap">
-      {"imports":{"three":"./node_modules/three/build/three.module.js"}}
-    </script>
-    <script type="module" src="./src/main.js"></script>
-  </head>
-  <body>
-    <header class="topbar">
-      <div><p class="eyebrow">LUNAR COMMAND 3D</p><h1>Entrenamiento ASCAN</h1></div>
-      <div id="connection-status" class="status-pill" role="status">SIMULACIÓN LISTA</div>
-    </header>
-    <main class="app-shell">
-      <section class="mission-summary" aria-labelledby="mission-heading">
-        <div><p class="eyebrow">FASE DE MISIÓN</p><h2 id="mission-heading">Acondicionamiento terrestre</h2><p id="mission-objective">Confirma el protocolo previo y prepara la primera estación.</p><label class="scenario-label" for="scenario-select">Escenario de demo</label><select id="scenario-select"><option value="physical-conditioning">Acondicionamiento físico</option><option value="mental-readiness">Evaluación mental</option></select></div>
-        <dl class="mission-clock"><div><dt>MET</dt><dd id="mission-time">T+000:00</dd></div><div><dt>ESTADO</dt><dd id="mission-state">LISTO</dd></div></dl>
-      </section>
-      <section class="panel phase-rail" aria-labelledby="phase-heading">
-        <div class="section-heading compact"><div><p class="eyebrow">MÁQUINA DE ESTADOS</p><h2 id="phase-heading">Progresión de misión</h2></div><span id="phase-progress" class="muted">FASE 0 / 8</span></div>
-        <ol id="mission-phases" class="phase-list" aria-label="Fases de la misión"></ol>
-      </section>
-      <div class="workspace">
-        <section class="scene-card" aria-labelledby="scene-heading">
-          <div class="section-heading"><div><p class="eyebrow">VISTA DE ENTRENAMIENTO</p><h2 id="scene-heading">Base terrestre · Sala ARED / T2</h2></div><div class="button-row"><button id="start-session" class="primary-button" type="button">Iniciar sesión</button><button id="finish-session" class="secondary-button" type="button" disabled>Finalizar</button></div></div>
-          <div id="scene-container" class="scene-container" aria-label="Representación 3D de la sala de entrenamiento"></div>
-          <p id="webgl-status" class="muted" role="status"></p>
-        </section>
-        <aside class="side-stack" aria-label="Telemetría y comunicación">
-          <section class="panel" aria-labelledby="telemetry-heading"><div class="section-heading compact"><h2 id="telemetry-heading">Telemetría</h2><span class="live-dot">EN LÍNEA</span></div><div id="telemetry-panel" class="telemetry-grid"></div></section>
-          <section class="panel" aria-labelledby="checklist-heading"><div class="section-heading compact"><h2 id="checklist-heading">Checklist</h2><span id="checklist-progress" class="muted">0 / 0</span></div><p id="checklist-instruction" class="panel-instruction">Inicia la sesión para cargar el procedimiento.</p><div id="checklist-panel" class="checklist-list"></div><div id="station-panel" class="station-list" aria-label="Estaciones físicas"></div></section>
-        </aside>
-      </div>
-      <section class="panel lumine-panel" aria-labelledby="lumine-heading"><div class="section-heading compact"><div><p class="eyebrow">COPILOTO TÁCTICO</p><h2 id="lumine-heading">LUMINE <span class="muted">/ A.R.E.S.</span></h2></div><span id="voice-status" class="muted">Modo texto</span></div><div id="conversation-log" class="conversation-log" aria-live="polite"></div><form id="voice-form" class="voice-form"><label class="sr-only" for="voice-input">Consulta para LUMINE</label><input id="voice-input" name="voice-input" type="text" autocomplete="off" placeholder="Escribe una consulta para LUMINE…"><button class="secondary-button" type="submit">Enviar</button></form></section>
-      <section id="report-panel" class="panel report-panel" aria-labelledby="report-heading" hidden><div class="section-heading compact"><h2 id="report-heading">Informe de sesión</h2><span id="report-result"></span></div><div id="report-content"></div></section>
-    </main>
-  </body>
-</html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Lunar Command · Earth Operations</title>
+<meta name="description" content="Explora una base terrestre en primera persona y completa tu entrenamiento ASCAN.">
+<link rel="stylesheet" href="./src/field.css">
+<script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js"}}</script>
+<script type="module" src="./src/field.js"></script>
+</head><body>
+<div id="world"></div><div class="vignette" aria-hidden="true"></div>
+<header><a href="./">LC <span>/</span> EARTH OPERATIONS</a><small>SECTOR 07 · EN LÍNEA</small><button id="menu-button">ESC · Menú</button></header>
+<main>
+<section id="briefing" class="briefing">
+<small>LUNAR COMMAND 3D // PROTOCOLO ASCAN</small>
+<h1>ANTES DEL<br>PRIMER <em>VUELO.</em></h1>
+<p class="intro">Toda misión empieza en la Tierra.<br>Entra en la base. Verifica tu equipo.<br>Demuestra que puedes tomar el mando.</p>
+<div class="mission-card"><span>00</span><div><small>MISIÓN DE ENTRENAMIENTO</small><h2>Preparación para lo desconocido</h2><p>Traje · Coordinación física · Decisiones críticas</p></div></div>
+<button id="deploy" class="primary">ENTRAR EN LA BASE ↗</button>
+<p class="hint">WASD · Moverse / Ratón · Mirar / E · Interactuar</p>
+<p class="fiction">Simulación ficticia. Sin afiliación con NASA.</p>
+</section>
+<section id="game-hud" hidden>
+<div class="objective"><small>OBJETIVO ACTUAL <span id="step-count">01 / 03</span></small><h2 id="objective-title"></h2><p id="objective-detail"></p><span id="distance"></span></div>
+<div class="crosshair" aria-hidden="true">+</div>
+<div class="interaction"><button id="interact" class="primary" disabled>Acércate a una estación</button></div>
+<div id="exercise" class="exercise" hidden><small>COORDINACIÓN / <span id="rep-count">0 / 6</span></small><div class="gauge"><div class="target-zone"></div><span id="needle"></span></div><p>Pulsa E cuando la aguja entre en la zona verde.</p></div>
+<section id="mental" class="decision" hidden aria-labelledby="decision-title"><small>AVISOS CONCURRENTES</small><h2 id="decision-title">¿Qué atiendes primero?</h2><p>La presión de cabina cae. Un módulo de carga informa una subida de temperatura.</p><button id="answer-air">1 · Aislar la fuga de atmósfera</button><button id="answer-power">2 · Revisar la carga térmica</button></section>
+<aside class="lumine"><span class="portrait">L</span><div><small>LUMINE / A.R.E.S. · TEXTO</small><p id="message" role="status">Comandante, dirígete al punto de verificación del traje.</p></div></aside>
+<div class="telemetry"><div><small>MET</small><strong id="clock">00:00</strong></div><div><small>PROTOCOLO</small><strong id="progress">0 / 3</strong></div><div><small>ERRORES</small><strong id="errors">0</strong></div></div>
+<div class="coordinates" id="position"></div>
+</section>
+<section id="pause" class="modal" hidden><small>CONTROL DE MISIÓN</small><h2>Exploración en pausa</h2><p>WASD para moverte. Ratón capturado o arrastre para mirar. También puedes usar las flechas. E para interactuar.</p><button id="resume" class="primary">Continuar</button><button id="restart">Reiniciar entrenamiento</button></section>
+<section id="results" class="modal" hidden><small>DEBRIEF / FASE 0</small><h2>Entrenamiento completado</h2><strong id="score" class="score"></strong><p id="result-detail"></p><button id="again" class="primary">Volver a entrenar</button><p class="hint">Las fases de vuelo se incorporarán en futuras versiones.</p></section>
+<p id="fatal" class="modal" hidden role="alert"></p>
+</main>
+<footer><span>BASE TERRESTRE / SECTOR 07</span><span>FASE 00 ━━━━ ASCAN</span><span>WASD + RATÓN · E INTERACTUAR</span></footer>
+</body></html>

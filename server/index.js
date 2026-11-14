@@ -1,10 +1,10 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { extname, join, normalize } from 'node:path';
+import { extname, join, normalize, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createLiveToken } from './gemini-token.js';
 
-const root = fileURLToPath(new URL('..', import.meta.url));
+const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const port = Number(process.env.PORT ?? 8000);
 const allowedOrigin = process.env.ALLOWED_ORIGIN ?? `http://127.0.0.1:${port}`;
 const contentTypes = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.md': 'text/plain; charset=utf-8' };
