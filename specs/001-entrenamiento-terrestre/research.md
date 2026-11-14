@@ -125,3 +125,14 @@ sin introducir comandos o carpetas propietarias que desplacen `.specify/` o `.cl
 Las siguientes iteraciones deben actualizar los artefactos existentes y ejecutar las
 verificaciones correspondientes antes de declarar convergencia; no se generarán fases
 paralelas fuera del flujo documentado.
+
+## Decisión 8: Diferir la voz en la demo actual
+
+**Decision**: La demo jugable actual funcionará en modo texto y paneles. No solicitará
+permisos de micrófono ni abrirá sesiones Gemini Live durante esta iteración. El cliente
+de audio, el contrato y el servicio de token permanecen aislados para reactivarlos cuando
+la experiencia de checklists y telemetría esté estabilizada.
+
+**Rationale**: Mantiene el alcance inmediato en entrenamiento físico/mental, evita una
+dependencia externa durante las pruebas de navegador y conserva una ruta de evolución sin
+replantear el núcleo determinista.

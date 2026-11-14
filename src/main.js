@@ -1,26 +1,15 @@
 import * as THREE from 'three';
 import { Simulation } from './core/simulation.js';
 import { confirmStep } from './core/checklist-engine.js';
-import { buildLumineInstructions, buildTelemetryBlock } from './core/voice-policy.js';
+import { buildTelemetryBlock } from './core/voice-policy.js';
 import { createSession } from './core/mission-state.js';
 import { createScene } from './rendering/scene.js';
-import { startMicrophone } from './audio/microphone.js';
-import { VoiceClient } from './audio/voice-client.js';
 
 let session = createSession({ seed: 24014 });
 let simulation = new Simulation(session);
 const scene = createScene(document.querySelector('#scene-container'));
-const selectors = { connection: '#connection-status', start: '#start-session', finish: '#finish-session', scenario: '#scenario-select', missionTime: '#mission-time', missionState: '#mission-state', objective: '#mission-objective', telemetry: '#telemetry-panel', checklist: '#checklist-panel', checklistProgress: '#checklist-progress', checklistInstruction: '#checklist-instruction', stationPanel: '#station-panel', report: '#report-panel', reportResult: '#report-result', reportContent: '#report-content', conversation: '#conversation-log', voiceStatus: '#voice-status', voiceForm: '#voice-form', voiceInput: '#voice-input', microphone: '#microphone-button' };
+const selectors = { connection: '#connection-status', start: '#start-session', finish: '#finish-session', scenario: '#scenario-select', missionTime: '#mission-time', missionState: '#mission-state', objective: '#mission-objective', telemetry: '#telemetry-panel', checklist: '#checklist-panel', checklistProgress: '#checklist-progress', checklistInstruction: '#checklist-instruction', stationPanel: '#station-panel', report: '#report-panel', reportResult: '#report-result', reportContent: '#report-content', conversation: '#conversation-log', voiceStatus: '#voice-status', voiceForm: '#voice-form', voiceInput: '#voice-input' };
 const elements = Object.fromEntries(Object.entries(selectors).map(([key, selector]) => [key, document.querySelector(selector)]));
-let stopMicrophone = null;
-let voiceClient;
-
-voiceClient = new VoiceClient({
-  onStatus(status) { elements.voiceStatus.textContent = status === 'connected' ? 'Voz conectada' : status === 'connecting' ? 'Conectando voz…' : 'Voz no disponible'; },
-  onTranscript(speaker, text) { addConversation(speaker, text); },
-  onAudio(data) { voiceClient.player.playBase64(data); },
-  onInterrupt() { addConversation('LUMINE', 'Interrupción recibida. Escuchando, comandante.'); },
-});
 
 function formatMissionTime(ms) { const seconds = Math.floor(ms / 1000); return `T+${String(Math.floor(seconds / 60)).padStart(3, '0')}:${String(seconds % 60).padStart(2, '0')}`; }
 function addConversation(speaker, text) { const entry = document.createElement('p'); entry.className = 'conversation-entry'; entry.innerHTML = `<strong>${speaker}</strong> ${text.replace(/[<>]/g, '')}`; elements.conversation.append(entry); elements.conversation.scrollTop = elements.conversation.scrollHeight; }
@@ -33,24 +22,7 @@ function render() { const snapshot = simulation.snapshot(); elements.missionTime
 elements.scenario.addEventListener('change', () => { if (session.status === 'active') return; session = createSession({ seed: 24014, scenarioId: elements.scenario.value }); simulation = new Simulation(session); elements.start.disabled = false; elements.finish.disabled = true; elements.report.hidden = true; elements.conversation.replaceChildren(); render(); });
 elements.start.addEventListener('click', () => { simulation.start(); addConversation('LUMINE', 'Comandante, estado inicial nominal. Solicito la primera verificación de checklist.'); elements.start.disabled = true; render(); });
 elements.finish.addEventListener('click', () => { const report = simulation.finish(); addConversation('LUMINE', `Sesión finalizada. Resultado ${report.result}. Revisión recomendada antes del próximo vuelo.`); render(); });
-elements.voiceForm.addEventListener('submit', (event) => { event.preventDefault(); const text = elements.voiceInput.value.trim(); if (!text) return; const context = buildTelemetryBlock(session, 'Confirme el paso activo del checklist.'); addConversation('COMANDANTE', text); if (!voiceClient.sendText(text, context)) addConversation('LUMINE', `Telemetría contextual disponible. ${context}`); elements.voiceInput.value = ''; });
-elements.microphone.addEventListener('click', async () => {
-  if (stopMicrophone) {
-    stopMicrophone();
-    stopMicrophone = null;
-    elements.microphone.setAttribute('aria-pressed', 'false');
-    elements.microphone.textContent = 'Hablar';
-    return;
-  }
-  try {
-    if (voiceClient.socket?.readyState !== WebSocket.OPEN) await voiceClient.connect({ instructions: buildLumineInstructions(), context: buildTelemetryBlock(session) });
-    stopMicrophone = await startMicrophone((chunk) => voiceClient.sendAudio(chunk));
-    elements.microphone.setAttribute('aria-pressed', 'true');
-    elements.microphone.textContent = 'Detener voz';
-  } catch {
-    elements.voiceStatus.textContent = 'Voz no disponible · usa texto';
-  }
-});
+elements.voiceForm.addEventListener('submit', (event) => { event.preventDefault(); const text = elements.voiceInput.value.trim(); if (!text) return; const context = buildTelemetryBlock(session, 'Confirme el paso activo del checklist.'); addConversation('COMANDANTE', text); addConversation('LUMINE', `Modo texto activo. ${context}`); elements.voiceInput.value = ''; });
 let lastFrame = performance.now();
 let lastUiRender = 0;
 function animate(now) {
@@ -65,5 +37,5 @@ function animate(now) {
   }
   requestAnimationFrame(animate);
 }
-elements.voiceStatus.title = buildLumineInstructions(); render(); requestAnimationFrame(animate);
+render(); requestAnimationFrame(animate);
 export { THREE, simulation };

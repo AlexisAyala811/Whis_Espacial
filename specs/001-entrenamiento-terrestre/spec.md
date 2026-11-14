@@ -41,7 +41,10 @@ Como aspirante, quiero resolver una evaluación mental con información incomple
 
 ---
 
-### User Story 3 - Consultar y responder a LUMINE (Priority: P3)
+### User Story 3 - Consultar y responder a LUMINE (Priority: P3, diferida)
+
+> Estado actual: esta historia se conserva como evolución planificada, pero la demo
+> publicada en esta iteración funciona exclusivamente con texto y paneles.
 
 Como aspirante, quiero hablar con LUMINE, la IA de a bordo A.R.E.S., y recibir respuestas tácticas para consultar telemetría, repetir una instrucción o confirmar una decisión sin abandonar la escena de entrenamiento.
 
@@ -109,7 +112,7 @@ Como aspirante, quiero hablar con LUMINE, la IA de a bordo A.R.E.S., y recibir r
 
 ## Assumptions
 
-- La primera demo se dirige a una persona en navegador de escritorio con teclado, ratón, micrófono y conexión a Internet opcional para la voz.
+- La primera demo se dirige a una persona en navegador de escritorio con teclado y ratón; la voz y el micrófono quedan fuera del alcance activo de esta iteración.
 - La demo cubre la base terrestre y no incluye todavía lanzamiento, crucero, EDL, operaciones de superficie ni ISRU.
 - El entrenamiento físico será una representación simulada con controles y telemetría, no una medición médica del usuario ni un diagnóstico.
 - NASA, A.R.E.S. y V.I.E.R.N.E.S.-M se usarán como ficción inspirada. La demo no afirmará afiliación, certificación ni validación oficial de NASA.
