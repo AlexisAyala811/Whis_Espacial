@@ -6,19 +6,24 @@ La página inicial ahora abre una base 3D a pantalla completa inspirada en la in
 de NightOps/GENIE, con geometría original. Pulsa **Entrar en la base**.
 Usa WASD para caminar, Shift para correr, ratón capturado o arrastre para mirar
 (flechas como alternativa), E para interactuar y Esc para abrir el menú.
-Recorre tres escenarios: preparación de traje → acondicionamiento físico (ARED y T2)
-→ control de misión (ECLSS). Completa el objetivo para abrir la puerta siguiente;
+Recorre seis escenarios: preparación de traje → acondicionamiento físico (ARED y T2)
+→ control de misión (ECLSS) → entrenamiento EVA en NBL → hábitat de investigación
+→ preparación de lanzamiento en VAB. Completa el objetivo para abrir la puerta siguiente;
 atraviésala o pulsa E junto a ella. Una pantalla de carga aparece mientras se genera
 la nueva sala. Puedes volver por la puerta anterior sin perder progreso.
-El recorrido incluye tres verificaciones, seis repeticiones a tiempo y una decisión
-de prioridad. Los errores reducen la puntuación. El informe final se guarda
+El recorrido incluye tres verificaciones, seis repeticiones a tiempo, una decisión
+de prioridad y tres minijuegos originales de procedimientos: conectar umbilicales EVA,
+equilibrar recursos del hábitat y restablecer buses eléctricos. Los errores reducen
+la puntuación. El informe final se guarda
 localmente cuando el navegador lo permite. Reiniciar restaura la partida.
 Esta versión requiere teclado y está diseñada para escritorio; no incluye controles táctiles.
+En NBL, Espacio y Ctrl permiten ajustar la altura en el agua simulada.
 La coordinación ARED es una mecánica de juego, no un modelo fisiológico.
 
 Cada sala se construye al entrar y libera los recursos de la anterior. La base usa
 geometría y materiales originales generados en código: suelo modular, paredes
-paneladas, iluminación de techo, monitores operativos, trajes, equipo ARED y cinta T2.
+paneladas, iluminación de techo, monitores operativos, trajes, equipo ARED, cinta T2,
+módulo de entrenamiento EVA, literas y cultivos del hábitat, y cohete de entrenamiento.
 El objetivo visual actual es una instalación técnica creíble
 sin depender de modelos descargados. Los detalles aún son estilizados; el render no es
 una reconstrucción fotográfica de instalaciones reales.

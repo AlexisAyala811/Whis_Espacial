@@ -14,23 +14,24 @@
 <small>LUNAR COMMAND 3D // PROTOCOLO ASCAN</small>
 <h1>ANTES DEL<br>PRIMER <em>VUELO.</em></h1>
 <p class="intro">Toda misión empieza en la Tierra.<br>Entra en la base. Verifica tu equipo.<br>Demuestra que puedes tomar el mando.</p>
-<div class="mission-card"><span>00</span><div><small>MISIÓN DE ENTRENAMIENTO</small><h2>Preparación para lo desconocido</h2><p>Traje · Coordinación física · Decisiones críticas</p></div></div>
+<div class="mission-card"><span>00</span><div><small>MISIÓN DE ENTRENAMIENTO</small><h2>Preparación para lo desconocido</h2><p>Seis escenarios · Tareas de sistemas · Decisiones críticas</p></div></div>
 <button id="deploy" class="primary">ENTRAR EN LA BASE ↗</button>
 <p class="hint">WASD · Moverse / Ratón · Mirar / E · Interactuar</p>
 <p class="fiction">Simulación ficticia. Sin afiliación con NASA.</p>
 </section>
 <section id="game-hud" hidden>
-<div class="objective"><small>OBJETIVO ACTUAL <span id="step-count">01 / 03</span></small><h2 id="objective-title"></h2><p id="objective-detail"></p><span id="distance"></span></div>
+<div class="objective"><small>OBJETIVO ACTUAL <span id="step-count">01 / 06</span></small><h2 id="objective-title"></h2><p id="objective-detail"></p><span id="distance"></span></div>
 <div class="crosshair" aria-hidden="true">+</div>
 <div class="interaction"><button id="interact" class="primary" disabled>Acércate a una estación</button></div>
 <div id="exercise" class="exercise" hidden><small>COORDINACIÓN / <span id="rep-count">0 / 6</span></small><div class="gauge"><div class="target-zone"></div><span id="needle"></span></div><p>Pulsa E cuando la aguja entre en la zona verde.</p></div>
 <section id="mental" class="decision" hidden aria-labelledby="decision-title"><small>AVISOS CONCURRENTES</small><h2 id="decision-title">¿Qué atiendes primero?</h2><p>La presión de cabina cae. Un módulo de carga informa una subida de temperatura.</p><button id="answer-air">1 · Aislar la fuga de atmósfera</button><button id="answer-power">2 · Revisar la carga térmica</button></section>
+<section id="task" class="task-modal" hidden role="dialog" aria-modal="true" aria-labelledby="task-title"><small id="task-kicker">PROCEDIMIENTO</small><h2 id="task-title"></h2><p id="task-instruction"></p><p id="task-feedback" role="status"></p><div id="task-controls"></div><button id="task-close">Volver a la sala</button></section>
 <aside class="lumine"><span class="portrait">L</span><div><small>LUMINE / A.R.E.S. · TEXTO</small><p id="message" role="status">Comandante, dirígete al punto de verificación del traje.</p></div></aside>
-<div class="telemetry"><div><small>MET</small><strong id="clock">00:00</strong></div><div><small>PROTOCOLO</small><strong id="progress">0 / 3</strong></div><div><small>ERRORES</small><strong id="errors">0</strong></div></div>
+<div class="telemetry"><div><small>MET</small><strong id="clock">00:00</strong></div><div><small>PROTOCOLO</small><strong id="progress">0 / 6</strong></div><div><small>ERRORES</small><strong id="errors">0</strong></div></div>
 <div class="coordinates" id="position"></div>
 </section>
 <section id="loading" class="loading" hidden role="status" aria-live="polite"><div class="loading-content"><small>TRANSICIÓN DE ESCENARIO // BASE TERRESTRE</small><h2 id="loading-title">Cargando escenario</h2><p>Preparando geometría, iluminación y sistemas de la siguiente sala.</p><div class="loading-track" aria-hidden="true"><span></span></div><small>Permanece en la zona de transferencia</small></div></section>
-<section id="pause" class="modal" hidden><small>CONTROL DE MISIÓN</small><h2>Exploración en pausa</h2><p>WASD para moverte. Ratón capturado o arrastre para mirar. También puedes usar las flechas. E para interactuar y cruzar puertas abiertas.</p><button id="resume" class="primary">Continuar</button><button id="restart">Reiniciar entrenamiento</button></section>
+<section id="pause" class="modal" hidden><small>CONTROL DE MISIÓN</small><h2>Exploración en pausa</h2><p>WASD para moverte. Ratón capturado o arrastre para mirar. También puedes usar las flechas. E para interactuar y cruzar puertas abiertas. En NBL, Espacio y Ctrl ajustan la altura.</p><button id="resume" class="primary">Continuar</button><button id="restart">Reiniciar entrenamiento</button></section>
 <section id="results" class="modal" hidden><small>DEBRIEF / FASE 0</small><h2>Entrenamiento completado</h2><strong id="score" class="score"></strong><p id="result-detail"></p><button id="again" class="primary">Volver a entrenar</button><p class="hint">Las fases de vuelo se incorporarán en futuras versiones.</p></section>
 <p id="fatal" class="modal" hidden role="alert"></p>
 </main>

@@ -5,6 +5,9 @@ export const STATIONS = [
   { id: 'suit', name: '01 / TRAJE', scene: 0, x: -3.7, z: -1.4, color: 0x91d9c2 },
   { id: 'ared', name: '02 / ARED', scene: 1, x: -3.7, z: -1.4, color: 0xe8bb79 },
   { id: 'mental', name: '03 / ECLSS', scene: 2, x: -3.7, z: -1.4, color: 0x8bbdd5 },
+  { id: 'eva', name: '04 / EVA', scene: 3, x: -3.7, z: -1.4, color: 0x7bd7e4 },
+  { id: 'habitat', name: '05 / HÁBITAT', scene: 4, x: -3.7, z: -1.4, color: 0xb3d98b },
+  { id: 'vab', name: '06 / VAB', scene: 5, x: -3.7, z: -1.4, color: 0xf0c37d },
 ];
 
 const arrivalZ = 7.7;
@@ -26,7 +29,7 @@ export function createScenarioWorld(container) {
   const keys = new Set();
   const velocity = new THREE.Vector2();
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
-  let dragging = false, controlsActive = false, stride = 0, sceneIndex = 0;
+  let dragging = false, controlsActive = false, stride = 0, sceneIndex = 0, hoverY = 1.7;
 
   const suitWhite = new THREE.MeshStandardMaterial({ color: 0xdce3df, roughness: .68 });
   const suitGray = new THREE.MeshStandardMaterial({ color: 0x829698, roughness: .7 });
@@ -44,10 +47,10 @@ export function createScenarioWorld(container) {
 
   function makeRoom(index) {
     const scene = new THREE.Scene();
-    const colors = [0x626e70, 0x666b68, 0x575f5e];
+    const colors = [0x626e70, 0x666b68, 0x575f5e, 0x164e65, 0x747c79, 0x4c5658];
     scene.background = new THREE.Color(colors[index]);
     scene.fog = new THREE.FogExp2(colors[index], .008);
-    scene.add(new THREE.HemisphereLight(0xf2f4ec, 0x6d7774, 1.55));
+    scene.add(new THREE.HemisphereLight(index === 3 ? 0xa8e8f5 : 0xf2f4ec, index === 3 ? 0x24516b : 0x6d7774, index === 3 ? 2 : 1.55));
     const light = new THREE.DirectionalLight(0xf5f2e8, 1.25);
     light.position.set(-4, 8, 6); scene.add(light);
     const obstacles = [], materials = new Map();
@@ -90,7 +93,7 @@ export function createScenarioWorld(container) {
         }
       } else {
         context.fillStyle = '#c9d8ca'; context.font = 'bold 21px monospace';
-        context.fillText(['SUIT / BIOPLOT', 'ARED / LOAD', 'ECLSS / AIR', 'FLIGHT DYNAMICS'][seed % 4], 19, 33);
+        context.fillText(['SUIT / BIOPLOT', 'ARED / LOAD', 'ECLSS / AIR', 'EVA / UMBILICAL', 'HERA / RESOURCES', 'VAB / POWER'][seed % 6], 19, 33);
         context.strokeStyle = '#345357'; context.lineWidth = 1;
         for (let x = 20; x < 505; x += 32) { context.beginPath(); context.moveTo(x, 45); context.lineTo(x, 229); context.stroke(); }
         for (let y = 48; y < 235; y += 24) { context.beginPath(); context.moveTo(17, y); context.lineTo(497, y); context.stroke(); }
@@ -141,19 +144,21 @@ export function createScenarioWorld(container) {
 
     // Each scenario owns its own room, geometry and textures; the next one is built on demand.
     box(0, -.16, 0, 20, .32, 20, 0x454d4c);
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({ color: [0x8b8d87, 0x777e7b, 0x85877e][index], metalness: .08, roughness: .95 }));
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(20, 20), new THREE.MeshStandardMaterial({ color: [0x8b8d87, 0x777e7b, 0x85877e, 0x497a82, 0xb5b9ad, 0x727b76][index], metalness: .08, roughness: .95 }));
     floor.rotation.x = -Math.PI / 2; floor.position.y = .005; scene.add(floor);
     for (let x = -9; x <= 9; x += 2) box(x, .02, 0, .025, .016, 19.5, 0x646e6a);
     for (let z = -9; z <= 9; z += 2) box(0, .02, z, 19.5, .016, .025, 0x646e6a);
-    box(-10, 3, 0, .35, 6, 20, 0x98a5a2); box(10, 3, 0, .35, 6, 20, 0x98a5a2);
+    const roomHeight = index === 5 ? 17 : 6;
+    const wallColor = index === 3 ? 0x397c8d : index === 4 ? 0xc6ccc0 : 0x98a5a2;
+    box(-10, roomHeight / 2, 0, .35, roomHeight, 20, wallColor); box(10, roomHeight / 2, 0, .35, roomHeight, 20, wallColor);
     for (const side of [-1, 1]) {
-      box(side * 5.6, 3, -9.9, 8.8, 6, .3, 0x9aa6a2);
-      box(side * 5.6, 3, 9.9, 8.8, 6, .3, 0x82928f);
+      box(side * 5.6, roomHeight / 2, -9.9, 8.8, roomHeight, .3, wallColor);
+      box(side * 5.6, roomHeight / 2, 9.9, 8.8, roomHeight, .3, wallColor);
     }
-    box(0, 6, 0, 20, .2, 20, 0xc5cac2);
-    for (let x = -9; x < 10; x += 2) for (let z = -9; z < 10; z += 2) {
-      box(x, 5.87, z, 1.94, .024, 1.94, 0xd0d3ca);
-      if (((x + z) / 2) % 3 === 0) box(x, 5.83, z, 1.3, .02, .42, 0xf4f3e8, true);
+    box(0, roomHeight, 0, 20, .2, 20, index === 5 ? 0x66716e : 0xc5cac2);
+    if (index !== 5) for (let x = -9; x < 10; x += 2) for (let z = -9; z < 10; z += 2) {
+      box(x, 5.87, z, 1.94, .024, 1.94, index === 3 ? 0x427888 : 0xd0d3ca);
+      if (((x + z) / 2) % 3 === 0) box(x, 5.83, z, 1.3, .02, .42, index === 3 ? 0x8cd7ec : 0xf4f3e8, true);
     }
     for (let z = -7; z <= 7; z += 3.5) for (const side of [-1, 1]) {
       box(side * 9.78, 3, z, .08, 5.4, 3.2, 0xb3bfba);
@@ -161,8 +166,8 @@ export function createScenarioWorld(container) {
       box(side * 9.65, 5.25, z, .12, .18, 3.2, 0x546d72);
     }
     for (const x of [-7.5, -5, -2.7, 2.7, 5, 7.5]) {
-      box(x, 3.1, -9.7, 2.2, 5.25, .08, 0xb7c1b9);
-      box(x, 3.1, 9.7, 2.2, 5.25, .08, 0x9cacaa);
+      box(x, 3.1, -9.7, 2.2, 5.25, .08, index === 3 ? 0x669aac : 0xb7c1b9);
+      box(x, 3.1, 9.7, 2.2, 5.25, .08, index === 3 ? 0x467f91 : 0x9cacaa);
     }
     // Door frames sit in front of the wall; the room switch happens at their threshold.
     for (const z of [-9.55, 9.55]) {
@@ -209,7 +214,7 @@ export function createScenarioWorld(container) {
       textPanel('T2 / CARDIO', 4, 3.1, -3.7, 2.3);
       obstacles.push({ x: 4, z: -2.4, w: 2, d: 3.2 });
       for (const x of [3.5, 5.7]) cylinder(x, .3, 2.2, .28, .28, .18, 0x718787);
-    } else {
+    } else if (index === 2) {
       for (const z of [-4, .6, 5.2]) {
         consoleUnit(4.6, z, 3, 2.7);
         box(4.6, .57, z + 1.7, .8, .12, .65, 0x515d58);
@@ -218,6 +223,54 @@ export function createScenarioWorld(container) {
       }
       for (const x of [-4.8, -1.8, 1.2, 4.2, 7.2]) display(x, 3.35, -9.4, 2.3, 1.2, 3);
       textPanel('MISSION CONTROL / ECLSS', 1.7, 4.65, -9.28, 7);
+    } else if (index === 3) {
+      const module = cylinder(4.2, 2.35, -2.4, 1.55, 1.55, 4.2, 0xc2d4d7);
+      module.rotation.x = Math.PI / 2;
+      for (const z of [-4, -2.4, -.8]) {
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(1.58, .08, 10, 40), material(0x597e8b));
+        ring.position.set(4.2, 2.35, z); scene.add(ring);
+      }
+      const hatch = new THREE.Mesh(new THREE.TorusGeometry(.88, .14, 12, 40), material(0x344f5e));
+      hatch.position.set(4.2, 2.35, -.23); scene.add(hatch);
+      box(4.2, .38, -2.4, 4.2, .5, 5.1, 0x3b626d);
+      for (const x of [2.3, 6.1]) for (const z of [-5, .2]) box(x, 1.4, z, .1, 2.8, .12, 0xb0bdba);
+      for (let i = 0; i < 26; i++) {
+        const bubble = new THREE.Mesh(new THREE.SphereGeometry(.025 + (i % 3) * .018, 8, 6), new THREE.MeshBasicMaterial({ color: 0xbdebf3, transparent: true, opacity: .35 }));
+        bubble.position.set((i % 7) * 2.25 - 7.1, .65 + (i % 5) * .72, -6 + Math.floor(i / 7) * 3.3); scene.add(bubble);
+      }
+      textPanel('NBL / EVA UMBILICAL', 3.7, 4.5, -9.28, 5.5);
+      obstacles.push({ x: 4.2, z: -2.4, w: 4.4, d: 5.3 });
+    } else if (index === 4) {
+      for (const y of [.55, 2.15]) {
+        box(4.8, y, -3.9, 3.8, .22, 1.9, 0x9ba59b);
+        box(4.8, y + .15, -3.9, 3.5, .14, 1.65, 0x3e6474);
+        box(4.8, y + .17, -4.65, .9, .14, .5, 0xd8dad2);
+      }
+      for (const z of [1.1, 2.8, 4.5]) {
+        box(6.2, .92, z, 1.25, 1.65, .9, 0x8d9d92);
+        box(6.2, 1.75, z, 1.25, .08, .9, 0xc4c9bb);
+        for (const x of [5.9, 6.2, 6.5]) {
+          cylinder(x, 2, z, .05, .04, .5, 0x789865);
+          const leaf = new THREE.Mesh(new THREE.SphereGeometry(.13, 8, 6), material(0x78ad67));
+          leaf.position.set(x, 2.26, z); scene.add(leaf);
+        }
+      }
+      textPanel('HERA / HABITAT SYSTEMS', 2.7, 4.55, -9.28, 5.8);
+      obstacles.push({ x: 4.8, z: -3.9, w: 4, d: 2.2 }, { x: 6.2, z: 2.8, w: 1.5, d: 4.5 });
+    } else {
+      for (const x of [-8.5, 8.5]) for (const y of [6, 11, 16]) box(x, y, -1, .35, .26, 17, 0xe2b266);
+      for (const z of [-7, -2, 3, 8]) for (const x of [-8.5, 8.5]) box(x, 8.5, z, .22, 17, .22, 0x657576);
+      for (const y of [4.5, 8.5, 12.5]) {
+        box(4.1, y, -2.8, 6.3, .18, .48, 0xdfad58);
+        box(4.1, y, -2.8, .48, .18, 6.3, 0xdfad58);
+      }
+      cylinder(4.1, 6, -2.8, 1.25, 1.25, 11, 0xc77f45);
+      for (const y of [2.4, 6.8, 10.8]) cylinder(4.1, y, -2.8, 1.27, 1.27, .16, 0xe2e5da);
+      const nose = new THREE.Mesh(new THREE.ConeGeometry(1.25, 2.5, 24), material(0xe5e9df));
+      nose.position.set(4.1, 12.75, -2.8); scene.add(nose);
+      for (const x of [2.3, 5.9]) cylinder(x, 3.2, -2.8, .44, .44, 6.2, 0xe3e7df);
+      textPanel('VAB / LAUNCH INTEGRATION', 2.8, 4.55, -9.28, 6);
+      obstacles.push({ x: 4.1, z: -2.8, w: 4.6, d: 4.2 });
     }
     scene.add(camera);
     return { scene, obstacles, beacon, forwardLeaves, backLeaves, doorLamp };
@@ -267,7 +320,7 @@ export function createScenarioWorld(container) {
     focus() { canvas.focus(); },
     async capture() { try { await canvas.requestPointerLock(); } catch { /* Drag and arrows remain available. */ } },
     release() { if (document.pointerLockElement === canvas) document.exitPointerLock(); clear(); },
-    reset() { disposeRoom(room); sceneIndex = 0; room = makeRoom(0); camera.position.set(0, 1.7, arrivalZ); camera.rotation.set(0, 0, 0); stride = 0; clear(); },
+    reset() { disposeRoom(room); sceneIndex = 0; room = makeRoom(0); camera.position.set(0, 1.7, arrivalZ); camera.rotation.set(0, 0, 0); hoverY = 1.7; stride = 0; clear(); },
     async load(index) {
       if (index === sceneIndex || index < 0 || index >= SCENARIOS.length) return;
       const backwards = index < sceneIndex;
@@ -277,7 +330,7 @@ export function createScenarioWorld(container) {
       await new Promise(resolve => setTimeout(resolve, Math.max(0, 650 - (performance.now() - start))));
       disposeRoom(room); room = nextRoom; sceneIndex = index;
       camera.position.set(0, 1.7, backwards ? -arrivalZ : arrivalZ);
-      camera.rotation.set(0, backwards ? Math.PI : 0, 0); stride = 0; clear();
+      camera.rotation.set(0, backwards ? Math.PI : 0, 0); hoverY = 1.7; stride = 0; clear();
     },
     update(dt, active, target, stage) {
       controlsActive = active;
@@ -292,7 +345,7 @@ export function createScenarioWorld(container) {
         const forward = Number(keys.has('KeyW')) - Number(keys.has('KeyS'));
         const right = Number(keys.has('KeyD')) - Number(keys.has('KeyA'));
         const length = Math.hypot(forward, right) || 1;
-        const pace = keys.has('ShiftLeft') ? 2.85 : 1.75;
+        const pace = sceneIndex === 3 ? 1.15 : keys.has('ShiftLeft') ? 2.85 : 1.75;
         const desiredX = (right * Math.cos(camera.rotation.y) - forward * Math.sin(camera.rotation.y)) * pace / length;
         const desiredZ = (-forward * Math.cos(camera.rotation.y) - right * Math.sin(camera.rotation.y)) * pace / length;
         const blend = 1 - Math.exp(-(forward || right ? 9 : 12) * dt);
@@ -304,13 +357,14 @@ export function createScenarioWorld(container) {
         const motion = velocity.length() / 2.85;
         if (motion > .02) stride += dt * (keys.has('ShiftLeft') ? 11 : 8);
         const bob = reducedMotion.matches ? 0 : Math.sin(stride) * .018 * motion;
-        camera.position.y = THREE.MathUtils.lerp(camera.position.y, 1.7 + bob, Math.min(1, dt * 12));
+        if (sceneIndex === 3) hoverY = THREE.MathUtils.clamp(hoverY + (Number(keys.has('Space')) - Number(keys.has('ControlLeft'))) * dt * .8, 1.4, 3.25);
+        camera.position.y = THREE.MathUtils.lerp(camera.position.y, hoverY + bob, Math.min(1, dt * (sceneIndex === 3 ? 5 : 12)));
         arms.forEach((arm, i) => { arm.position.y = reducedMotion.matches ? 0 : Math.sin(stride + (i ? Math.PI : 0)) * .012 * motion; });
         if (z < exitZ && Math.abs(x) < 1.08 && open) return sceneIndex + 1;
         if (z > -exitZ && Math.abs(x) < 1.08 && sceneIndex > 0) return sceneIndex - 1;
       } else {
         velocity.set(0, 0);
-        camera.position.y = THREE.MathUtils.lerp(camera.position.y, 1.7, Math.min(1, dt * 12));
+        camera.position.y = THREE.MathUtils.lerp(camera.position.y, hoverY, Math.min(1, dt * 12));
         arms.forEach(arm => { arm.position.y = THREE.MathUtils.lerp(arm.position.y, 0, Math.min(1, dt * 12)); });
       }
       renderer.render(room.scene, camera);

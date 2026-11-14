@@ -3,19 +3,64 @@ import { createScenarioWorld, STATIONS } from './rendering/scenario-world.js';
 import { SCENARIOS } from './core/scenario-route.js';
 
 const $=id=>document.getElementById(id);
-let mission=new FieldTraining(),running=false,started=false,transitioning=false,pauseAfterTransition=false,world;
-const titles=['Verifica tu traje','Controla cada repetición','Prioriza el soporte vital'];
-const details=['Acércate a la consola 01. Confirma presión, agua y telemetría con E.','Completa seis repeticiones en ARED pulsando E en la zona verde.','Resuelve los avisos de la consola ECLSS.'];
+let mission=new FieldTraining(),running=false,started=false,transitioning=false,pauseAfterTransition=false,selectedCable=null,world;
+const titles=['Verifica tu traje','Controla cada repetición','Prioriza el soporte vital','Conecta el módulo EVA','Equilibra los recursos','Restablece la energía'];
+const details=['Acércate a la consola 01. Confirma presión, agua y telemetría con E.','Completa seis repeticiones en ARED pulsando E en la zona verde.','Resuelve los avisos de la consola ECLSS.','En NBL, une cada línea con su puerto. Espacio y Ctrl ajustan la altura.','Ajusta oxígeno, agua y energía del hábitat.','Activa los tres buses eléctricos del cohete.'];
 try { world=createScenarioWorld($('world')); }
 catch { $('fatal').hidden=false;$('fatal').textContent='No se pudo iniciar la escena 3D. Activa WebGL o abre esta página en un navegador de escritorio compatible.'; }
 function say(message){$('message').textContent=message;}
+function taskButton(label, action, className=''){
+  const button=document.createElement('button');button.type='button';button.textContent=label;button.className=className;button.addEventListener('click',action);return button;
+}
+function taskSection(title, grid=false){
+  const section=document.createElement('div');section.className='task-section';
+  const heading=document.createElement('small');heading.textContent=title;section.append(heading);$('task-controls').append(section);
+  if(!grid)return section;
+  const buttons=document.createElement('div');buttons.className='task-grid';section.append(buttons);return buttons;
+}
+function renderTask(){
+  const controls=$('task-controls');controls.replaceChildren();
+  if(mission.stage===3){
+    $('task-kicker').textContent='NBL / PROCEDIMIENTO EVA';$('task-title').textContent='Conecta los umbilicales';
+    $('task-instruction').textContent='Selecciona una línea y luego el puerto con el mismo rótulo. Cada conexión incorrecta penaliza la sesión.';
+    const labels={oxygen:'O₂',data:'DATOS',power:'ENERGÍA'};
+    const sources=taskSection('LÍNEAS DEL MÓDULO',true);
+    for(const key of ['oxygen','data','power']){
+      const button=taskButton(labels[key],()=>{selectedCable=key;renderTask();controls.querySelector('[data-port]')?.focus();},selectedCable===key?'selected':mission.evaLinks.has(key)?'done':'');
+      button.disabled=mission.evaLinks.has(key);sources.append(button);
+    }
+    const ports=taskSection('PUERTOS DE DESTINO',true);
+    for(const key of ['power','oxygen','data']){
+      const button=taskButton(labels[key],()=>{if(!selectedCable){$('task-feedback').textContent='Elige primero una línea.';return;}const cable=selectedCable;selectedCable=null;act({cable,port:key});});
+      button.dataset.port=key;button.disabled=mission.evaLinks.has(key);ports.append(button);
+    }
+  }else if(mission.stage===4){
+    $('task-kicker').textContent='HERA / GESTIÓN DE RECURSOS';$('task-title').textContent='Estabiliza el hábitat';
+    $('task-instruction').textContent='Ajusta los tres sistemas hasta su objetivo y confirma el balance.';
+    const labels={oxygen:'Oxígeno',water:'Agua',energy:'Energía'},targets={oxygen:80,water:60,energy:70};
+    const section=taskSection('RECURSOS ACTUALES / OBJETIVO');
+    for(const key of ['oxygen','water','energy']){
+      const row=document.createElement('div');row.className='task-resource';
+      const value=document.createElement('span');value.textContent=`${labels[key]}  ${mission.resources[key]} %  →  ${targets[key]} %`;
+      row.append(value,taskButton('−',()=>act({resource:key,delta:-10})),taskButton('+',()=>act({resource:key,delta:10})));section.append(row);
+    }
+    controls.append(taskButton('Confirmar balance',()=>act({submit:true}),'task-confirm'));
+  }else if(mission.stage===5){
+    $('task-kicker').textContent='VAB / DISTRIBUCIÓN ELÉCTRICA';$('task-title').textContent='Restablece los tres buses';
+    $('task-instruction').textContent='Cada interruptor cambia su bus y los buses vecinos. Deja los tres en verde.';
+    const section=taskSection(`BUS PRINCIPAL · PROPULSIÓN · SEGURIDAD  /  ${mission.powerMoves} ${mission.powerMoves===1?'maniobra':'maniobras'}`,true);
+    for(let i=0;i<3;i++) section.append(taskButton(`${['PRINCIPAL','PROPULSIÓN','SEGURIDAD'][i]} · ${mission.powerBuses[i]?'ACTIVO':'INACTIVO'}`,()=>act({switch:i}),mission.powerBuses[i]?'done':''));
+  }
+}
+function openTask(){selectedCable=null;$('task-feedback').textContent='Sigue el procedimiento para desbloquear la puerta.';$('task').hidden=false;world.release();renderTask();$('task-controls').querySelector('button')?.focus();}
+function closeTask(recapture=true){$('task').hidden=true;selectedCable=null;if(recapture&&running&&!mission.complete){world.focus();world.capture();}}
 function play(){
   if(!world)return;
   started=true;running=true;document.body.classList.add('playing');$('briefing').hidden=true;$('pause').hidden=true;$('game-hud').hidden=false;
   world.focus();if($('mental').hidden)world.capture();
 }
-function pause(){if(!started||mission.complete)return;if(transitioning){pauseAfterTransition=true;return;}running=false;world.release();$('pause').hidden=false;$('resume').focus();}
-function reset(){mission=new FieldTraining();world.reset();$('results').hidden=true;$('mental').hidden=true;$('loading').hidden=true;pauseAfterTransition=false;say('Comandante, dirígete al punto de verificación del traje.');play();}
+function pause(){if(!started||mission.complete)return;if(transitioning){pauseAfterTransition=true;return;}running=false;$('task').hidden=true;$('mental').hidden=true;world.release();$('pause').hidden=false;$('resume').focus();}
+function reset(){mission=new FieldTraining();world.reset();$('results').hidden=true;$('mental').hidden=true;$('task').hidden=true;$('loading').hidden=true;selectedCable=null;pauseAfterTransition=false;say('Comandante, dirígete al punto de verificación del traje.');play();}
 async function transitionTo(index){
   if(transitioning||!running||index<0||index>=SCENARIOS.length)return;
   transitioning=true;
@@ -43,11 +88,16 @@ function act(answer){
   }
   if(!near)return;
   if(near.id==='mental'&&mission.target==='mental'&&!answer){$('mental').hidden=false;world.release();$('answer-air').focus();return;}
-  say(mission.interact(near.id,answer));
+  if(['eva','habitat','vab'].includes(near.id)&&mission.target===near.id&&!answer){openTask();return;}
+  const previousStage=mission.stage;
+  const response=mission.interact(near.id,answer);
+  say(response);
+  if(!$('task').hidden){$('task-feedback').textContent=response;if(mission.stage!==previousStage)closeTask(!mission.complete);else renderTask();}
+  if(!$('mental').hidden&&mission.stage!==previousStage){$('mental').hidden=true;world.focus();world.capture();}
   if(mission.complete){
-    running=false;world.release();$('mental').hidden=true;$('results').hidden=false;
+    running=false;world.release();$('mental').hidden=true;$('task').hidden=true;$('results').hidden=false;
     $('score').textContent=mission.score+' / 100';
-    $('result-detail').textContent='Tres estaciones completadas en '+Math.floor(mission.elapsed)+' segundos. '+mission.errors+' errores registrados. '+(mission.score>=70?'Apto para continuar entrenando.':'Repite el entrenamiento para afianzar el procedimiento.');
+    $('result-detail').textContent='Seis escenarios completados en '+Math.floor(mission.elapsed)+' segundos. '+mission.errors+' errores registrados. '+(mission.score>=70?'Apto para continuar entrenando.':'Repite el entrenamiento para afianzar el procedimiento.');
     $('again').focus();
     try{localStorage.setItem('lunar-command-field-report',JSON.stringify({score:mission.score,errors:mission.errors,seconds:mission.elapsed}));}catch{say('Entrenamiento completado. El navegador no permite guardar el informe.');}
   }
@@ -57,9 +107,10 @@ $('restart').addEventListener('click',reset);$('again').addEventListener('click'
 $('menu-button').addEventListener('click',pause);$('interact').addEventListener('click',()=>act());
 $('answer-air').addEventListener('click',()=>act('atmosphere'));
 $('answer-power').addEventListener('click',()=>act('power'));
+$('task-close').addEventListener('click',()=>closeTask());
 window.addEventListener('keydown',e=>{
   if(e.repeat||e.target.closest('input,textarea'))return;
-  if(e.code==='Escape')pause();
+  if(e.code==='Escape'){if(!$('task').hidden)closeTask();else pause();return;}
   if(e.code==='KeyE')act();
   if(!$('mental').hidden&&e.code==='Digit1')act('atmosphere');
   if(!$('mental').hidden&&e.code==='Digit2')act('power');
@@ -71,15 +122,15 @@ function frame(now){
   const dt=Math.min((now-last)/1000,.05);last=now;
   if(world){
     if(running&&!transitioning)mission.advance(dt);
-    const next=world.update(dt,running&&!transitioning&&$('mental').hidden,mission.target,mission.stage);
+    const next=world.update(dt,running&&!transitioning&&$('mental').hidden&&$('task').hidden,mission.target,mission.stage);
     if(next!==null&&!transitioning)transitionTo(next);
     const near=world.near(),door=world.door(mission.stage),seconds=Math.floor(mission.elapsed);
     $('clock').textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
-    $('progress').textContent=mission.stage+' / 3';$('errors').textContent=mission.errors;
-    $('position').textContent='X '+world.camera.position.x.toFixed(1)+' / Z '+world.camera.position.z.toFixed(1);
+    $('progress').textContent=mission.stage+' / '+SCENARIOS.length;$('errors').textContent=mission.errors;
+    $('position').textContent='X '+world.camera.position.x.toFixed(1)+' / Y '+world.camera.position.y.toFixed(1)+' / Z '+world.camera.position.z.toFixed(1);
     $('objective-title').textContent=titles[mission.stage]??'Entrenamiento completado';
     $('objective-detail').textContent=!mission.complete&&mission.stage>world.currentIndex?'Cruza la puerta abierta para llegar a '+SCENARIOS[world.currentIndex+1].title+'.':details[mission.stage]??'Consulta tu informe de sesión.';
-    $('step-count').textContent='0'+Math.min(mission.stage+1,3)+' / 03';
+    $('step-count').textContent=String(Math.min(mission.stage+1,SCENARIOS.length)).padStart(2,'0')+' / '+String(SCENARIOS.length).padStart(2,'0');
     $('scene-name').textContent=SCENARIOS[world.currentIndex].title.toUpperCase()+' · EN LÍNEA';
     $('distance').textContent=mission.target?(mission.stage>world.currentIndex?'PUERTA / ':STATIONS[world.currentIndex].name+' · ')+world.distance(mission.target).toFixed(1)+' m':'';
     $('interact').disabled=(!near&&!door)||!running||transitioning;
