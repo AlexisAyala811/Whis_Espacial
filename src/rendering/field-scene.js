@@ -8,19 +8,19 @@ export const STATIONS = [
 
 export function createFieldScene(container) {
   const scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x263743);
-  scene.fog = new THREE.FogExp2(0x263743, .009);
+  scene.background = new THREE.Color(0x4c5354);
+  scene.fog = new THREE.FogExp2(0x4c5354, .006);
   const camera = new THREE.PerspectiveCamera(72, 1, .08, 150);
   camera.rotation.order = 'YXZ';
   camera.position.set(0, 1.7, 9);
   const renderer = new THREE.WebGLRenderer({ antialias: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.4;
+  renderer.toneMappingExposure = 1.2;
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   container.append(renderer.domElement);
-  scene.add(new THREE.HemisphereLight(0xe6f4ff, 0x71808a, 2));
-  const sun = new THREE.DirectionalLight(0xf1faff, 2.3);
+  scene.add(new THREE.HemisphereLight(0xf4f2e9, 0x777d79, 1.45));
+  const sun = new THREE.DirectionalLight(0xf6f6ee, 1.35);
   sun.position.set(-3, 9, 8); scene.add(sun);
   const materials = new Map();
   function material(color, glow = false) {
@@ -48,7 +48,7 @@ export function createFieldScene(container) {
   function label(text,x,y,z,color='#9fe9df',width=3) {
     const canvas = document.createElement('canvas'); canvas.width=768; canvas.height=128;
     const ctx = canvas.getContext('2d'); ctx.fillStyle='#0a1922'; ctx.fillRect(0,0,768,128);
-    ctx.fillStyle=color; ctx.font='bold 48px monospace'; ctx.textAlign='center'; ctx.fillText(text,384,82);
+    ctx.fillStyle=color; ctx.font=`bold ${Math.min(48,Math.floor(700/(text.length*.62)))}px monospace`; ctx.textAlign='center'; ctx.fillText(text,384,82);
     const texture = new THREE.CanvasTexture(canvas);
     const mesh = new THREE.Mesh(new THREE.PlaneGeometry(width,width/6), new THREE.MeshBasicMaterial({map:texture}));
     mesh.position.set(x,y,z); scene.add(mesh);
@@ -72,14 +72,47 @@ export function createFieldScene(container) {
     const mesh=new THREE.Mesh(new THREE.PlaneGeometry(1.72,.72),new THREE.MeshBasicMaterial({map:texture}));
     mesh.position.set(x,y,z);scene.add(mesh);
   }
-  const floorTexture=panelTexture('#66757c','#4a5962');
-  const floor=new THREE.Mesh(new THREE.PlaneGeometry(24,28),new THREE.MeshStandardMaterial({map:floorTexture,metalness:.28,roughness:.86}));
+  // Dense, legible control surfaces are drawn into textures to keep the room affordable on the web.
+  function controlTexture(seed, screen = false) {
+    const canvas=document.createElement('canvas');canvas.width=512;canvas.height=256;
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle=screen?'#101d21':'#777d76';ctx.fillRect(0,0,512,256);
+    let state=seed*7919+17;
+    const random=()=>{state=(state*1664525+1013904223)>>>0;return state/4294967296;};
+    if(screen){
+      ctx.fillStyle='#b7cbb6';ctx.font='bold 17px monospace';ctx.fillText(['FLIGHT DYNAMICS','ECLSS / ENVIRONMENT','CREW SYSTEMS'][seed%3],18,27);
+      ctx.strokeStyle='#345653';ctx.lineWidth=1;
+      for(let x=18;x<500;x+=32){ctx.beginPath();ctx.moveTo(x,36);ctx.lineTo(x,230);ctx.stroke();}
+      for(let y=38;y<235;y+=24){ctx.beginPath();ctx.moveTo(16,y);ctx.lineTo(498,y);ctx.stroke();}
+      ctx.strokeStyle='#88b6a5';ctx.lineWidth=2;ctx.beginPath();
+      for(let x=18;x<492;x+=5){const y=120+Math.sin(x*.025+seed)*31+Math.sin(x*.11+seed)*8;x===18?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+      ctx.stroke();
+      for(let i=0;i<30;i++){ctx.fillStyle=random()>.7?'#d9b777':'#759c94';ctx.fillRect(22+(i%10)*47,187+Math.floor(i/10)*16,24+random()*12,5);}
+    } else {
+      for(let row=0;row<7;row++)for(let col=0;col<19;col++){
+        const x=13+col*26,y=10+row*34,r=random();
+        ctx.fillStyle=r>.89?'#c7a96d':r>.55?'#c6cdc5':'#414b4c';
+        if(r>.77){ctx.beginPath();ctx.arc(x+7,y+9,4,0,Math.PI*2);ctx.fill();}
+        else ctx.fillRect(x,y,15,13);
+        ctx.fillStyle='#303c3c';ctx.fillRect(x,y+17,20,2);
+      }
+    }
+    const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;
+    texture.anisotropy=Math.min(renderer.capabilities.getMaxAnisotropy(),8);return texture;
+  }
+  const floorTexture=panelTexture('#858782','#737974');
+  const floor=new THREE.Mesh(new THREE.PlaneGeometry(24,28),new THREE.MeshStandardMaterial({map:floorTexture,metalness:.08,roughness:.94}));
   floor.rotation.x=-Math.PI/2;floor.position.y=.005;scene.add(floor);
   box(0,-.18,0,24,.35,28,0x394b55);
   box(0,3,-12,24,6,.4,0x82939a);
   box(-12,3,0,.4,6,28,0x83939b); box(12,3,0,.4,6,28,0x83939b);
   box(0,3,14,24,6,.4,0x677b86);
-  box(0,6,0,24,.25,28,0x9cacb4);
+  box(0,6,0,24,.25,28,0xc4c7bf);
+  // Suspended ceiling and recessed fluorescent panels echo the terrestrial reference.
+  for(let z=-11;z<14;z+=2)for(let x=-11;x<12;x+=2){
+    box(x,5.865,z,1.94,.025,1.94,0xd5d6cd);
+    if((Math.round(x+z)%4)===0)box(x,5.828,z,1.35,.018,.46,0xf1f2e7,true);
+  }
   // Layered wall panels, conduits and skirting create architectural scale.
   for(let z=-11;z<14;z+=3){
     for(const side of [-1,1]){
@@ -164,12 +197,29 @@ export function createFieldScene(container) {
     box(x,.22,-9.1,1.9,.15,.9,0x6b858c);
     obstacles.push({x,z:-9,w:1.5,d:1});
   }
-  for(const x of [9,10.5]) for(const z of [7,9]) {
-    box(x,.6,z,1.3,1.2,1.3,0x6d8189); box(x,1.22,z,1.35,.06,1.35,0xc3cdca);
-    box(x,1.85,z-.38,.98,.68,.08,0x304750);
-    for(let i=0;i<4;i++)box(x-.35+i*.23,1.87,z-.33,.13,.035,.03,i===0?0xa3ded5:0xb5c7c9,true);
-    for(let i=0;i<4;i++)box(x-.52+i*.35,.58,z+.67,.22,.08,.12,0x344c56);
-    obstacles.push({x,z,w:1.5,d:1.5});
+  // Mission Control gallery: two staffed rows, with a clear central walking route.
+  box(6.5,4.15,1.65,8,.72,.19,0x606b66);
+  label('MISSION CONTROL / FLIGHT OPS',6.5,4.15,1.765,'#e4e6d6',7.7);
+  for(let row=0;row<2;row++)for(let col=0;col<3;col++){
+    const x=4.15+col*2.35,z=3.2+row*5.1,seed=row*3+col;
+    box(x,.56,z,2.22,1.05,1.35,0x858c82);
+    box(x,1.11,z+.53,2.27,.13,.4,0xadb3a8);
+    box(x,1.78,z-.36,2.13,1.12,.18,0x454e4a);
+    box(x,1.78,z-.247,1.85,.77,.035,0x141c1e);
+    const screen=new THREE.Mesh(new THREE.PlaneGeometry(1.75,.68),new THREE.MeshBasicMaterial({map:controlTexture(seed,true)}));
+    screen.position.set(x,1.78,z-.223);scene.add(screen);
+    const controls=new THREE.Mesh(new THREE.PlaneGeometry(2.05,.75),new THREE.MeshStandardMaterial({map:controlTexture(seed),metalness:.18,roughness:.78,side:THREE.DoubleSide}));
+    controls.rotation.x=-.55;controls.position.set(x,1.28,z+.37);scene.add(controls);
+    for(const side of [-1,1])box(x+side*1.03,1.5,z+.19,.07,.85,1.04,0xabb0a6);
+    box(x,.75,z+1.45,.86,.13,.72,0x535d58);
+    box(x,.46,z+1.45,.12,.57,.12,0x5e6964);
+    box(x,.32,z+1.45,.65,.08,.56,0x454f4c);
+    box(x,1.25,z+1.77,.82,.8,.09,0x626d67);
+    obstacles.push({x,z:z+.55,w:2.22,d:3.1});
+  }
+  for(const x of [4.15,6.5,8.85]){
+    const display=new THREE.Mesh(new THREE.PlaneGeometry(2.1,1.13),new THREE.MeshBasicMaterial({map:controlTexture(Math.round(x*2),true)}));
+    display.position.set(x,3.25,-11.542);scene.add(display);
   }
   // T2 treadmill: visible as a physical training station in the same room.
   box(7,.19,-8,2.1,.25,3.1,0x303e47);
@@ -197,6 +247,7 @@ export function createFieldScene(container) {
   }
   // First-person suit sleeves and gloves stay at eye level without hiding the path.
   const glove=material(0xd7e0dc),cuff=material(0x839aa0);
+  const arms=[];
   for(const side of [-1,1]){
     const arm=new THREE.Group();
     const sleeve=new THREE.Mesh(new THREE.CylinderGeometry(.09,.14,.38,10),glove);
@@ -205,17 +256,20 @@ export function createFieldScene(container) {
     wrist.rotation.z=side*.55;wrist.position.set(side*.57,-.56,-1);arm.add(wrist);
     const hand=new THREE.Mesh(new THREE.BoxGeometry(.17,.11,.15),glove);
     hand.position.set(side*.54,-.49,-1.04);arm.add(hand);
-    camera.add(arm);
+    camera.add(arm);arms.push(arm);
   }
   scene.add(camera);
   let dragging=false;
   const keys = new Set();
+  const velocity=new THREE.Vector2();
+  const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
+  let stride=0,controlsActive=false;
   const canvas=renderer.domElement;
   canvas.tabIndex=0; canvas.setAttribute('aria-label','Base terrestre en primera persona. WASD para caminar; flechas para mirar.');
   const down=e=>{if(e.target.closest('input,textarea,button,select'))return; if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();keys.add(e.code);};
   const up=e=>keys.delete(e.code);
-  const clear=()=>{keys.clear();dragging=false;};
-  const look=e=>{if(document.pointerLockElement===canvas||dragging){camera.rotation.y-=e.movementX*.002;camera.rotation.x=THREE.MathUtils.clamp(camera.rotation.x-e.movementY*.002,-1.3,1.3);}};
+  const clear=()=>{keys.clear();dragging=false;velocity.set(0,0);};
+  const look=e=>{if(controlsActive&&(document.pointerLockElement===canvas||dragging)){camera.rotation.y-=e.movementX*.002;camera.rotation.x=THREE.MathUtils.clamp(camera.rotation.x-e.movementY*.002,-1.3,1.3);}};
   window.addEventListener('keydown',down);window.addEventListener('keyup',up);window.addEventListener('blur',clear);
   document.addEventListener('mousemove',look);
   canvas.addEventListener('pointerdown',()=>{dragging=true;canvas.focus();});window.addEventListener('pointerup',()=>{dragging=false;});
@@ -227,17 +281,32 @@ export function createFieldScene(container) {
     focus(){canvas.focus();},
     async capture(){try{await canvas.requestPointerLock();}catch{ /* Drag and keyboard remain available. */ }},
     release(){if(document.pointerLockElement===canvas)document.exitPointerLock();clear();},
-    reset(){camera.position.set(0,1.7,9);camera.rotation.set(0,0,0);clear();},
+    reset(){camera.position.set(0,1.7,9);camera.rotation.set(0,0,0);stride=0;clear();},
     update(dt,active,target){
+      controlsActive=active;
       if(active){
         camera.rotation.y+=((keys.has('ArrowLeft')?1:0)-(keys.has('ArrowRight')?1:0))*dt*1.5;
         camera.rotation.x=THREE.MathUtils.clamp(camera.rotation.x+((keys.has('ArrowUp')?1:0)-(keys.has('ArrowDown')?1:0))*dt,-1.3,1.3);
         let forward=(keys.has('KeyW')?1:0)-(keys.has('KeyS')?1:0),right=(keys.has('KeyD')?1:0)-(keys.has('KeyA')?1:0);
-        const length=Math.hypot(forward,right)||1,speed=(keys.has('ShiftLeft')?5:3)*dt/length;
-        const x=camera.position.x+(right*Math.cos(camera.rotation.y)-forward*Math.sin(camera.rotation.y))*speed;
-        const z=camera.position.z+(-forward*Math.cos(camera.rotation.y)-right*Math.sin(camera.rotation.y))*speed;
-        if(!blocked(x,camera.position.z))camera.position.x=x;
-        if(!blocked(camera.position.x,z))camera.position.z=z;
+        const length=Math.hypot(forward,right)||1;
+        const pace=keys.has('ShiftLeft')?2.85:1.75;
+        const desiredX=(right*Math.cos(camera.rotation.y)-forward*Math.sin(camera.rotation.y))*pace/length;
+        const desiredZ=(-forward*Math.cos(camera.rotation.y)-right*Math.sin(camera.rotation.y))*pace/length;
+        const blend=1-Math.exp(-(forward||right?9:12)*dt);
+        velocity.x=THREE.MathUtils.lerp(velocity.x,desiredX,blend);
+        velocity.y=THREE.MathUtils.lerp(velocity.y,desiredZ,blend);
+        const x=camera.position.x+velocity.x*dt,z=camera.position.z+velocity.y*dt;
+        if(!blocked(x,camera.position.z))camera.position.x=x;else velocity.x=0;
+        if(!blocked(camera.position.x,z))camera.position.z=z;else velocity.y=0;
+        const motion=velocity.length()/2.85;
+        if(motion>.02)stride+=dt*(keys.has('ShiftLeft')?11:8);
+        const bob=reducedMotion.matches?0:Math.sin(stride)*.018*motion;
+        camera.position.y=THREE.MathUtils.lerp(camera.position.y,1.7+bob,Math.min(1,dt*12));
+        arms.forEach((arm,i)=>{arm.position.y=reducedMotion.matches?0:Math.sin(stride+(i?Math.PI:0))*.012*motion;});
+      }else{
+        velocity.set(0,0);
+        camera.position.y=THREE.MathUtils.lerp(camera.position.y,1.7,Math.min(1,dt*12));
+        arms.forEach(arm=>{arm.position.y=THREE.MathUtils.lerp(arm.position.y,0,Math.min(1,dt*12));});
       }
       beacons.forEach((b,i)=>{b.visible=STATIONS[i].id===target;});
       renderer.render(scene,camera);
