@@ -3,7 +3,8 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Lunar Command 3D</title>
+    <meta name="description" content="Demo de entrenamiento terrestre de Lunar Command 3D">
+    <title>Lunar Command 3D · Entrenamiento ASCAN</title>
     <link rel="stylesheet" href="./src/styles.css">
     <script type="importmap">
       {"imports":{"three":"./node_modules/three/build/three.module.js"}}
@@ -11,9 +12,28 @@
     <script type="module" src="./src/main.js"></script>
   </head>
   <body>
-    <main>
-      <h1>Lunar Command 3D</h1>
-      <p>Estructura inicial del proyecto.</p>
+    <header class="topbar">
+      <div><p class="eyebrow">LUNAR COMMAND 3D</p><h1>Entrenamiento ASCAN</h1></div>
+      <div id="connection-status" class="status-pill" role="status">SIMULACIÓN LISTA</div>
+    </header>
+    <main class="app-shell">
+      <section class="mission-summary" aria-labelledby="mission-heading">
+        <div><p class="eyebrow">FASE DE MISIÓN</p><h2 id="mission-heading">Acondicionamiento terrestre</h2><p id="mission-objective">Confirma el protocolo previo y prepara la primera estación.</p></div>
+        <dl class="mission-clock"><div><dt>MET</dt><dd id="mission-time">T+000:00</dd></div><div><dt>ESTADO</dt><dd id="mission-state">LISTO</dd></div></dl>
+      </section>
+      <div class="workspace">
+        <section class="scene-card" aria-labelledby="scene-heading">
+          <div class="section-heading"><div><p class="eyebrow">VISTA DE ENTRENAMIENTO</p><h2 id="scene-heading">Base terrestre · Sala ARED / T2</h2></div><div class="button-row"><button id="start-session" class="primary-button" type="button">Iniciar sesión</button><button id="finish-session" class="secondary-button" type="button" disabled>Finalizar</button></div></div>
+          <div id="scene-container" class="scene-container" aria-label="Representación 3D de la sala de entrenamiento"></div>
+          <p id="webgl-status" class="muted" role="status"></p>
+        </section>
+        <aside class="side-stack" aria-label="Telemetría y comunicación">
+          <section class="panel" aria-labelledby="telemetry-heading"><div class="section-heading compact"><h2 id="telemetry-heading">Telemetría</h2><span class="live-dot">EN LÍNEA</span></div><div id="telemetry-panel" class="telemetry-grid"></div></section>
+          <section class="panel" aria-labelledby="checklist-heading"><div class="section-heading compact"><h2 id="checklist-heading">Checklist</h2><span id="checklist-progress" class="muted">0 / 0</span></div><p id="checklist-instruction" class="panel-instruction">Inicia la sesión para cargar el procedimiento.</p><div id="checklist-panel" class="checklist-list"></div><div id="station-panel" class="station-list" aria-label="Estaciones físicas"></div></section>
+        </aside>
+      </div>
+      <section class="panel lumine-panel" aria-labelledby="lumine-heading"><div class="section-heading compact"><div><p class="eyebrow">COPILOTO TÁCTICO</p><h2 id="lumine-heading">LUMINE <span class="muted">/ A.R.E.S.</span></h2></div><span id="voice-status" class="muted">Voz en espera</span></div><div id="conversation-log" class="conversation-log" aria-live="polite"></div><form id="voice-form" class="voice-form"><label class="sr-only" for="voice-input">Consulta para LUMINE</label><input id="voice-input" name="voice-input" type="text" autocomplete="off" placeholder="Escribe una consulta para LUMINE…"><button class="secondary-button" type="submit">Enviar</button><button id="microphone-button" class="secondary-button" type="button" aria-pressed="false">Hablar</button></form></section>
+      <section id="report-panel" class="panel report-panel" aria-labelledby="report-heading" hidden><div class="section-heading compact"><h2 id="report-heading">Informe de sesión</h2><span id="report-result"></span></div><div id="report-content"></div></section>
     </main>
   </body>
 </html>

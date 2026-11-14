@@ -1,1 +1,40 @@
-export { REVISION as threeRevision } from 'three';
+import * as THREE from 'three';
+import { Simulation } from './core/simulation.js';
+import { confirmStep } from './core/checklist-engine.js';
+import { buildLumineInstructions, buildTelemetryBlock } from './core/voice-policy.js';
+import { createSession } from './core/mission-state.js';
+import { createScene } from './rendering/scene.js';
+
+const session = createSession({ seed: 24014 });
+const simulation = new Simulation(session);
+const scene = createScene(document.querySelector('#scene-container'));
+const selectors = { connection: '#connection-status', start: '#start-session', finish: '#finish-session', missionTime: '#mission-time', missionState: '#mission-state', objective: '#mission-objective', telemetry: '#telemetry-panel', checklist: '#checklist-panel', checklistProgress: '#checklist-progress', checklistInstruction: '#checklist-instruction', stationPanel: '#station-panel', report: '#report-panel', reportResult: '#report-result', reportContent: '#report-content', conversation: '#conversation-log', voiceStatus: '#voice-status', voiceForm: '#voice-form', voiceInput: '#voice-input' };
+const elements = Object.fromEntries(Object.entries(selectors).map(([key, selector]) => [key, document.querySelector(selector)]));
+
+function formatMissionTime(ms) { const seconds = Math.floor(ms / 1000); return `T+${String(Math.floor(seconds / 60)).padStart(3, '0')}:${String(seconds % 60).padStart(2, '0')}`; }
+function addConversation(speaker, text) { const entry = document.createElement('p'); entry.className = 'conversation-entry'; entry.innerHTML = `<strong>${speaker}</strong> ${text.replace(/[<>]/g, '')}`; elements.conversation.append(entry); elements.conversation.scrollTop = elements.conversation.scrollHeight; }
+function renderTelemetry(snapshot) { elements.telemetry.replaceChildren(); for (const item of Object.values(snapshot.telemetry)) { const card = document.createElement('div'); card.className = 'telemetry-card'; card.dataset.status = item.status; card.innerHTML = `<div class="telemetry-name">${item.name}</div><div class="telemetry-value">${item.value} ${item.unit}</div><div class="telemetry-name">${item.status.toUpperCase()}</div>`; elements.telemetry.append(card); } if (!Object.keys(snapshot.telemetry).length) elements.telemetry.innerHTML = '<p class="muted">Sin lecturas activas.</p>'; }
+function renderChecklist(snapshot) { const checklist = snapshot.checklists[0]; if (!checklist) return; const complete = checklist.steps.filter((step) => step.completedAtMs !== null).length; elements.checklistProgress.textContent = `${complete} / ${checklist.steps.length}`; elements.checklistInstruction.textContent = checklist.status === 'complete' ? 'Checklist completo. Selecciona una estación para continuar.' : 'Confirma cada paso en orden.'; elements.checklist.replaceChildren(); checklist.steps.forEach((step, index) => { const button = document.createElement('button'); button.type = 'button'; button.className = 'checklist-step'; button.disabled = snapshot.status === 'ready' || step.completedAtMs !== null; button.setAttribute('aria-current', index === checklist.currentIndex ? 'step' : 'false'); button.innerHTML = `<span class="step-index">${step.completedAtMs !== null ? '✓' : String(index + 1).padStart(2, '0')}</span><span>${step.label}<span class="step-description">${step.description}</span></span>`; button.addEventListener('click', () => { const currentChecklist = session.checklists[0]; confirmStep(session, currentChecklist, step.id, 'panel'); render(); }); elements.checklist.append(button); }); }
+function renderStations(snapshot) { elements.stationPanel.replaceChildren(); for (const station of snapshot.stations) { const card = document.createElement('div'); card.className = 'station-card'; const copy = document.createElement('div'); copy.innerHTML = `<strong>${station.name}</strong><small>${station.status.toUpperCase()} · fatiga ${(station.fatigue * 100).toFixed(0)}%</small>`; const button = document.createElement('button'); button.type = 'button'; button.className = 'secondary-button'; button.disabled = snapshot.status !== 'active' || station.status === 'unsafe'; button.textContent = station.status === 'active' ? 'Completar' : station.status === 'complete' ? 'Completada' : 'Activar'; button.addEventListener('click', () => { if (station.status === 'active') simulation.completeStation(station.id); else simulation.activateStation(station.id); render(); }); card.append(copy, button); elements.stationPanel.append(card); } }
+function renderReport(report) { if (!report) return; elements.report.hidden = false; elements.reportResult.textContent = `${report.result.toUpperCase()} · ${report.score}/100`; elements.reportContent.innerHTML = `<p>Decisiones registradas: ${report.decisions.length}. Incidentes: ${report.incidents.length}.</p><ul>${report.recommendations.map((item) => `<li>${item}</li>`).join('')}</ul>`; }
+function render() { const snapshot = simulation.snapshot(); elements.missionTime.textContent = formatMissionTime(snapshot.missionTimeMs); elements.missionState.textContent = snapshot.status.toUpperCase(); elements.connection.textContent = snapshot.status === 'active' ? 'SIMULACIÓN ACTIVA' : 'SIMULACIÓN LISTA'; elements.objective.textContent = snapshot.status === 'active' ? 'Sigue el checklist y vigila la telemetría.' : 'Confirma el protocolo previo y prepara la primera estación.'; elements.finish.disabled = snapshot.status !== 'active'; renderTelemetry(snapshot); renderChecklist(snapshot); renderStations(snapshot); renderReport(snapshot.lastReport); scene.update(snapshot); }
+
+elements.start.addEventListener('click', () => { simulation.start(); addConversation('LUMINE', 'Comandante, estado inicial nominal. Solicito la primera verificación de checklist.'); elements.start.disabled = true; render(); });
+elements.finish.addEventListener('click', () => { const report = simulation.finish(); addConversation('LUMINE', `Sesión finalizada. Resultado ${report.result}. Revisión recomendada antes del próximo vuelo.`); render(); });
+elements.voiceForm.addEventListener('submit', (event) => { event.preventDefault(); const text = elements.voiceInput.value.trim(); if (!text) return; addConversation('COMANDANTE', text); addConversation('LUMINE', `Telemetría contextual disponible. ${buildTelemetryBlock(session, 'Confirme el paso activo del checklist.')}`); elements.voiceInput.value = ''; });
+let lastFrame = performance.now();
+let lastUiRender = 0;
+function animate(now) {
+  const delta = now - lastFrame;
+  lastFrame = now;
+  simulation.advance(delta);
+  if (now - lastUiRender >= 200) {
+    lastUiRender = now;
+    render();
+  } else {
+    scene.update(simulation.snapshot());
+  }
+  requestAnimationFrame(animate);
+}
+elements.voiceStatus.title = buildLumineInstructions(); render(); requestAnimationFrame(animate);
+export { THREE, simulation };
