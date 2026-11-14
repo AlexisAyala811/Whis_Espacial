@@ -22,7 +22,8 @@ function isAllowedOrigin(request) {
 async function serveFile(response, requestPath) {
   const relative = requestPath === '/' ? 'index.html' : requestPath.replace(/^\//, '');
   const absolute = normalize(join(root, relative));
-  if (!absolute.startsWith(normalize(root)) || absolute.includes('..')) {
+  const rootPath = normalize(root);
+  if (absolute !== rootPath && !absolute.startsWith(`${rootPath}${process.platform === 'win32' ? '\\' : '/'}`)) {
     response.writeHead(403); response.end('Forbidden'); return;
   }
   try {

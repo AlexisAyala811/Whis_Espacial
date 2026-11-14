@@ -92,3 +92,36 @@ sin mezclar el reloj de renderizado con el de las reglas.
 La consulta de Context7 resolvió el SDK JavaScript de Google Gen AI. La consulta detallada
 de documentación no devolvió contenido en el entorno, por lo que se contrastaron las
 decisiones con la documentación oficial de Google enlazada arriba.
+
+## Decisión 6: Referencias de producto y arquitectura
+
+**Decision**: Tomar [Lunar Habitat ACT](https://lunaract.space/) como referencia de
+presentación técnica y [GENIE](https://github.com/XiRoSe/genie-engine) como referencia
+de organización de un proyecto Three.js, sin copiar código, textos, imágenes ni identidad
+visual de terceros.
+
+**Patrones adoptados para Lunar Command 3D**:
+
+- De Lunar Habitat ACT: narrar la base como un sistema operativo de supervivencia,
+  exponer métricas verificables, presentar subsistemas con contexto y convertir la
+  escena 3D en un explorador de decisiones, no en un fondo decorativo.
+- De GENIE: mantener límites explícitos entre motor genérico, contenido de escenario y
+  ejecución del juego; mover el balance y los niveles a datos; y conservar verificaciones
+  reproducibles en navegador y pruebas automatizadas.
+
+**Aplicación en esta demo**: `src/core/` contiene reglas deterministas y datos de
+escenario, `src/rendering/` contiene la escena Three.js, la interfaz accesible se sirve
+desde `index.html`/`src/main.js`, y `server/` se limita al servicio local de tokens. Las
+referencias quedan documentadas para orientar futuras iteraciones de módulos, no como
+dependencias runtime.
+
+## Decisión 7: Mantener la instalación oficial de GitHub Spec Kit
+
+**Decision**: Conservar la estructura oficial de [GitHub Spec Kit](https://github.com/github/spec-kit)
+para Claude Code: Constitución por proyecto y artefactos de cada feature bajo `specs/`,
+sin introducir comandos o carpetas propietarias que desplacen `.specify/` o `.claude/`.
+
+**Aplicación**: esta feature ya completó Constitution, Specify, Plan, Tasks e Implement.
+Las siguientes iteraciones deben actualizar los artefactos existentes y ejecutar las
+verificaciones correspondientes antes de declarar convergencia; no se generarán fases
+paralelas fuera del flujo documentado.

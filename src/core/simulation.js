@@ -75,8 +75,19 @@ export class Simulation {
       if (!event.activated && this.session.missionTimeMs >= event.triggerAtMs) {
         event.activated = true;
         recordEvent(this.session, { type: 'mental-event', eventId: event.id, priority: event.priority });
+        setTelemetry(this.session, 'activeAlerts', this.mentalEvents.filter((item) => item.activated && item.outcome === 'pending').length, 'events', event.priority === 'warning' ? TELEMETRY_STATUS.WARNING : TELEMETRY_STATUS.CAUTION);
       }
     }
+  }
+
+  resolveMentalEvent(eventId, action) {
+    const event = this.mentalEvents.find((item) => item.id === eventId && item.activated);
+    if (!event || !event.validActions.includes(action) || event.outcome !== 'pending') return false;
+    event.selectedAction = action;
+    event.outcome = action === event.preferredAction ? 'nominal' : 'recovered';
+    recordEvent(this.session, { type: 'mental-decision', eventId, action, outcome: event.outcome });
+    setTelemetry(this.session, 'activeAlerts', this.mentalEvents.filter((item) => item.activated && item.outcome === 'pending').length, 'events', event.outcome === 'nominal' ? TELEMETRY_STATUS.NOMINAL : TELEMETRY_STATUS.CAUTION);
+    return true;
   }
 
   activateStation(stationId) {
