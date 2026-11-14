@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://lunar-command-3d.example/contracts/session-state.schema.json",
+  "title": "Lunar Command 3D training session state",
+  "type": "object",
+  "required": ["id", "seed", "phase", "scenarioId", "status", "missionTimeMs", "telemetry", "voice", "events"],
+  "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "seed": {"type": "integer", "minimum": 0},
+    "phase": {"const": "ground-training"},
+    "scenarioId": {"enum": ["physical-conditioning", "mental-readiness"]},
+    "status": {"enum": ["ready", "active", "paused-for-system", "completed", "failed"]},
+    "missionTimeMs": {"type": "integer", "minimum": 0},
+    "activeChecklistId": {"type": ["string", "null"]},
+    "telemetry": {"type": "object", "additionalProperties": {"$ref": "#/$defs/telemetry"}},
+    "voice": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {"enum": ["disabled", "connecting", "connected", "reconnecting", "unavailable"]},
+        "sessionResumeHandle": {"type": ["string", "null"]}
+      },
+      "additionalProperties": false
+    },
+    "events": {"type": "array", "items": {"type": "object"}}
+  },
+  "$defs": {
+    "telemetry": {
+      "type": "object",
+      "required": ["name", "value", "unit", "status", "updatedAtMs", "trend"],
+      "properties": {
+        "name": {"type": "string"},
+        "value": {"type": ["number", "string"]},
+        "unit": {"type": "string"},
+        "status": {"enum": ["nominal", "caution", "warning", "alert"]},
+        "updatedAtMs": {"type": "integer", "minimum": 0},
+        "trend": {"enum": ["rising", "falling", "steady"]}
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

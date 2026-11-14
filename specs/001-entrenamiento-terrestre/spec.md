@@ -41,9 +41,9 @@ Como aspirante, quiero resolver una evaluación mental con información incomple
 
 ---
 
-### User Story 3 - Consultar y responder a A.R.E.S. (Priority: P3)
+### User Story 3 - Consultar y responder a LUMINE (Priority: P3)
 
-Como aspirante, quiero hablar con la IA de a bordo y recibir respuestas tácticas para consultar telemetría, repetir una instrucción o confirmar una decisión sin abandonar la escena de entrenamiento.
+Como aspirante, quiero hablar con LUMINE, la IA de a bordo A.R.E.S., y recibir respuestas tácticas para consultar telemetría, repetir una instrucción o confirmar una decisión sin abandonar la escena de entrenamiento.
 
 **Why this priority**: La conversación de voz define la identidad de la demo y permite que el entrenamiento se sienta como una operación acompañada, sin sustituir los checklists que validan las decisiones.
 
@@ -51,7 +51,7 @@ Como aspirante, quiero hablar con la IA de a bordo y recibir respuestas táctica
 
 **Acceptance Scenarios**:
 
-1. **Given** una sesión de entrenamiento está activa, **When** el astronauta pregunta por el estado de un parámetro o solicita repetir la instrucción, **Then** A.R.E.S. responde en el contexto de la fase actual y la respuesta queda visible en el panel.
+1. **Given** una sesión de entrenamiento está activa, **When** el astronauta pregunta por el estado de un parámetro o solicita repetir la instrucción, **Then** LUMINE responde en el contexto de la fase actual y la respuesta queda visible en el panel.
 2. **Given** el servicio de voz no responde, **When** el astronauta intenta hablar, **Then** la interfaz informa el estado, permite escribir la consulta y conserva el flujo de la sesión.
 
 ### Edge Cases
@@ -59,7 +59,7 @@ Como aspirante, quiero hablar con la IA de a bordo y recibir respuestas táctica
 - El astronauta pierde la conexión de voz durante una anomalía. La sesión conserva su estado y habilita entrada escrita y botones de respuesta.
 - El micrófono no existe, está bloqueado o no concede permiso. La demo explica el problema sin impedir la ejecución de los checklists.
 - El astronauta tarda más que el límite de una decisión. El tiempo sigue avanzando y la sesión aplica la consecuencia definida para una omisión.
-- El astronauta repite una respuesta o envía una orden incompatible con la fase. A.R.E.S. pide confirmación o devuelve el procedimiento permitido.
+- El astronauta repite una respuesta o envía una orden incompatible con la fase. LUMINE pide confirmación o devuelve el procedimiento permitido.
 - La ventana del navegador se reduce o cambia de orientación. Los paneles esenciales siguen siendo utilizables y el estado del entrenamiento no se pierde.
 - Una respuesta de voz llega tarde. No debe reemplazar una decisión ya confirmada y debe identificarse como respuesta asociada a la consulta original.
 
@@ -72,13 +72,17 @@ Como aspirante, quiero hablar con la IA de a bordo y recibir respuestas táctica
 - **FR-003**: La demo DEBE incluir una evaluación mental con checklists, avisos concurrentes, límites de respuesta y consecuencias operativas simuladas.
 - **FR-004**: El sistema DEBE mantener el tiempo de la sesión durante las decisiones y registrar las omisiones, confirmaciones, cambios de estado y resultados.
 - **FR-005**: El usuario DEBE poder seleccionar, confirmar, revisar y corregir una acción mediante paneles de checklist accesibles con teclado y ratón.
-- **FR-006**: A.R.E.S. DEBE aceptar consultas habladas y responder con voz contextual durante una sesión activa mediante el proveedor externo de voz de Google configurado para el proyecto.
+- **FR-006**: LUMINE, la identidad conversacional de A.R.E.S., DEBE aceptar consultas habladas y responder con voz contextual durante una sesión activa mediante el proveedor externo de voz de Google configurado para el proyecto.
 - **FR-007**: El sistema DEBE ofrecer entrada escrita y respuesta visible como alternativa cuando el micrófono, el permiso de audio o el servicio de voz no estén disponibles.
-- **FR-008**: Las respuestas de A.R.E.S. DEBEN respetar el estado de la sesión, distinguir entre información, instrucción y confirmación, y evitar confirmar una acción que el usuario no haya aceptado.
-- **FR-009**: La interfaz DEBE mostrar telemetría esencial, instrucciones actuales, alertas, estado de conexión de voz y resultado de la sesión fuera del lienzo 3D.
-- **FR-010**: La demo DEBE comunicar los estados esenciales con texto y no depender solo de color, sonido o movimiento.
-- **FR-011**: La demo DEBE permitir reiniciar una sesión desde el estado inicial y conservar un informe de la última sesión en el dispositivo del usuario.
-- **FR-012**: Las credenciales y secretos del proveedor externo DEBEN permanecer fuera de los archivos públicos de la demo y de los datos enviados al repositorio.
+- **FR-008**: Las respuestas de LUMINE DEBEN respetar el estado de la sesión, distinguir entre información, instrucción y confirmación, y evitar confirmar una acción que el usuario no haya aceptado.
+- **FR-009**: LUMINE DEBE mantener un registro conversacional breve, directo y orientado a la acción. En fase nominal puede expresar empatía y humor seco sutil. Durante una contingencia DEBE usar frases cortas, datos precisos y prioridad operacional, sin Markdown complejo ni LaTeX en la salida hablada.
+- **FR-010**: LUMINE DEBE iniciar la sesión con un saludo al comandante, el estado inicial y la solicitud de la primera verificación de checklist.
+- **FR-011**: El sistema DEBE asociar cada respuesta de LUMINE con la fase de misión, el tiempo metrológico, el estado operativo, el parámetro crítico y la acción requerida cuando ocurra una decisión relevante.
+- **FR-012**: El sistema DEBE representar la progresión de la misión mediante fases explícitas, comenzando en el acondicionamiento pre-vuelo de la Tierra y dejando preparadas las transiciones posteriores hacia lanzamiento, tránsito, EDL y superficie.
+- **FR-013**: La interfaz DEBE mostrar telemetría esencial, instrucciones actuales, alertas, estado de conexión de voz y resultado de la sesión fuera del lienzo 3D.
+- **FR-014**: La demo DEBE comunicar los estados esenciales con texto y no depender solo de color, sonido o movimiento.
+- **FR-015**: La demo DEBE permitir reiniciar una sesión desde el estado inicial y conservar un informe de la última sesión en el dispositivo del usuario.
+- **FR-016**: Las credenciales y secretos del proveedor externo DEBEN permanecer fuera de los archivos públicos de la demo y de los datos enviados al repositorio.
 
 ### Key Entities
 
@@ -87,7 +91,8 @@ Como aspirante, quiero hablar con la IA de a bordo y recibir respuestas táctica
 - **Evento mental**: Aviso o decisión con prioridad, ventana temporal, respuestas válidas y consecuencias.
 - **Checklist**: Secuencia de acciones verificables asociada a una estación o evento.
 - **Telemetría**: Lectura contextual de un parámetro simulado con valor, unidad, estado y momento de la sesión.
-- **Intercambio de voz**: Consulta o instrucción del usuario, respuesta de A.R.E.S., fase asociada, estado de entrega y alternativa textual si aplica.
+- **Intercambio de voz**: Consulta o instrucción del usuario, respuesta de LUMINE/A.R.E.S., fase asociada, estado de entrega y alternativa textual si aplica.
+- **Estado de misión**: Fase activa, tiempo metrológico, estado operativo, parámetro crítico y acción requerida que contextualizan la conversación.
 - **Informe de entrenamiento**: Resumen de decisiones, tiempos, incidentes, resultado y recomendaciones de la sesión.
 
 ## Success Criteria *(mandatory)*
@@ -111,3 +116,4 @@ Como aspirante, quiero hablar con la IA de a bordo y recibir respuestas táctica
 - La conversación de voz requiere un servicio externo de Google y una configuración de credenciales segura que se definirá durante la planificación.
 - El idioma inicial de la interfaz y de la voz será español.
 - La primera versión prioriza una escena demostrable y dos actividades conectadas sobre la cobertura completa del currículo descrito en el documento de contexto.
+- El prompt de LUMINE se implementará como política de comportamiento versionada y comprobable, mientras que la máquina de estados y las consecuencias seguirán siendo reglas del simulador.
