@@ -186,3 +186,11 @@ Crea un **Web Service** para este repositorio, selecciona la rama `main` y usa:
 Render proporciona `PORT` automáticamente. El servidor escucha en `0.0.0.0` en Render y conserva `127.0.0.1` al ejecutar el proyecto localmente. Si no se establece `ALLOWED_ORIGIN`, usa automáticamente la URL pública que Render proporciona. Para un dominio personalizado, establece `ALLOWED_ORIGIN` como el origen HTTPS exacto de ese dominio, sin barra final.
 
 Opcionalmente, configura `NASA_API_KEY` como variable de entorno privada de Render para APOD; si no se configura, se usa `DEMO_KEY`, sujeto a sus límites. No copies la clave en el código ni en Git. La simulación funciona sin configurar voz ni `GEMINI_API_KEY`.
+
+## Minijuegos y sonido
+
+- El traje muestra el progreso de las tres comprobaciones; ARED permite pulsar **E** o el botón de repetición.
+- En EVA se pueden arrastrar las líneas o seleccionar línea y puerto con teclado; el panel muestra las conexiones completadas.
+- El hábitat muestra medidores de recursos; en el VAB, enfocar un interruptor indica los circuitos que cambiará.
+- En la cabina, selecciona una decisión, revisa la previsión y confírmala. La previsión no cambia los recursos hasta confirmar.
+- Los ambientes y efectos se generan localmente, sin voz ni descargas de audio. Usa **Sound on/off** y el control de volumen para ajustarlos. El navegador inicia el sonido después de una interacción y la preferencia se conserva entre escenas.

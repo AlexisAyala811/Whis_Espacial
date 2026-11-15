@@ -1,3 +1,4 @@
+import { createMissionAudio } from './audio/mission-audio.js';
 import * as THREE from 'three';
 import {createGraphicsQuality,applySceneQuality} from './rendering/graphics-quality.js';
 import {createFirstPersonArms} from './rendering/first-person-arms.js';
@@ -7,11 +8,12 @@ import { RoundedBoxGeometry } from '../../node_modules/three/examples/jsm/geomet
 import { makeSurfaceTextures, drawTelemetry } from './rendering/surface-detail.js';
 import { createWali } from './wali.js';
 
+const audio=createMissionAudio({scene:'mars-habitat',active:true});
 const $=id=>document.getElementById(id),reduced=matchMedia('(prefers-reduced-motion: reduce)'),returned=new URLSearchParams(location.search).get('regreso')==='panel';
 const keys=new Set(),obstacles=[];let renderer,camera,scene,arms,dragging=false,loading=false,yaw=0,pitch=0,last=performance.now(),screenTime=0,nearAction=null,lastMessage='';
 const consolePoint={x:0,z:-5.1},exitPoint={x:0,z:8.6};
 function say(message){if(message!==lastMessage){lastMessage=message;$('message').textContent=message;}}
-function transition(target){if(loading||!nearAction||nearAction.id!==target)return;arms?.trigger('interact');loading=true;keys.clear();$('loading-title').textContent=target==='console'?"Opening mission control":"Returning to the surface";$('loading-detail').textContent=target==='console'?"Loading the resource dashboard…":"Preparing the airlock…";$('loading').hidden=false;setTimeout(()=>{location.href=target==='console'?'./outpost.html?origen=habitat':'./mars.html?regreso=base';},reduced.matches?0:800);}
+function transition(target){if(loading||!nearAction||nearAction.id!==target)return;arms?.trigger('interact');audio.cue('door');audio.setActive(false);loading=true;keys.clear();$('loading-title').textContent=target==='console'?"Opening mission control":"Returning to the surface";$('loading-detail').textContent=target==='console'?"Loading the resource dashboard…":"Preparing the airlock…";$('loading').hidden=false;setTimeout(()=>{location.href=target==='console'?'./outpost.html?origen=habitat':'./mars.html?regreso=base';},reduced.matches?0:800);}
 $('interact').addEventListener('click',()=>{if(nearAction)transition(nearAction.id);});
 try{
   renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
@@ -75,6 +77,7 @@ try{
   window.addEventListener('keydown',event=>{if(event.target.closest('button,a,input,select,textarea'))return;if(['KeyW','KeyS','KeyA','KeyD','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','ControlLeft','ControlRight','ShiftLeft','ShiftRight'].includes(event.code))event.preventDefault();keys.add(event.code);if(event.code==='KeyE'&&!event.repeat&&nearAction)transition(nearAction.id);});
   window.addEventListener('keyup',event=>keys.delete(event.code));window.addEventListener('blur',()=>{keys.clear();dragging=false;});
   function blocked(x,z){return Math.abs(x)>5.55||Math.abs(z)>8.65||obstacles.some(o=>Math.abs(x-o.x)<o.w/2+.32&&Math.abs(z-o.z)<o.d/2+.32);}
+  let lastFootstep=0;
   function frame(now){const dt=Math.min((now-last)/1000,.05);last=now;
     if(!loading){yaw+=((keys.has('ArrowLeft')?1:0)-(keys.has('ArrowRight')?1:0))*dt*1.5;pitch=THREE.MathUtils.clamp(pitch+((keys.has('ArrowUp')?1:0)-(keys.has('ArrowDown')?1:0))*dt,-1,1);
       const forward=Number(keys.has('KeyW'))-Number(keys.has('KeyS')),right=Number(keys.has('KeyD'))-Number(keys.has('KeyA')),len=Math.hypot(forward,right)||1;
@@ -88,6 +91,7 @@ try{
       if(!reduced.matches){screenTime+=dt;if(screenTime>=1){screenTime=0;drawTelemetry(screenCanvas,4,now/1000);screenMap.needsUpdate=true;}}
     }
     const moving=!loading&&['KeyW','KeyA','KeyS','KeyD'].some(k=>keys.has(k));
+    if(moving&&now-lastFootstep>520){audio.cue('step');lastFootstep=now;}
     arms.update(dt,{active:!loading,moving:moving?1:0,sprint:keys.has('ControlLeft')||keys.has('ControlRight')||keys.has('ShiftLeft')||keys.has('ShiftRight')});
     waliCompanion.update(dt,!loading,blocked,wali?.isInteracting());wali?.setAnchor(waliCompanion.anchor());renderer.render(scene,camera);requestAnimationFrame(frame);
   }requestAnimationFrame(frame);

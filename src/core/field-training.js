@@ -1,5 +1,10 @@
 // Browser-independent rules for the first-person training route.
 import { OutpostTraining } from './outpost-training.js';
+// Each switch affects its own bus and its immediate neighbors.
+export function affectedPowerBuses(index) {
+  if (!Number.isInteger(index) || index < 0 || index > 2) return [];
+  return [0, 1, 2].filter(bus => Math.abs(index - bus) <= 1);
+}
 export class FieldTraining {
   constructor() {
     this.stage = 0; this.checks = 0; this.reps = 0; this.errors = 0; this.elapsed = 0; this.lastRep = -1;
@@ -56,7 +61,7 @@ export class FieldTraining {
     if (station === 'vab') {
       const switchIndex = answer?.switch;
       if (!Number.isInteger(switchIndex) || switchIndex < 0 || switchIndex > 2) return "Select a power bus.";
-      for (let i = Math.max(0, switchIndex - 1); i <= Math.min(2, switchIndex + 1); i++) this.powerBuses[i] = !this.powerBuses[i];
+      for (const i of affectedPowerBuses(switchIndex)) this.powerBuses[i] = !this.powerBuses[i];
       this.powerMoves++;
       if (this.powerBuses.every(Boolean)) { this.stage++; return "Power buses stable. Proceed to the spacecraft cabin."; }
       if (this.powerMoves > 4) this.errors++;

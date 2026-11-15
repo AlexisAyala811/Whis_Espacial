@@ -63,10 +63,17 @@ export const OUTPOST_QUESTIONS = Object.freeze([
 export class OutpostTraining {
   constructor() { this.sol = 0; this.resources = { air: 65, power: 95, shield: 60, food: 65 }; this.log = []; this.failed = false; }
   get complete() { return this.sol === OUTPOST_QUESTIONS.length && !this.failed; }
-  choose(index) {
+  preview(index) {
     if (this.failed || this.complete || !Number.isInteger(index) || index < 0 || index > 2) return null;
+    const choice = OUTPOST_QUESTIONS[this.sol].options[index];
+    const resources = Object.fromEntries(Object.entries(this.resources).map(([key,value]) => [key, Math.max(0, Math.min(100, value + (choice.delta[key] ?? 0)))]));
+    return {resources, failed:Object.values(resources).some(value => value < 20)};
+  }
+  choose(index) {
+    const forecast = this.preview(index);
+    if (!forecast) return null;
     const question = OUTPOST_QUESTIONS[this.sol], choice = question.options[index];
-    for (const [key, change] of Object.entries(choice.delta)) this.resources[key] = Math.max(0, Math.min(100, this.resources[key] + change));
+    Object.assign(this.resources, forecast.resources);
     this.log.push({ title: question.title, choice: choice.text, correct: choice.correct, why: choice.why });
     this.sol++;
     this.failed = Object.values(this.resources).some(value => value < 20);

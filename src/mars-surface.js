@@ -1,9 +1,11 @@
+import { createMissionAudio } from './audio/mission-audio.js';
 import * as THREE from 'three';
 import {createGraphicsQuality,applySceneQuality} from './rendering/graphics-quality.js';
 import {createFirstPersonArms} from './rendering/first-person-arms.js';
 import { createWaliCompanion } from './rendering/wali-companion.js';
 import { createWali } from './wali.js';
 
+const audio=createMissionAudio({scene:'mars-surface',active:true});
 const $=id=>document.getElementById(id), reduced=matchMedia('(prefers-reduced-motion: reduce)'),fromBase=new URLSearchParams(location.search).get('regreso')==='base';
 let active=fromBase,loading=false,landed=fromBase,dragging=false,yaw=0,pitch=0;
 const keys=new Set(),canvasHost=$('mars-world');let renderer,scene,camera,arms,last=performance.now();
@@ -19,7 +21,7 @@ else setTimeout(finishLanding,reduced.matches?0:4000);
 $('leave-ship').addEventListener('click',()=>{$('landing').hidden=true;active=true;$('message').textContent="Welcome to Mars. Walk down the ramp toward the habitat.";renderer?.domElement.focus();});
 function enterBase(){
   if(!active||loading||Math.hypot(camera.position.x-door.x,camera.position.z-door.z)>2.4)return;
-  arms?.trigger('interact');active=false;loading=true;$('loading').hidden=false;
+  arms?.trigger('interact');audio.cue('door');audio.setActive(false);active=false;loading=true;$('loading').hidden=false;
   setTimeout(()=>{window.location.href='./habitat.html';},reduced.matches?0:900);
 }
 $('enter-base').addEventListener('click',enterBase);
@@ -111,6 +113,7 @@ try{
   document.addEventListener('mousemove',event=>{if(!active||!dragging)return;yaw-=event.movementX*.003;pitch=THREE.MathUtils.clamp(pitch-event.movementY*.003,-1,1);});
   window.addEventListener('keydown',event=>{if(event.target.closest('button,a,input,select,textarea'))return;if(['KeyW','KeyS','KeyA','KeyD','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','ControlLeft','ControlRight','ShiftLeft','ShiftRight'].includes(event.code))event.preventDefault();keys.add(event.code);if(event.code==='KeyE'&&!event.repeat)enterBase();});
   window.addEventListener('keyup',event=>keys.delete(event.code));window.addEventListener('blur',()=>{keys.clear();dragging=false;});
+  let lastFootstep=0;
   function frame(now){const dt=Math.min((now-last)/1000,.05);last=now;
     if(active){yaw+=((keys.has('ArrowLeft')?1:0)-(keys.has('ArrowRight')?1:0))*dt*1.5;pitch=THREE.MathUtils.clamp(pitch+((keys.has('ArrowUp')?1:0)-(keys.has('ArrowDown')?1:0))*dt,-1,1);
       const forward=Number(keys.has('KeyW'))-Number(keys.has('KeyS')),right=Number(keys.has('KeyD'))-Number(keys.has('KeyA')),len=Math.hypot(forward,right)||1;
@@ -121,6 +124,7 @@ try{
       camera.rotation.set(pitch,yaw,0);const distance=Math.hypot(camera.position.x-door.x,camera.position.z-door.z);$('distance').textContent=`HABITAT · ${distance.toFixed(1)} m`;$('enter-base').hidden=distance>2.4;
     }
     const moving=active&&['KeyW','KeyA','KeyS','KeyD'].some(k=>keys.has(k));
+    if(moving&&now-lastFootstep>520){audio.cue('step');lastFootstep=now;}
     arms.update(dt,{active,moving:moving?1:0,sprint:keys.has('ControlLeft')||keys.has('ControlRight')||keys.has('ShiftLeft')||keys.has('ShiftRight')});
     waliCompanion.update(dt,active&&!loading,(x,z)=>Math.abs(x)>15.7||z<minZ||z>8,wali?.isInteracting());
     wali?.setAnchor(waliCompanion.anchor());renderer.render(scene,camera);requestAnimationFrame(frame);

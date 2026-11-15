@@ -1,7 +1,9 @@
+import { createMissionAudio } from './audio/mission-audio.js';
 import {MarsBase,SYSTEMS,POWER_PER_SOL} from './core/mars-base.js';
 import {solarData} from './nasa-panel.js';
 import {createWali} from './wali.js';
 
+const audio=createMissionAudio({scene:'mars-base',active:true});
 const $=id=>document.getElementById(id);
 const labels={air:"Air",water:"Water",food:"Food",health:'Health'};
 const systems={life:['Life support',"Keeps the air breathable."],crop:["Crops","Uses water; produces food after accumulating 6 units."],shield:['Shelter',''],comms:["Communications","Sends a message; the reply takes 2 game sols."]};
@@ -67,7 +69,7 @@ function render(){
     for(const note of report.notes)article.append(el('p',note));target.append(article);
   }
 }
-$('advance').addEventListener('click',()=>{if(!locked)showSolarContext();locked=true;const result=mission.advance(allocation);if(!result)return;saveMission();render();if(mission.finished)$('restart-mars').focus();});
+$('advance').addEventListener('click',()=>{if(!locked)showSolarContext();locked=true;const result=mission.advance(allocation);if(!result)return;audio.cue(mission.failed?'error':'success');saveMission();render();if(mission.finished)$('restart-mars').focus();});
 $('restart-mars').addEventListener('click',()=>{locked=false;mission=new MarsBase(solar);allocation={life:3,crop:2,shield:2,comms:1};try{sessionStorage.removeItem(SAVE_KEY);}catch{}showSolarContext();render();$('advance').focus();});
 render();if(locked)showSolarContext();
 solarData().then(data=>{solar=data;if(!locked){mission=new MarsBase(data);showSolarContext();render();}}).catch(()=>{if(!locked){showSolarContext();render();}});
