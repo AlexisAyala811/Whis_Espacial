@@ -4,11 +4,20 @@ export function decorateRoom(index,{box,cylinder,display,textPanel,obstacles}) {
     // Clean preparation room: lockers, workbench, suit bays and an orange airlock.
     for(const x of [-6.5,6.5]) for(const z of [-6,-3,0,3,6]){
       box(x,1.55,z,.7,3,1.55,0xd9ded9);box(x+(x<0?.38:-.38),1.5,z,.05,2.65,1.3,0x92a4ac);
+      const face=x+(x<0?.42:-.42),side=x<0?1:-1;
+      for(const y of [.5,.58,.66])box(face,y,z,.025,.025,.82,0x546b70);
+      for(const dz of [-.55,.55])box(face,1.5,z+dz,.025,2.42,.025,0xb8cbca);
+      box(face+side*.03,1.22,z+.43,.05,.48,.09,0x293f46);
+      box(face+side*.05,1.24,z+.43,.035,.26,.025,0xadc4c5);
+      box(face+side*.03,2.22,z,.035,.22,.85,0x5f7b80);
+      for(const dz of [-.25,0,.25])box(face+side*.05,2.22,z+dz,.025,.06,.1,0xc8d8d3);
       obstacles.push({x,z,w:.8,d:1.7});
     }
     for(const x of [-1.8,1.8]) box(x,2.25,-8.7,.22,4.5,.45,0xd49a55);
     box(0,4.4,-8.7,3.8,.25,.45,0xd49a55);
     box(4.8,.48,3.5,2.8,.15,1,0xadb8b5);for(const x of [3.6,6])box(x,.24,3.5,.12,.5,.7,0x647575);
+    for(const x of [3.85,4.45,5.05,5.65])box(x,.57,3.5,.53,.045,.8,0x879d9d);
+    box(4.8,.11,3.5,2.45,.08,.7,0x566d70);
     obstacles.push({x:4.8,z:3.5,w:2.8,d:1});
     for(const x of [3.4,6.1]){box(x,.07,-2.8,1.8,.13,1.8,0x687e86);box(x,.14,-2.8,1.5,.04,1.5,0xc9d8d5);}
   }else if(index===1){

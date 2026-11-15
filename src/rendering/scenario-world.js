@@ -5,6 +5,7 @@ import { decorateRoom } from './room-identity.js';
 import { makeSurfaceTextures, drawTelemetry } from './surface-detail.js';
 import { buildCabinDetails } from './cabin-details.js';
 import { finishScenario } from './scenario-finish.js';
+import { makePreparationSuits } from './preparation-suits.js';
 import { RoundedBoxGeometry } from '../../node_modules/three/examples/jsm/geometries/RoundedBoxGeometry.js';
 
 export const STATIONS = [
@@ -45,7 +46,7 @@ export function createScenarioWorld(container) {
   const arms = [];
   const palmGeometry = new RoundedBoxGeometry(.19,.10,.22,3,.035);
   const fingerGeometry = new THREE.CapsuleGeometry(.022,.065,3,8);
-  const cuffGeometry = new THREE.TorusGeometry(.106,.016,8,18);
+  const cuffGeometry = new THREE.TorusGeometry(.09,.009,8,18);
   const grip = new THREE.MeshStandardMaterial({ color: 0x475e64, roughness: .92 });
   for (const side of [-1, 1]) {
     const arm = new THREE.Group();
@@ -62,7 +63,7 @@ export function createScenarioWorld(container) {
       pad.position.set((i-1.5)*.044,-.026,-.18-(i===1||i===2?.01:0));glove.add(pad);
     }
     const thumb=new THREE.Mesh(fingerGeometry,suitWhite);thumb.rotation.set(Math.PI/2,side*.7,side*.25);thumb.position.set(side*.12,-.005,-.03);glove.add(thumb);
-    const cuff=new THREE.Mesh(cuffGeometry,grip);cuff.position.set(0,0,.105);glove.add(cuff);
+    const cuff=new THREE.Mesh(cuffGeometry,suitGray);cuff.position.set(0,0,.105);glove.add(cuff);
     arm.add(glove);
     camera.add(arm); arms.push(arm);
   }
@@ -190,27 +191,6 @@ export function createScenarioWorld(container) {
       ring.rotation.x = -Math.PI / 2; ring.position.set(station.x, .055, station.z); scene.add(ring);
       return ring;
     }
-    function mannequin(x, z) {
-      box(x, 1.45, z, .72, 1.15, .44, 0xe5e8df);
-      box(x,1.48,z-.3,.68,.9,.24,0xa8bab9);
-      box(x,1.48,z+.24,.58,.42,.08,0x9db1b0);
-      box(x,1.6,z+.3,.36,.08,.04,0x426475);
-      for(const side of [-1,1]){
-        box(x+side*.3,1.95,z+.18,.14,.11,.08,0xd59556);
-        box(x+side*.48,.87,z+.02,.22,.12,.29,0x738e93);
-        box(x+side*.22,.16,z+.11,.27,.18,.52,0x617d81);
-      }
-      const helmet = new THREE.Mesh(new THREE.SphereGeometry(.32, 18, 14), material(0xcbd9d6));
-      helmet.position.set(x, 2.38, z); scene.add(helmet);
-      box(x, 2.36, z + .31, .44, .19, .035, 0x3b5960);
-      for (const side of [-1, 1]) {
-        box(x + side * .48, 1.42, z, .2, 1.08, .26, 0xdfe5df);
-        box(x + side * .22, .55, z, .26, .75, .33, 0xdfe5df);
-      }
-      box(x, .17, z, 1.65, .15, .9, 0x697d80);
-      obstacles.push({ x, z, w: 1.4, d: 1 });
-    }
-
     // Each scenario owns its own room, geometry and textures; the next one is built on demand.
     box(0, -.16, 0, halfWidth*2, .32, 20, 0x454d4c);
     const floor = new THREE.Mesh(new THREE.PlaneGeometry(halfWidth*2, 20), new THREE.MeshStandardMaterial({ color: [0xa7b4b1, 0x849997, 0x758c91, 0x599da6, 0xc9c6ad, 0x899b99, 0x536b72][index], map: textures.floor, metalness: index===6 ? .38 : .15, roughness: index===6 ? .48 : .82 }));
@@ -235,7 +215,7 @@ export function createScenarioWorld(container) {
     box(0, roomHeight, 0, halfWidth*2, .2, 20, index === 5 ? 0x66716e : index === 6 ? 0x536a72 : 0xc5cac2, false, 'wall');
     if ([0,2].includes(index)) for (let x = -halfWidth+1; x < halfWidth; x += 2) for (let z = -9; z < 10; z += 2) {
       box(x, roomHeight-.13, z, 1.94, .024, 1.94, index === 3 ? 0x427888 : 0xd0d3ca);
-      if (((x + z) / 2) % 3 === 0) box(x, roomHeight-.17, z, 1.3, .02, .42, index === 3 ? 0x8cd7ec : 0xf4f3e8, true);
+      if ((((x + halfWidth - 1) / 2) + ((z + 9) / 2)) % 3 === 0) box(x, roomHeight-.17, z, 1.3, .02, .42, 0xf4f3e8, true);
     }
     if(index===0) for (let z = -7; z <= 7; z += 3.5) for (const side of [-1, 1]) {
       box(side * (halfWidth-.22), 3, z, .08, 5.4, 3.2, 0xb3bfba);
@@ -276,6 +256,7 @@ export function createScenarioWorld(container) {
     const station = STATIONS[index];
     const beacon = stationUnit(station, index);
     if (index === 0) {
+      const mannequin=makePreparationSuits(scene,textures,obstacles);
       mannequin(3.4, -2.8); mannequin(6.1, -2.8);
       for (const x of [3.2, 6]) display(x, 3.1, -9.4, 2.3, 1.15, 0);
     } else if (index === 1) {
