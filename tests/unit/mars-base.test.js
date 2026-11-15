@@ -15,14 +15,14 @@ test('preview does not change the mission and matches the result',()=>{
 });
 test('crop needs investment over time and message arrives after two sols',()=>{
   const m=new MarsBase(),a={life:3,crop:2,shield:2,comms:1};
-  assert.match(m.advance(a).notes.join(' '),/Mensaje enviado/);
-  assert.doesNotMatch(m.advance(a).notes.join(' '),/Llegó la respuesta/);
-  const third=m.advance(a);assert.match(third.notes.join(' '),/Llegó la respuesta/);assert.match(third.notes.join(' '),/Cosecha/);
+  assert.match(m.advance(a).notes.join(' '),/Message sent/);
+  assert.doesNotMatch(m.advance(a).notes.join(' '),/reply arrived/);
+  const third=m.advance(a);assert.match(third.notes.join(' '),/reply arrived/);assert.match(third.notes.join(' '),/Harvest/);
   m.advance(a);m.advance(a);assert.equal(m.finished,true);assert.equal(m.failed,false);assert.equal(m.history.length,5);assert.equal(m.advance(a),null);
 });
 test('unprotected solar exercise and neglect can lead to failure',()=>{
   const m=new MarsBase(),a={life:0,crop:0,shield:0,comms:0};m.advance(a);
-  const sol2=m.advance(a);assert.match(sol2.notes.join(' '),/faltó energía/);assert.equal(m.resources.health,82);
+  const sol2=m.advance(a);assert.match(sol2.notes.join(' '),/insufficient shelter power/);assert.equal(m.resources.health,82);
   while(!m.finished)m.advance(a);assert.equal(m.failed,true);assert.equal(m.finished,true);
 });
 test('NASA observation is historical context, invalid or empty data uses fictional exercise',()=>{

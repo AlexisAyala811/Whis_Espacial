@@ -15,13 +15,13 @@ test('Wali offers a valid next step for every non-complete electrical configurat
   assert.equal(nextPowerMove([true,true,true]),null);
 });
 test('Wali adapts hints to mission progress and solar exercise',()=>{
-  assert.match(waliHint({scene:'suit',checks:2}),/2 de 3/);
-  assert.match(waliHint({scene:'ared',reps:4}),/4 de 6/);
-  assert.match(waliHint({scene:'eva'}),/oxígeno/i);
-  assert.match(waliHint({scene:'mars-base',sol:2,shield:1,shieldNeeded:3}),/3 unidades/);
-  assert.match(waliHint({scene:'mars-habitat',near:'console'}),/Pulsa E/);
-  assert.match(waliHint({scene:'suit',stage:2,sceneIndex:0}),/puerta abierta/);
-  assert.match(waliHint({scene:'ship',completed:true,stage:7,sceneIndex:6}),/Descender a Marte/);
+  assert.match(waliHint({scene:'suit',checks:2}),/2 of 3/);
+  assert.match(waliHint({scene:'ared',reps:4}),/4 of 6/);
+  assert.match(waliHint({scene:'eva'}),/oxygen/i);
+  assert.match(waliHint({scene:'mars-base',sol:2,shield:1,shieldNeeded:3}),/3 units/);
+  assert.match(waliHint({scene:'mars-habitat',near:'console'}),/Press E/);
+  assert.match(waliHint({scene:'suit',stage:2,sceneIndex:0}),/open door/);
+  assert.match(waliHint({scene:'ship',completed:true,stage:7,sceneIndex:6}),/Descend to Mars/);
 });
 test('every scenario has a short educational fact',()=>{
   for(const id of ['suit','ared','mental','eva','habitat','vab','ship','mars-surface','mars-habitat','mars-base'])assert.ok(WALI_FACTS[id]?.length>20,id);

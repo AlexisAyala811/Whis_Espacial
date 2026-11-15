@@ -8,11 +8,11 @@ const $=id=>document.getElementById(id),reduced=matchMedia('(prefers-reduced-mot
 const keys=new Set(),obstacles=[];let renderer,camera,scene,dragging=false,loading=false,yaw=0,pitch=0,last=performance.now(),screenTime=0,nearAction=null,lastMessage='';
 const consolePoint={x:0,z:-5.1},exitPoint={x:0,z:8.6};
 function say(message){if(message!==lastMessage){lastMessage=message;$('message').textContent=message;}}
-function transition(target){if(loading||!nearAction||nearAction.id!==target)return;loading=true;keys.clear();$('loading-title').textContent=target==='console'?'Abriendo control de misión':'Saliendo a la superficie';$('loading-detail').textContent=target==='console'?'Cargando el panel de recursos…':'Preparando la esclusa…';$('loading').hidden=false;setTimeout(()=>{location.href=target==='console'?'./outpost.html?origen=habitat':'./mars.html?regreso=base';},reduced.matches?0:800);}
+function transition(target){if(loading||!nearAction||nearAction.id!==target)return;loading=true;keys.clear();$('loading-title').textContent=target==='console'?"Opening mission control":"Returning to the surface";$('loading-detail').textContent=target==='console'?"Loading the resource dashboard…":"Preparing the airlock…";$('loading').hidden=false;setTimeout(()=>{location.href=target==='console'?'./outpost.html?origen=habitat':'./mars.html?regreso=base';},reduced.matches?0:800);}
 $('interact').addEventListener('click',()=>{if(nearAction)transition(nearAction.id);});
 try{
   renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-  const canvas=renderer.domElement;$('habitat-world').append(canvas);canvas.tabIndex=0;canvas.setAttribute('aria-label','Interior 3D del hábitat marciano. Camina hasta la consola o vuelve a la esclusa.');
+  const canvas=renderer.domElement;$('habitat-world').append(canvas);canvas.tabIndex=0;canvas.setAttribute('aria-label',"3D Mars habitat interior. Walk to the console or return to the airlock.");
   scene=new THREE.Scene();scene.background=new THREE.Color(0x667d82);camera=new THREE.PerspectiveCamera(70,1,.08,80);camera.rotation.order='YXZ';camera.position.set(0,1.7,returned?-2.3:5.9);scene.add(camera);
   const waliCompanion=createWaliCompanion(scene,camera,reduced);
   const wali=createWali({showAvatar:false,getContext:()=>({scene:'mars-habitat',active:!loading,near:nearAction?.id})});
@@ -40,7 +40,7 @@ try{
   // Sleeping berths on the left.
   for(const y of [.65,2.15]){rounded(-4.35,y,-1.2,2.8,.25,1.6,metal);rounded(-4.35,y+.18,-1.2,2.55,.18,1.4,fabric);rounded(-5.1,y+.3,-1.2,.65,.12,1.15,wall,.05);}
   for(const x of [-5.7,-3])for(const z of [-1.95,-.45])box(x,1.6,z,.09,3.2,.09,metal);
-  obstacles.push({x:-4.35,z:-1.2,w:3,d:1.85});sign('DESCANSO',-4.3,3.45,-2.13,2.7);
+  obstacles.push({x:-4.35,z:-1.2,w:3,d:1.85});sign("SLEEP",-4.3,3.45,-2.13,2.7);
   // Plant rack with individual leaves; the model is decorative, not a crop simulator.
   box(4.45,.55,-2.4,2.25,1.1,1.55,metal);box(4.45,1.15,-2.4,2.1,.12,1.4,dark);
   for(const x of [3.75,4.2,4.65,5.1])for(const z of [-2.8,-2.05]){const stem=new THREE.Mesh(new THREE.CylinderGeometry(.025,.035,.44,7),leaf);stem.position.set(x,1.43,z);scene.add(stem);const foliage=new THREE.Mesh(new THREE.SphereGeometry(.17,9,7),leaf);foliage.scale.set(1.25,.7,1);foliage.position.set(x,1.68,z);scene.add(foliage);}
@@ -48,15 +48,15 @@ try{
     const blade=new THREE.Mesh(new THREE.SphereGeometry(.12,10,7),leaf);blade.scale.set(1.5,.32,.65);blade.rotation.z=side*.42;blade.position.set(x+side*.11,1.57,z);scene.add(blade);
   }
   box(4.45,2.25,-2.4,2,.08,.35,glow);for(const x of [3.4,5.5])box(x,1.7,-2.4,.08,2.4,.08,metal);
-  obstacles.push({x:4.45,z:-2.4,w:2.5,d:1.8});sign('CULTIVO',4.45,2.8,-3.24,2.4);
+  obstacles.push({x:4.45,z:-2.4,w:2.5,d:1.8});sign("CROPS",4.45,2.8,-3.24,2.4);
   // Environmental rack and storage on right side.
-  rounded(4.6,1.2,3.8,2.1,2.4,1.15,metal);box(4.6,1.55,3.18,1.6,.75,.08,dark);for(const x of [4,4.6,5.2])box(x,1.55,3.12,.22,.14,.04,glow);obstacles.push({x:4.6,z:3.8,w:2.3,d:1.4});sign('SOPORTE VITAL',4.6,2.85,3.1,2.5);
+  rounded(4.6,1.2,3.8,2.1,2.4,1.15,metal);box(4.6,1.55,3.18,1.6,.75,.08,dark);for(const x of [4,4.6,5.2])box(x,1.55,3.12,.22,.14,.04,glow);obstacles.push({x:4.6,z:3.8,w:2.3,d:1.4});sign("LIFE SUPPORT",4.6,2.85,3.1,2.5);
   // Mission console, screen and seat; no blockage in the entry aisle.
   rounded(0,.65,-5.1,3.1,1.3,1.15,metal);box(0,1.35,-5.1,3.15,.12,1.2,dark);
   const screenCanvas=document.createElement('canvas');screenCanvas.width=512;screenCanvas.height=256;drawTelemetry(screenCanvas,4,0);const screenMap=new THREE.CanvasTexture(screenCanvas);screenMap.colorSpace=THREE.SRGBColorSpace;
   box(0,2.15,-5.67,2.7,1.2,.14,dark);const screen=new THREE.Mesh(new THREE.PlaneGeometry(2.48,1.02),new THREE.MeshBasicMaterial({map:screenMap}));screen.position.set(0,2.15,-5.58);scene.add(screen);
   for(const x of [-1,-.6,-.2,.2,.6,1])box(x,1.43,-4.8,.22,.025,.17,glow);
-  sign('CONTROL DE MISION',0,3.2,-5.63,3.4);obstacles.push({x:0,z:-5.1,w:3.2,d:1.35});
+  sign("MISSION CONTROL",0,3.2,-5.63,3.4);obstacles.push({x:0,z:-5.1,w:3.2,d:1.35});
   const ring=new THREE.Mesh(new THREE.TorusGeometry(1.7,.025,8,48),glow);ring.rotation.x=-Math.PI/2;ring.position.set(0,.055,-5.1);scene.add(ring);
   // Photographic Mars view is a wall display, not an accurate live window.
   const image=new Image();image.onload=()=>{const tex=new THREE.Texture(image);tex.colorSpace=THREE.SRGBColorSpace;tex.needsUpdate=true;const pane=new THREE.Mesh(new THREE.PlaneGeometry(3.1,1.15),new THREE.MeshBasicMaterial({map:tex}));pane.position.set(-5.84,3.1,4.1);pane.rotation.y=Math.PI/2;scene.add(pane);};image.src='./assets/mars/spirit-panorama.jpg';
@@ -74,10 +74,10 @@ try{
       const x=camera.position.x+(right*Math.cos(yaw)-forward*Math.sin(yaw))*speed*dt/len,z=camera.position.z+(-forward*Math.cos(yaw)-right*Math.sin(yaw))*speed*dt/len;
       if(!blocked(x,camera.position.z))camera.position.x=x;if(!blocked(camera.position.x,z))camera.position.z=z;camera.rotation.set(pitch,yaw,0);
       const cDist=Math.hypot(camera.position.x-consolePoint.x,camera.position.z-consolePoint.z),eDist=Math.hypot(camera.position.x-exitPoint.x,camera.position.z-exitPoint.z);
-      nearAction=cDist<2.5?{id:'console',label:'E · Abrir control de misión →'}:eDist<2.4?{id:'exit',label:'E · Salir a la superficie →'}:null;
-      $('interact').hidden=!nearAction;if(nearAction)$('interact').textContent=nearAction.label;$('distance').textContent=`CONSOLA · ${cDist.toFixed(1)} m`;
-      if(nearAction?.id==='console')say('Consola de misión cerca. Pulsa E para administrar la base.');else if(nearAction?.id==='exit')say('Esclusa cerca. Pulsa E para volver a la superficie.');else if(Math.hypot(camera.position.x+4.35,camera.position.z+1.2)<2.7)say('Zona de descanso: las literas permiten separar el sueño del trabajo.');else if(Math.hypot(camera.position.x-4.45,camera.position.z+2.4)<2.5)say('Zona de cultivo: la producción necesita agua, energía y tiempo.');else if(Math.hypot(camera.position.x-4.6,camera.position.z-3.8)<2.5)say('Soporte vital: vigila el aire y los recursos de la tripulación.');else say('Explora el hábitat. La consola central controla los recursos de la base.');
+      nearAction=cDist<2.5?{id:'console',label:"E · Open mission control →"}:eDist<2.4?{id:'exit',label:"E · Return to surface →"}:null;
+      $('interact').hidden=!nearAction;if(nearAction)$('interact').textContent=nearAction.label;$('distance').textContent=`CONSOLE · ${cDist.toFixed(1)} m`;
+      if(nearAction?.id==='console')say("Mission console nearby. Press E to manage the base.");else if(nearAction?.id==='exit')say("Airlock nearby. Press E to return to the surface.");else if(Math.hypot(camera.position.x+4.35,camera.position.z+1.2)<2.7)say("Sleeping area: bunks separate rest from work.");else if(Math.hypot(camera.position.x-4.45,camera.position.z+2.4)<2.5)say("Growing area: food production requires water, energy and time.");else if(Math.hypot(camera.position.x-4.6,camera.position.z-3.8)<2.5)say("Life support: monitor the air and crew resources.");else say("Explore the habitat. The central console controls the base resources.");
       if(!reduced.matches){screenTime+=dt;if(screenTime>=1){screenTime=0;drawTelemetry(screenCanvas,4,now/1000);screenMap.needsUpdate=true;}}
     }waliCompanion.update(dt,!loading,blocked,wali?.isInteracting());wali?.setAnchor(waliCompanion.anchor());renderer.render(scene,camera);requestAnimationFrame(frame);
   }requestAnimationFrame(frame);
-}catch(error){$('fatal').hidden=false;console.error('No se pudo iniciar el hábitat:',error);}
+}catch(error){$('fatal').hidden=false;console.error('Unable to start habitat:',error);}

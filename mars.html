@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Llegada a Marte · Lunar Command 3D</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Arrival on Mars · Lunar Command 3D</title>
 <link rel="stylesheet" href="./src/mars-surface.css"><script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js"}}</script><script type="module" src="./src/mars-surface.js"></script></head>
-<body><div id="mars-world"></div><header><strong>LC / EXPEDICIÓN A MARTE</strong><span>SUPERFICIE · SOL 01</span></header>
-<main><section class="objective" aria-labelledby="objective-title"><small>OBJETIVO ACTUAL</small><h1 id="objective-title">Llega al hábitat</h1><p>Baja por la rampa de la nave y camina hasta la puerta iluminada de la base.</p><p id="distance" aria-live="off"></p></section>
-<div class="crosshair" aria-hidden="true">+</div><div class="door-prompt"><button id="enter-base" hidden type="button">E · Entrar al hábitat →</button></div>
-<aside class="help"><strong>LUMINE / TEXTO</strong><p id="message" role="status">El descenso ha terminado. Revisa tu ruta antes de salir.</p></aside>
-<section id="landing" class="overlay" role="dialog" aria-modal="true" aria-labelledby="landing-title"><div><small>SECUENCIA SIMULADA · SIN VOZ</small><h2 id="landing-title">Descendiendo a Marte</h2><p id="landing-message">La nave atraviesa la atmósfera y se prepara para aterrizar.</p><button id="skip-landing" type="button">Saltar descenso</button><button id="leave-ship" type="button" hidden>Salir de la nave →</button></div></section>
-<section id="loading" class="overlay" hidden role="status" aria-live="polite"><div><small>TRANSFERENCIA DE ESCENARIO</small><h2>Entrando a la base</h2><p>Preparando los sistemas del hábitat…</p></div></section>
-<p id="fatal" class="overlay" hidden role="alert">No se pudo abrir la superficie 3D. Revisa que WebGL esté disponible y vuelve a intentarlo.</p></main>
-<footer>WASD · CAMINAR / RATÓN O FLECHAS · MIRAR / CTRL + W · CORRER / E · INTERACTUAR</footer></body></html>
+<body><div id="mars-world"></div><header><strong>LC / MARS EXPEDITION</strong><span>SURFACE · SOL 01</span></header>
+<main><section class="objective" aria-labelledby="objective-title"><small>CURRENT OBJECTIVE</small><h1 id="objective-title">Reach the habitat</h1><p>Walk down the spacecraft ramp to the illuminated habitat door.</p><p id="distance" aria-live="off"></p></section>
+<div class="crosshair" aria-hidden="true">+</div><div class="door-prompt"><button id="enter-base" hidden type="button">E · Enter the habitat →</button></div>
+<aside class="help"><strong>LUMINE / TEXT</strong><p id="message" role="status">Descent is complete. Check your route before exiting.</p></aside>
+<section id="landing" class="overlay" role="dialog" aria-modal="true" aria-labelledby="landing-title"><div><small>SIMULATED SEQUENCE · NO VOICE</small><h2 id="landing-title">Descending to Mars</h2><p id="landing-message">The spacecraft is descending through the atmosphere and preparing to land.</p><button id="skip-landing" type="button">Skip descent</button><button id="leave-ship" type="button" hidden>Leave the spacecraft →</button></div></section>
+<section id="loading" class="overlay" hidden role="status" aria-live="polite"><div><small>SCENE TRANSITION</small><h2>Entering the base</h2><p>Preparing habitat systems…</p></div></section>
+<p id="fatal" class="overlay" hidden role="alert">Unable to open the 3D surface. Check WebGL support and try again.</p></main>
+<footer>WASD · WALK / MOUSE OR ARROWS · LOOK / CTRL + W · RUN / E · INTERACT</footer></body></html>

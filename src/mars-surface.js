@@ -8,14 +8,14 @@ let active=fromBase,loading=false,landed=fromBase,dragging=false,yaw=0,pitch=0;
 const keys=new Set(),canvasHost=$('mars-world');let renderer,scene,camera,last=performance.now();
 const door={x:0,z:-7.35},minZ=-7.35;
 function finishLanding(){
-  if(landed)return;landed=true;$('landing-title').textContent='Aterrizaje completado';
-  $('landing-message').textContent='La nave está en la superficie. Baja por la rampa y sigue las luces hasta la base.';
+  if(landed)return;landed=true;$('landing-title').textContent="Landing complete";
+  $('landing-message').textContent="The spacecraft is on the surface. Walk down the ramp and follow the lights to the base.";
   $('skip-landing').hidden=true;$('leave-ship').hidden=false;$('leave-ship').focus();
 }
 $('skip-landing').addEventListener('click',finishLanding);
-if(fromBase){$('landing').hidden=true;$('message').textContent='Has vuelto a la superficie. Tu progreso en la base está guardado en esta pestaña.';}
+if(fromBase){$('landing').hidden=true;$('message').textContent="You have returned to the surface. Your base progress is saved in this tab.";}
 else setTimeout(finishLanding,reduced.matches?0:4000);
-$('leave-ship').addEventListener('click',()=>{$('landing').hidden=true;active=true;$('message').textContent='Bienvenido a Marte. Baja por la rampa y camina hacia el hábitat.';renderer?.domElement.focus();});
+$('leave-ship').addEventListener('click',()=>{$('landing').hidden=true;active=true;$('message').textContent="Welcome to Mars. Walk down the ramp toward the habitat.";renderer?.domElement.focus();});
 function enterBase(){
   if(!active||loading||Math.hypot(camera.position.x-door.x,camera.position.z-door.z)>2.4)return;
   active=false;loading=true;$('loading').hidden=false;
@@ -24,7 +24,7 @@ function enterBase(){
 $('enter-base').addEventListener('click',enterBase);
 try{
   renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
-  canvasHost.append(renderer.domElement);renderer.domElement.tabIndex=0;renderer.domElement.setAttribute('aria-label','Superficie marciana 3D. Camina por la rampa y pulsa E cerca de la puerta del hábitat.');
+  canvasHost.append(renderer.domElement);renderer.domElement.tabIndex=0;renderer.domElement.setAttribute('aria-label',"3D Mars surface. Walk down the ramp and press E near the habitat door.");
   scene=new THREE.Scene();scene.background=new THREE.Color(0xb07962);scene.fog=new THREE.Fog(0xb07962,32,92);
   // Soft, dusty sky gradient; the historical panorama remains a separate backdrop.
   const skyCanvas=document.createElement('canvas');skyCanvas.width=8;skyCanvas.height=256;
@@ -124,9 +124,9 @@ try{
       camera.position.x=THREE.MathUtils.clamp(camera.position.x+(right*Math.cos(yaw)-forward*Math.sin(yaw))*speed*dt/len,-16,16);
       camera.position.z=THREE.MathUtils.clamp(camera.position.z+(-forward*Math.cos(yaw)-right*Math.sin(yaw))*speed*dt/len,minZ,8);
       const rampHeight=Math.abs(camera.position.x)<1.15?THREE.MathUtils.clamp((camera.position.z-5)*.39,0,1.15):0;camera.position.y=1.7+rampHeight;
-      camera.rotation.set(pitch,yaw,0);const distance=Math.hypot(camera.position.x-door.x,camera.position.z-door.z);$('distance').textContent=`HÁBITAT · ${distance.toFixed(1)} m`;$('enter-base').hidden=distance>2.4;
+      camera.rotation.set(pitch,yaw,0);const distance=Math.hypot(camera.position.x-door.x,camera.position.z-door.z);$('distance').textContent=`HABITAT · ${distance.toFixed(1)} m`;$('enter-base').hidden=distance>2.4;
     }
     waliCompanion.update(dt,active&&!loading,(x,z)=>Math.abs(x)>15.7||z<minZ||z>8,wali?.isInteracting());
     wali?.setAnchor(waliCompanion.anchor());renderer.render(scene,camera);requestAnimationFrame(frame);
   }requestAnimationFrame(frame);
-}catch(error){$('landing').hidden=true;$('fatal').hidden=false;console.error('No se pudo iniciar la superficie marciana:',error);}
+}catch(error){$('landing').hidden=true;$('fatal').hidden=false;console.error('Unable to start Mars surface:',error);}

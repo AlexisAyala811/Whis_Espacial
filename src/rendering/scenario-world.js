@@ -13,13 +13,13 @@ import { makePreparationSuits } from './preparation-suits.js';
 import { RoundedBoxGeometry } from '../../node_modules/three/examples/jsm/geometries/RoundedBoxGeometry.js';
 
 export const STATIONS = [
-  { id: 'suit', name: '01 / TRAJE', scene: 0, x: -3.7, z: -1.4, color: 0x91d9c2 },
+  { id: 'suit', name: "01 / SUIT", scene: 0, x: -3.7, z: -1.4, color: 0x91d9c2 },
   { id: 'ared', name: '02 / ARED', scene: 1, x: -3.7, z: -1.4, color: 0xe8bb79 },
   { id: 'mental', name: '03 / ECLSS', scene: 2, x: -3.7, z: -1.4, color: 0x8bbdd5 },
   { id: 'eva', name: '04 / EVA', scene: 3, x: -3.7, z: -1.4, color: 0x7bd7e4 },
-  { id: 'habitat', name: '05 / HÁBITAT', scene: 4, x: -3.7, z: -1.4, color: 0xb3d98b },
+  { id: 'habitat', name: "05 / HABITAT", scene: 4, x: -3.7, z: -1.4, color: 0xb3d98b },
   { id: 'vab', name: '06 / VAB', scene: 5, x: -3.7, z: -1.4, color: 0xf0c37d },
-  { id: 'ship', name: '07 / CABINA', scene: 6, x: -3.7, z: -1.4, color: 0x9bbbe5 },
+  { id: 'ship', name: '07 / CABIN', scene: 6, x: -3.7, z: -1.4, color: 0x9bbbe5 },
 ];
 
 const arrivalZ = 7.7;
@@ -37,7 +37,7 @@ export function createScenarioWorld(container) {
   camera.position.set(0, 1.7, arrivalZ);
   const canvas = renderer.domElement;
   canvas.tabIndex = 0;
-  canvas.setAttribute('aria-label', 'Escenario 3D. WASD para caminar; Ctrl más W o Shift para correr. Ratón o flechas para mirar. Cruza la puerta iluminada para avanzar.');
+  canvas.setAttribute('aria-label', "3D scene. WASD to walk; Ctrl plus W or Shift to run. Mouse or arrows to look. Cross the illuminated door to proceed.");
   const keys = new Set();
   const velocity = new THREE.Vector2();
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -249,8 +249,8 @@ export function createScenarioWorld(container) {
     const forwardLeaves = [box(-.64, 2.25, -9.48, 1.25, 4.2, .16, 0x899896), box(.64, 2.25, -9.48, 1.25, 4.2, .16, 0x899896)];
     const backLeaves = [box(index ? -1.68 : -.64, 2.25, 9.48, 1.25, 4.2, .16, 0x899896), box(index ? 1.68 : .64, 2.25, 9.48, 1.25, 4.2, .16, 0x899896)];
     const doorLamp = box(0, 4.62, -9.31, 1.2, .07, .08, 0xbe6458, true);
-    if (index < SCENARIOS.length - 1) textPanel(`PUERTA / ${SCENARIOS[index + 1].title.toUpperCase()}`, 0, 4.98, -9.28, 4.4);
-    else textPanel('CONTROL DE MISION / FIN DE RUTA', 0, 4.98, -9.28, 4.4);
+    if (index < SCENARIOS.length - 1) textPanel(`DOOR / ${SCENARIOS[index + 1].title.toUpperCase()}`, 0, 4.98, -9.28, 4.4);
+    else textPanel("MISSION CONTROL / END OF ROUTE", 0, 4.98, -9.28, 4.4);
     if(index===5) for (const x of [-7.5, 7.5]) for (const z of [-6, 1, 7]) {
       box(x, 1.05, z, 1.15, 2.1, .65, 0x8b9b99);
       box(x, 1.04, z + .34, .96, 1.8, .025, 0xb2bdb8);
@@ -403,7 +403,7 @@ export function createScenarioWorld(container) {
           rail.position.set(stripe-.15,.03,side*.85);model.add(rail);
         }
       }
-      textPanel('MODELO / NAVE DE MISION',4.8,2.9,3.35,2.8);
+      textPanel("MODEL / MISSION SPACECRAFT",4.8,2.9,3.35,2.8);
       obstacles.push({x:4.8,z:4.15,w:1.7,d:1.5});
       animatedParts.push({type:'ship-model',mesh:model});
     }

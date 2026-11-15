@@ -3,7 +3,7 @@ import { createChecklist } from './checklist-engine.js';
 export function createPhysicalScenario() {
   return {
     id: 'physical-conditioning',
-    title: 'Acondicionamiento físico ASCAN',
+    title: "ASCAN physical conditioning",
     stations: [
       {
         id: 'ared-strength',
@@ -30,11 +30,11 @@ export function createPhysicalScenario() {
     ],
     checklist: createChecklist({
       id: 'physical-start',
-      title: 'Verificación previa al acondicionamiento',
+      title: "Pre-conditioning check",
       steps: [
-        { id: 'suit-integrity', label: 'Confirmar integridad del traje', description: 'Presión diferencial estable.' },
-        { id: 'hydration-check', label: 'Confirmar hidratación', description: 'Reserva de agua disponible.' },
-        { id: 'station-ready', label: 'Confirmar estación activa', description: 'Instrumentación de la estación en línea.' },
+        { id: 'suit-integrity', label: "Confirm suit integrity", description: "Differential pressure stable." },
+        { id: 'hydration-check', label: "Confirm hydration", description: "Water reserve available." },
+        { id: 'station-ready', label: "Confirm station is active", description: "Station instruments online." },
       ],
     }),
   };
@@ -43,14 +43,14 @@ export function createPhysicalScenario() {
 export function createMentalScenario() {
   return {
     id: 'mental-readiness',
-    title: 'Evaluación mental bajo presión',
+    title: "Mental assessment under pressure",
     events: [
       {
         id: 'simultaneous-alerts',
         priority: 'warning',
         triggerAtMs: 15000,
         responseWindowMs: 20000,
-        prompt: 'Dos avisos simultáneos. Priorice el control de atmósfera antes de continuar.',
+        prompt: "Two simultaneous alerts. Prioritize atmosphere control before continuing.",
         validActions: ['atmosphere-first', 'power-first'],
         preferredAction: 'atmosphere-first',
         selectedAction: null,
@@ -61,7 +61,7 @@ export function createMentalScenario() {
         priority: 'caution',
         triggerAtMs: 15000,
         responseWindowMs: 20000,
-        prompt: 'Aviso térmico concurrente. Mantenga la potencia mientras estabiliza la atmósfera.',
+        prompt: "Concurrent thermal alert. Maintain power while stabilizing the atmosphere.",
         validActions: ['hold-power', 'power-first'],
         preferredAction: 'hold-power',
         selectedAction: null,
@@ -72,9 +72,9 @@ export function createMentalScenario() {
       id: 'mental-response',
       title: 'Respuesta a avisos concurrentes',
       steps: [
-        { id: 'acknowledge-alerts', label: 'Reconocer avisos', description: 'Confirmar recepción de ambas alertas.' },
-        { id: 'prioritize-atmosphere', label: 'Priorizar atmósfera', description: 'Seleccionar el sistema con riesgo inmediato.' },
-        { id: 'confirm-recovery', label: 'Confirmar recuperación', description: 'Ejecutar la acción de recuperación.' },
+        { id: 'acknowledge-alerts', label: 'Acknowledge alerts', description: "Confirm receipt of both alerts." },
+        { id: 'prioritize-atmosphere', label: "Prioritize atmosphere", description: "Select the system at immediate risk." },
+        { id: 'confirm-recovery', label: "Confirm recovery", description: "Perform the recovery action." },
       ],
     }),
   };

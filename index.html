@@ -1,55 +1,55 @@
 <!doctype html>
-<html lang="es"><head>
+<html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Lunar Command · Earth Operations</title>
-<meta name="description" content="Explora una base terrestre en primera persona y completa tu entrenamiento ASCAN.">
+<meta name="description" content="Explore a ground base in first person and complete your ASCAN training.">
 <link rel="stylesheet" href="./src/field.css">
 <script type="importmap">{"imports":{"three":"./node_modules/three/build/three.module.js"}}</script>
 <script type="module" src="./src/field.js"></script>
 </head><body>
 <div id="world"></div><div class="vignette" aria-hidden="true"></div>
-<header><a href="./">LC <span>/</span> EARTH OPERATIONS</a><small id="scene-name">PREPARACIÓN DE TRAJE · EN LÍNEA</small><a class="resource-nav" href="./resources.html" target="_blank" rel="noopener noreferrer">FUENTES ↗</a><button id="menu-button">ESC · Menú</button></header>
+<header><a href="./">LC <span>/</span> EARTH OPERATIONS</a><small id="scene-name">SUIT PREPARATION · ONLINE</small><a class="resource-nav" href="./resources.html" target="_blank" rel="noopener noreferrer">SOURCES ↗</a><button id="menu-button">ESC · Menu</button></header>
 <main>
 <section id="briefing" class="briefing">
-<small>LUNAR COMMAND 3D // PROTOCOLO ASCAN</small>
-<h1>ANTES DEL<br>PRIMER <em>VUELO.</em></h1>
-<p class="intro">Toda misión empieza en la Tierra.<br>Entra en la base. Verifica tu equipo.<br>Demuestra que puedes tomar el mando.</p>
-<div class="mission-card"><span>00</span><div><small>MISIÓN DE ENTRENAMIENTO</small><h2>Preparación para lo desconocido</h2><p>Siete escenarios · Nave espacial · Cinco soles de decisiones</p></div></div>
-<button id="deploy" class="primary">ENTRAR EN LA BASE ↗</button>
-<p class="hint">WASD · Moverse / Ctrl + W · Correr / Ratón · Mirar / E · Interactuar</p>
-<p class="fiction">Simulación ficticia. Sin afiliación con NASA.</p>
+<small>LUNAR COMMAND 3D // ASCAN PROTOCOL</small>
+<h1>BEFORE THE<br>FIRST <em>FLIGHT.</em></h1>
+<p class="intro">Every mission starts on Earth.<br>Enter the base. Check your equipment.<br>Show that you are ready to take command.</p>
+<div class="mission-card"><span>00</span><div><small>TRAINING MISSION</small><h2>Preparing for the unknown</h2><p>Seven scenarios · Spacecraft · Five sols of decisions</p></div></div>
+<button id="deploy" class="primary">ENTER THE BASE ↗</button>
+<p class="hint">WASD · Move / Ctrl + W · Run / Mouse · Look / E · Interact</p>
+<p class="fiction">Fictional simulation. Not affiliated with NASA.</p>
 </section>
 <section id="game-hud" hidden>
-<div class="objective"><small>OBJETIVO ACTUAL <span id="step-count">01 / 07</span></small><h2 id="objective-title"></h2><p id="objective-detail"></p><span id="distance"></span></div>
+<div class="objective"><small>CURRENT OBJECTIVE <span id="step-count">01 / 07</span></small><h2 id="objective-title"></h2><p id="objective-detail"></p><span id="distance"></span></div>
 <p id="room-purpose" class="room-purpose"></p>
-<div id="learning-points" aria-label="Objetos del escenario"></div>
-<button id="inspect-toggle" class="inspect-toggle">I · Explorar objetos</button>
-<aside id="nearby-object" class="nearby-object" hidden aria-label="Información de objeto cercano" aria-live="polite">
-<small>OBJETO CERCANO</small><h2 id="nearby-name"></h2><p id="nearby-purpose"></p><p id="nearby-details"></p>
-<button id="nearby-open" type="button">F · Conocer más y responder</button></aside>
+<div id="learning-points" aria-label="Objects in the scene"></div>
+<button id="inspect-toggle" class="inspect-toggle">I · Explore objects</button>
+<aside id="nearby-object" class="nearby-object" hidden aria-label="Nearby object information" aria-live="polite">
+<small>NEARBY OBJECT</small><h2 id="nearby-name"></h2><p id="nearby-purpose"></p><p id="nearby-details"></p>
+<button id="nearby-open" type="button">F · Learn more and answer</button></aside>
 <section id="object-card" class="object-card" hidden role="dialog" aria-modal="true" aria-labelledby="object-name">
 <small id="object-room"></small><h2 id="object-name"></h2><p id="object-purpose"></p>
 <p id="object-details"></p>
 <h3 id="object-question"></h3><div id="object-answers"></div><p id="object-feedback" role="status"></p>
-<a id="object-source" target="_blank" rel="noopener noreferrer">Leer la fuente ↗</a><button id="object-close">Volver a explorar · Esc</button></section>
+<a id="object-source" target="_blank" rel="noopener noreferrer">Read the source ↗</a><button id="object-close">Return to exploration · Esc</button></section>
 <div class="crosshair" aria-hidden="true">+</div>
-<div class="interaction"><button id="interact" class="primary" disabled>Acércate a una estación</button></div>
-<div id="exercise" class="exercise" hidden><small>COORDINACIÓN / <span id="rep-count">0 / 6</span></small><div class="gauge"><div class="target-zone"></div><span id="needle"></span></div><p>Pulsa E cuando la aguja entre en la zona verde.</p></div>
-<section id="mental" class="decision" hidden aria-labelledby="decision-title"><small>AVISOS CONCURRENTES</small><h2 id="decision-title">¿Qué atiendes primero?</h2><p>La presión de cabina cae. Un módulo de carga informa una subida de temperatura.</p><button id="answer-air">1 · Aislar la fuga de atmósfera</button><button id="answer-power">2 · Revisar la carga térmica</button></section>
-<section id="task" class="task-modal" hidden role="dialog" aria-modal="true" aria-labelledby="task-title"><small id="task-kicker">PROCEDIMIENTO</small><h2 id="task-title"></h2><p id="task-instruction"></p><p id="task-feedback" role="status"></p><div id="task-controls"></div><button id="task-close">Volver a la sala</button></section>
-<aside class="lumine"><span class="portrait">L</span><div><small>LUMINE / A.R.E.S. · TEXTO</small><p id="message" role="status">Comandante, dirígete al punto de verificación del traje.</p></div></aside>
-<div class="telemetry"><div><small>MET</small><strong id="clock">00:00</strong></div><div><small>PROTOCOLO</small><strong id="progress">0 / 7</strong></div><div><small>ERRORES</small><strong id="errors">0</strong></div></div>
+<div class="interaction"><button id="interact" class="primary" disabled>Approach a station</button></div>
+<div id="exercise" class="exercise" hidden><small>COORDINATION / <span id="rep-count">0 / 6</span></small><div class="gauge"><div class="target-zone"></div><span id="needle"></span></div><p>Press E when the needle enters the green zone.</p></div>
+<section id="mental" class="decision" hidden aria-labelledby="decision-title"><small>SIMULTANEOUS ALERTS</small><h2 id="decision-title">What should you address first?</h2><p>Cabin pressure is falling. A cargo module reports a rise in temperature.</p><button id="answer-air">1 · Isolate the atmosphere leak</button><button id="answer-power">2 · Check the thermal load</button></section>
+<section id="task" class="task-modal" hidden role="dialog" aria-modal="true" aria-labelledby="task-title"><small id="task-kicker">PROCEDURE</small><h2 id="task-title"></h2><p id="task-instruction"></p><p id="task-feedback" role="status"></p><div id="task-controls"></div><button id="task-close">Return to room</button></section>
+<aside class="lumine"><span class="portrait">L</span><div><small>LUMINE / A.R.E.S. · TEXT</small><p id="message" role="status">Commander, proceed to the suit check station.</p></div></aside>
+<div class="telemetry"><div><small>MET</small><strong id="clock">00:00</strong></div><div><small>PROTOCOL</small><strong id="progress">0 / 7</strong></div><div><small>ERRORS</small><strong id="errors">0</strong></div></div>
 <div class="coordinates" id="position"></div>
 </section>
 <section id="launch-sequence" class="launch-sequence" hidden role="dialog" aria-modal="true" aria-labelledby="launch-title">
-<canvas id="launch-canvas" width="1280" height="720" aria-label="Animación ficticia del lanzamiento de un cohete"></canvas>
-<div class="launch-overlay"><div><small>CONTROL DE MISIÓN / SECUENCIA SIMULADA</small><h2 id="launch-title">DESPEGUE</h2><p id="launch-phase" role="status">VERIFICACIÓN DE SISTEMAS</p></div><p class="launch-caption">Simulación visual · Sin voz</p><button id="launch-skip">Omitir secuencia y entrar a la nave</button></div>
+<canvas id="launch-canvas" width="1280" height="720" aria-label="Fictional rocket launch animation"></canvas>
+<div class="launch-overlay"><div><small>MISSION CONTROL / SIMULATED SEQUENCE</small><h2 id="launch-title">LIFTOFF</h2><p id="launch-phase" role="status">SYSTEMS CHECK</p></div><p class="launch-caption">Visual simulation · No voice</p><button id="launch-skip">Skip sequence and enter the spacecraft</button></div>
 </section>
-<section id="loading" class="loading" hidden role="status" aria-live="polite"><div class="loading-content"><small>TRANSICIÓN DE ESCENARIO // BASE TERRESTRE</small><h2 id="loading-title">Cargando escenario</h2><p>Preparando geometría, iluminación y sistemas de la siguiente sala.</p><div class="loading-track" aria-hidden="true"><span></span></div><small>Permanece en la zona de transferencia</small></div></section>
-<section id="pause" class="modal" hidden><small>CONTROL DE MISIÓN</small><h2>Exploración en pausa</h2><p>WASD para moverte. Ctrl + W o Shift para correr. Ratón capturado o arrastre para mirar. También puedes usar las flechas. E para interactuar y cruzar puertas abiertas. En NBL, Espacio sube y Ctrl sin W baja; Ctrl + W avanza más rápido.</p><button id="resume" class="primary">Continuar</button><button id="restart">Reiniciar entrenamiento</button></section>
-<section id="results" class="modal" hidden><small>DEBRIEF / FASE 0</small><h2>Entrenamiento completado</h2><strong id="score" class="score"></strong><p id="result-detail"></p><button id="begin-mars" class="primary">Descender a Marte →</button><button id="again">Volver a entrenar</button><p class="hint"><a href="./resources.html" target="_blank" rel="noopener noreferrer">Revisar las fuentes y los objetivos ↗</a></p></section>
-<section id="mars-shell" class="mars-shell" hidden role="dialog" aria-modal="true" aria-label="Expedición a Marte"><button id="close-mars" type="button">← Volver al informe</button><p id="mars-shell-loading" role="status">Preparando el descenso a Marte…</p><iframe id="mars-frame" title="Expedición a Marte y base marciana" allow="fullscreen" hidden></iframe></section>
+<section id="loading" class="loading" hidden role="status" aria-live="polite"><div class="loading-content"><small>SCENE TRANSITION // EARTH BASE</small><h2 id="loading-title">Loading scene</h2><p>Preparing the next room and its systems.</p><div class="loading-track" aria-hidden="true"><span></span></div><small>Remain in the transfer area</small></div></section>
+<section id="pause" class="modal" hidden><small>MISSION CONTROL</small><h2>Exploration paused</h2><p>Use WASD to move, Ctrl + W or Shift to run, and the mouse or arrow keys to look around. Press E to interact or cross an open door. In the NBL, Space moves up and Ctrl without W moves down.</p><button id="resume" class="primary">Continue</button><button id="restart">Restart training</button></section>
+<section id="results" class="modal" hidden><small>DEBRIEF / PHASE 0</small><h2>Training complete</h2><strong id="score" class="score"></strong><p id="result-detail"></p><button id="begin-mars" class="primary">Descend to Mars →</button><button id="again">Train again</button><p class="hint"><a href="./resources.html" target="_blank" rel="noopener noreferrer">Review sources and objectives ↗</a></p></section>
+<section id="mars-shell" class="mars-shell" hidden role="dialog" aria-modal="true" aria-label="Mars expedition"><button id="close-mars" type="button">← Back to report</button><p id="mars-shell-loading" role="status">Preparing for descent to Mars…</p><iframe id="mars-frame" title="Mars expedition and Mars base" allow="fullscreen" hidden></iframe></section>
 <p id="fatal" class="modal" hidden role="alert"></p>
 </main>
-<footer><span>BASE TERRESTRE / SECTOR 07</span><span>FASE 00 ━━━━ ASCAN</span><span>WASD · CTRL + W CORRER · E TAREA · F INSPECCIONAR · I CURSOR</span></footer>
+<footer><span>EARTH BASE / SECTOR 07</span><span>PHASE 00 ━━━━ ASCAN</span><span>WASD · CTRL + W RUN · E TASK · F INSPECT · I CURSOR</span></footer>
 </body></html>

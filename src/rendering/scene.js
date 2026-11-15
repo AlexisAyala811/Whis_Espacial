@@ -18,6 +18,6 @@ export function createScene(container) {
   const ring = new THREE.Mesh(new THREE.TorusGeometry(1.35, 0.08, 12, 64), new THREE.MeshStandardMaterial({ color: 0x6fe7f5, emissive: 0x1b6072, emissiveIntensity: 1.4 })); ring.rotation.x = Math.PI / 2; ring.position.set(0, 0.1, 1.3); scene.add(ring);
   const resize = () => { const width = Math.max(1, container.clientWidth); const height = Math.max(1, container.clientHeight); camera.aspect = width / height; camera.updateProjectionMatrix(); renderer.setSize(width, height, false); };
   const resizeObserver = new ResizeObserver(resize); resizeObserver.observe(container);
-  renderer.domElement.addEventListener('webglcontextlost', (event) => { event.preventDefault(); document.querySelector('#webgl-status').textContent = 'Contexto gráfico no disponible. La telemetría sigue visible.'; });
+  renderer.domElement.addEventListener('webglcontextlost', (event) => { event.preventDefault(); document.querySelector('#webgl-status').textContent = "Graphics unavailable. Telemetry remains visible."; });
   return { update(snapshot) { ring.rotation.z = snapshot.missionTimeMs / 5000; renderer.render(scene, camera); }, dispose() { resizeObserver.disconnect(); renderer.dispose(); scene.traverse((object) => { object.geometry?.dispose(); if (Array.isArray(object.material)) object.material.forEach((material) => material.dispose()); else object.material?.dispose(); }); } };
 }

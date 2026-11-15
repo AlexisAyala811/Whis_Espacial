@@ -10,10 +10,10 @@ import { LEARNING_ROOMS, LearningProgress } from './core/learning-catalog.js';
 let learning=new LearningProgress(), inspectMode=false, inspected=null, visiblePoints=[], nearbyPoint=null;
 const $=id=>document.getElementById(id);
 let mission=new FieldTraining(),running=false,started=false,transitioning=false,pauseAfterTransition=false,launchSeen=false,selectedCable=null,world,wali;
-const titles=['Verifica tu traje','Controla cada repetición','Prioriza el soporte vital','Conecta el módulo EVA','Equilibra los recursos','Restablece la energía','Dirige el puesto marciano'];
-const details=['Acércate a la consola 01. Confirma presión, agua y telemetría con E.','Completa seis repeticiones en ARED pulsando E en la zona verde.','Resuelve los avisos de la consola ECLSS.','En NBL, une cada línea con su puerto. Espacio sube; Ctrl sin W baja. Ctrl + W avanza más rápido.','Ajusta oxígeno, agua y energía del hábitat.','Activa los tres buses eléctricos del cohete.','En la cabina, toma cinco decisiones sobre un puesto marciano y observa sus consecuencias.'];
+const titles=["Check your suit","Control each repetition","Prioritize life support","Connect the EVA module","Balance resources","Restore power","Lead the Mars outpost"];
+const details=["Approach console 01. Press E to check pressure, water and telemetry.","Complete six ARED repetitions by pressing E in the green zone.","Resolve the alerts on the ECLSS console.","In the NBL, connect each line to its port. Space moves up; Ctrl without W moves down. Ctrl + W moves faster.","Adjust the habitat oxygen, water and power.","Activate all three rocket power buses.","In the cabin, make five decisions for a Mars outpost and observe the consequences."];
 try { world=createScenarioWorld($('world')); }
-catch { $('fatal').hidden=false;$('fatal').textContent='No se pudo iniciar la escena 3D. Activa WebGL o abre esta página en un navegador de escritorio compatible.'; }
+catch { $('fatal').hidden=false;$('fatal').textContent="Unable to start the 3D scene. Enable WebGL or open this page in a supported desktop browser."; }
 function closeInspection(recapture=true){
   inspected=null;inspectMode=false;$('object-card').hidden=true;
   if(recapture&&running){world.focus();world.capture();}
@@ -25,11 +25,11 @@ function openInspection(point){
   $('object-details').textContent=point.details;
   $('nearby-object').hidden=true;
   $('object-question').textContent=point.question;$('object-source').href=point.source;
-  $('object-feedback').textContent=learning.mastered.has(point.id)?'Ya resolviste esta pregunta. Puedes repasarla.':'';
+  $('object-feedback').textContent=learning.mastered.has(point.id)?"You have already answered this question. You can review it.":'';
   const answers=$('object-answers');answers.replaceChildren();
   point.options.forEach((text,index)=>answers.append(taskButton(text,()=>{
     const result=learning.answer(point.id,index);
-    $('object-feedback').textContent=(result.correct?'Correcto. ':'Revisa la idea y vuelve a intentar. ')+result.explanation;
+    $('object-feedback').textContent=(result.correct?"Correct. ":"Review the concept and try again.")+result.explanation;
   })));
   const card=$('object-card');card.hidden=false;
   card.style.left=Math.max(12,Math.min(point.x+24,innerWidth-Math.min(360,innerWidth-24)-12))+'px';
@@ -42,7 +42,7 @@ function updateLearning(){
   const container=$('learning-points');container.hidden=!allowed||!!inspected;
   $('inspect-toggle').hidden=!allowed||!!inspected;
   $('room-purpose').textContent=LEARNING_ROOMS[world.currentIndex].purpose;
-  $('inspect-toggle').textContent=inspectMode?'I · Volver a caminar':`I · Explorar objetos (${learning.mastered.size}/19)`;
+  $('inspect-toggle').textContent=inspectMode?"I · Return to walking":`I · Explore objects (${learning.mastered.size}/19)`;
   nearbyPoint=allowed&&!inspected?world.nearbyLearningPoint():null;
   const nearby=$('nearby-object');nearby.hidden=!nearbyPoint;
   if(nearbyPoint&&nearby.dataset.id!==nearbyPoint.id){
@@ -63,7 +63,7 @@ function updateLearning(){
   for(const point of visiblePoints){
     const button=container.querySelector(`[data-id="${point.id}"]`);
     button.style.left=Math.max(125,Math.min(innerWidth-125,point.x))+'px';button.style.top=point.y+'px';
-    button.setAttribute('aria-label',`Inspeccionar ${point.name}`);
+    button.setAttribute('aria-label',`Inspect ${point.name}`);
   }
 }
 function say(message){$('message').textContent=message;}
@@ -79,59 +79,59 @@ function taskSection(title, grid=false){
 function renderTask(){
   const controls=$('task-controls');controls.replaceChildren();
   if(mission.stage===3){
-    $('task-kicker').textContent='NBL / PROCEDIMIENTO EVA';$('task-title').textContent='Conecta los umbilicales';
-    $('task-instruction').textContent='Selecciona una línea y luego el puerto con el mismo rótulo. Cada conexión incorrecta penaliza la sesión.';
-    const labels={oxygen:'O₂',data:'DATOS',power:'ENERGÍA'};
-    const sources=taskSection('LÍNEAS DEL MÓDULO',true);
+    $('task-kicker').textContent="NBL / EVA PROCEDURE";$('task-title').textContent="Connect the umbilicals";
+    $('task-instruction').textContent="Select a line and then the port with the matching label. Incorrect connections add a penalty.";
+    const labels={oxygen:'O₂',data:"DATA",power:"POWER"};
+    const sources=taskSection("MODULE LINES",true);
     for(const key of ['oxygen','data','power']){
       const button=taskButton(labels[key],()=>{selectedCable=key;renderTask();controls.querySelector('[data-port]')?.focus();},selectedCable===key?'selected':mission.evaLinks.has(key)?'done':'');
       button.disabled=mission.evaLinks.has(key);sources.append(button);
     }
-    const ports=taskSection('PUERTOS DE DESTINO',true);
+    const ports=taskSection("DESTINATION PORTS",true);
     for(const key of ['power','oxygen','data']){
-      const button=taskButton(labels[key],()=>{if(!selectedCable){$('task-feedback').textContent='Elige primero una línea.';return;}const cable=selectedCable;selectedCable=null;act({cable,port:key});});
+      const button=taskButton(labels[key],()=>{if(!selectedCable){$('task-feedback').textContent="Select a line first.";return;}const cable=selectedCable;selectedCable=null;act({cable,port:key});});
       button.dataset.port=key;button.disabled=mission.evaLinks.has(key);ports.append(button);
     }
   }else if(mission.stage===4){
-    $('task-kicker').textContent='HERA / GESTIÓN DE RECURSOS';$('task-title').textContent='Estabiliza el hábitat';
-    $('task-instruction').textContent='Ajusta los tres sistemas hasta su objetivo y confirma el balance.';
-    const labels={oxygen:'Oxígeno',water:'Agua',energy:'Energía'},targets={oxygen:80,water:60,energy:70};
-    const section=taskSection('RECURSOS ACTUALES / OBJETIVO');
+    $('task-kicker').textContent="HERA / RESOURCE MANAGEMENT";$('task-title').textContent="Stabilize the habitat";
+    $('task-instruction').textContent="Adjust all three systems to their targets and confirm the balance.";
+    const labels={oxygen:"Oxygen",water:"Water",energy:"Energy"},targets={oxygen:80,water:60,energy:70};
+    const section=taskSection("CURRENT RESOURCES / TARGET");
     for(const key of ['oxygen','water','energy']){
       const row=document.createElement('div');row.className='task-resource';
       const value=document.createElement('span');value.textContent=`${labels[key]}  ${mission.resources[key]} %  →  ${targets[key]} %`;
       row.append(value,taskButton('−',()=>act({resource:key,delta:-10})),taskButton('+',()=>act({resource:key,delta:10})));section.append(row);
     }
-    controls.append(taskButton('Confirmar balance',()=>act({submit:true}),'task-confirm'));
+    controls.append(taskButton("Confirm balance",()=>act({submit:true}),'task-confirm'));
   }else if(mission.stage===5){
-    $('task-kicker').textContent='VAB / DISTRIBUCIÓN ELÉCTRICA';$('task-title').textContent='Restablece los tres buses';
-    $('task-instruction').textContent='Cada interruptor cambia su bus y los buses vecinos. Deja los tres en verde.';
-    const section=taskSection(`BUS PRINCIPAL · PROPULSIÓN · SEGURIDAD  /  ${mission.powerMoves} ${mission.powerMoves===1?'maniobra':'maniobras'}`,true);
-    for(let i=0;i<3;i++) section.append(taskButton(`${['PRINCIPAL','PROPULSIÓN','SEGURIDAD'][i]} · ${mission.powerBuses[i]?'ACTIVO':'INACTIVO'}`,()=>act({switch:i}),mission.powerBuses[i]?'done':''));
+    $('task-kicker').textContent="VAB / POWER DISTRIBUTION";$('task-title').textContent="Restore all three buses";
+    $('task-instruction').textContent="Each switch changes its bus and neighboring buses. Set all three to green.";
+    const section=taskSection(`MAIN BUS · PROPULSION · SAFETY / ${mission.powerMoves} ${mission.powerMoves===1?'move':'moves'}`,true);
+    for(let i=0;i<3;i++) section.append(taskButton(`${["MAIN","PROPULSION","SAFETY"][i]} · ${mission.powerBuses[i]?"ACTIVE":"INACTIVE"}`,()=>act({switch:i}),mission.powerBuses[i]?'done':''));
   }else if(mission.stage===6){
     const sim=mission.outpost,question=OUTPOST_QUESTIONS[sim.sol];
-    $('task-kicker').textContent='CABINA / SIMULACIÓN DE PUESTO MARCIANO';
-    $('task-title').textContent=sim.failed?'Puesto en estado crítico':question?.title??'Misión completada';
-    $('task-instruction').textContent=sim.failed?'Un recurso cayó por debajo del mínimo de juego. Repite los cinco soles con otra estrategia.':question?.question??'La tripulación completó la misión.';
-    const section=taskSection('RECURSOS SIMULADOS · MÍNIMO 20');
-    for(const [key,label] of Object.entries({air:'Aire',power:'Energía',shield:'Protección',food:'Alimentos'})){
+    $('task-kicker').textContent="CABIN / MARS OUTPOST SIMULATION";
+    $('task-title').textContent=sim.failed?"Outpost in critical condition":question?.title??"Mission complete";
+    $('task-instruction').textContent=sim.failed?"A resource fell below the game minimum. Retry the five sols with a different strategy.":question?.question??"The crew completed the mission.";
+    const section=taskSection("SIMULATED RESOURCES · MINIMUM 20");
+    for(const [key,label] of Object.entries({air:"Air",power:"Energy",shield:"Protection",food:"Food"})){
       const row=document.createElement('div');row.className='outpost-resource';
       const name=document.createElement('span');name.textContent=label;
       const meter=document.createElement('meter');meter.min=0;meter.max=100;meter.low=20;meter.value=sim.resources[key];meter.setAttribute('aria-label',label);
       const value=document.createElement('strong');value.textContent=sim.resources[key]+' %';row.append(name,meter,value);section.append(row);
     }
-    if(sim.failed){controls.append(taskButton('Reintentar misión marciana',()=>act({retry:true}),'task-confirm'));return;}
+    if(sim.failed){controls.append(taskButton("Retry Mars mission",()=>act({retry:true}),'task-confirm'));return;}
     if(sim.sol===0){const facts=document.createElement('section');facts.className='nasa-data';facts.setAttribute('aria-live','polite');controls.append(facts);showSolar(facts);}
-    const choices=taskSection('ELIGE UNA ACCIÓN · CADA OPCIÓN TIENE COSTO');choices.classList.add('outpost-options');
+    const choices=taskSection("CHOOSE AN ACTION · EVERY OPTION HAS A COST");choices.classList.add('outpost-options');
     question.options.forEach((option,index)=>{
-      const costs=Object.entries(option.delta).map(([key,value])=>`${{air:'aire',power:'energía',shield:'protección',food:'alimentos'}[key]} ${value>0?'+':''}${value}`).join(' · ');
+      const costs=Object.entries(option.delta).map(([key,value])=>`${{air:'air',power:"power",shield:"protection",food:'food'}[key]} ${value>0?'+':''}${value}`).join(' · ');
       choices.append(taskButton(`${index+1}. ${option.text}  /  ${costs}`,()=>act({choice:index})));
     });
-    const source=document.createElement('a');source.href=question.url;source.target='_blank';source.rel='noopener noreferrer';source.textContent='Consultar recurso: '+question.source+' ↗';source.className='task-source';controls.append(source);
-    const note=document.createElement('p');note.className='task-note';note.textContent='Los porcentajes y resultados son mecánicas ficticias para aprender a comparar costos; no son datos de una misión real.';controls.append(note);
+    const source=document.createElement('a');source.href=question.url;source.target='_blank';source.rel='noopener noreferrer';source.textContent="View resource: "+question.source+' ↗';source.className='task-source';controls.append(source);
+    const note=document.createElement('p');note.className='task-note';note.textContent="Percentages and outcomes are fictional teaching mechanics, not data from a real mission.";controls.append(note);
   }
 }
-function openTask(){selectedCable=null;$('task-feedback').textContent='Sigue el procedimiento para desbloquear la puerta.';$('task').hidden=false;world.release();renderTask();$('task-controls').querySelector('button')?.focus();}
+function openTask(){selectedCable=null;$('task-feedback').textContent="Follow the procedure to unlock the door.";$('task').hidden=false;world.release();renderTask();$('task-controls').querySelector('button')?.focus();}
 function closeTask(recapture=true){$('task').hidden=true;selectedCable=null;if(recapture&&running&&!mission.complete){world.focus();world.capture();}}
 function play(){
   if(!world)return;
@@ -140,7 +140,7 @@ function play(){
   world.focus();if($('mental').hidden)world.capture();
 }
 function pause(){if(!started||mission.complete)return;if(transitioning){pauseAfterTransition=true;return;}closeInspection(false);running=false;$('task').hidden=true;$('mental').hidden=true;world.release();$('pause').hidden=false;$('resume').focus();}
-function reset(){launchSeen=false;learning=new LearningProgress();closeInspection(false);mission=new FieldTraining();world.reset();$('results').hidden=true;$('mental').hidden=true;$('task').hidden=true;$('loading').hidden=true;selectedCable=null;pauseAfterTransition=false;say('Comandante, dirígete al punto de verificación del traje.');play();}
+function reset(){launchSeen=false;learning=new LearningProgress();closeInspection(false);mission=new FieldTraining();world.reset();$('results').hidden=true;$('mental').hidden=true;$('task').hidden=true;$('loading').hidden=true;selectedCable=null;pauseAfterTransition=false;say("Commander, proceed to the suit check station.");play();}
 async function transitionTo(index){
   if(transitioning||!running||index<0||index>=SCENARIOS.length)return;
   transitioning=true;
@@ -153,10 +153,10 @@ async function transitionTo(index){
     $('loading-title').textContent=SCENARIOS[index].title;
     $('loading').hidden=false;
     await world.load(index);
-    say('Escenario cargado: '+SCENARIOS[index].title+'. Continúa con el protocolo.');
+    say("Scene loaded: "+SCENARIOS[index].title+". Continue with the protocol.");
     world.focus();
   }catch{
-    say('No se pudo cargar la sala. Reinicia el entrenamiento para intentarlo de nuevo.');
+    say("Unable to load the room. Restart training to try again.");
     pauseAfterTransition=true;
   }finally{
     transitioning=false;$('loading').hidden=true;
@@ -167,7 +167,7 @@ function act(answer){
   if(!running||transitioning||mission.complete||inspected||inspectMode)return;
   const near=world.near(),door=world.door(mission.stage);
   if(!near&&door&&!answer){
-    if(door.locked)say('Puerta bloqueada. Completa el objetivo de esta sala antes de avanzar.');
+    if(door.locked)say("Door locked. Complete this room’s objective before proceeding.");
     else transitionTo(door.target);
     return;
   }
@@ -182,10 +182,10 @@ function act(answer){
   if(mission.complete){
     running=false;world.release();$('mental').hidden=true;$('task').hidden=true;$('results').hidden=false;
     $('score').textContent=mission.score+' / 100';
-    $('result-detail').textContent='Siete escenarios y la simulación de cinco soles completados en '+Math.floor(mission.elapsed)+' segundos. '+mission.errors+' errores registrados. '+(mission.score>=70?'Apto para continuar entrenando.':'Repite el entrenamiento para afianzar el procedimiento.');
-    $('result-detail').textContent+=` Aprendizaje: ${learning.mastered.size} de 19 objetos comprendidos.`;
+    $('result-detail').textContent="Seven scenarios and a five-sol simulation completed in "+Math.floor(mission.elapsed)+' seconds. '+mission.errors+" errors recorded. "+(mission.score>=70?"Ready to continue training.":"Repeat training to reinforce the procedure.");
+    $('result-detail').textContent+=` Learning: ${learning.mastered.size} of 19 objects mastered.`;
     $('begin-mars').focus();
-    try{localStorage.setItem('lunar-command-field-report',JSON.stringify({score:mission.score,errors:mission.errors,seconds:mission.elapsed}));}catch{say('Entrenamiento completado. El navegador no permite guardar el informe.');}
+    try{localStorage.setItem('lunar-command-field-report',JSON.stringify({score:mission.score,errors:mission.errors,seconds:mission.elapsed}));}catch{say("Training complete. The browser could not save the report.");}
   }
 }
 $('deploy').addEventListener('click',play);$('resume').addEventListener('click',play);
@@ -231,13 +231,13 @@ function frame(now){
     $('clock').textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
     $('progress').textContent=mission.stage+' / '+SCENARIOS.length;$('errors').textContent=mission.errors;
     $('position').textContent='X '+world.camera.position.x.toFixed(1)+' / Y '+world.camera.position.y.toFixed(1)+' / Z '+world.camera.position.z.toFixed(1);
-    $('objective-title').textContent=titles[mission.stage]??'Entrenamiento completado';
-    $('objective-detail').textContent=!mission.complete&&mission.stage>world.currentIndex?'Cruza la puerta abierta para llegar a '+SCENARIOS[world.currentIndex+1].title+'.':details[mission.stage]??'Consulta tu informe de sesión.';
+    $('objective-title').textContent=titles[mission.stage]??"Training complete";
+    $('objective-detail').textContent=!mission.complete&&mission.stage>world.currentIndex?"Cross the open door to reach "+SCENARIOS[world.currentIndex+1].title+'.':details[mission.stage]??"Review your session report.";
     $('step-count').textContent=String(Math.min(mission.stage+1,SCENARIOS.length)).padStart(2,'0')+' / '+String(SCENARIOS.length).padStart(2,'0');
-    $('scene-name').textContent=SCENARIOS[world.currentIndex].title.toUpperCase()+' · EN LÍNEA';
-    $('distance').textContent=mission.target?(mission.stage>world.currentIndex?'PUERTA / ':STATIONS[world.currentIndex].name+' · ')+world.distance(mission.target).toFixed(1)+' m':'';
+    $('scene-name').textContent=SCENARIOS[world.currentIndex].title.toUpperCase()+" · ONLINE";
+    $('distance').textContent=mission.target?(mission.stage>world.currentIndex?"DOOR / ":STATIONS[world.currentIndex].name+' · ')+world.distance(mission.target).toFixed(1)+' m':'';
     $('interact').disabled=(!near&&!door)||!running||transitioning;
-    $('interact').textContent=near?'E · '+near.name+(near.id==='suit'?' · '+mission.checks+'/3':''):door?(door.locked?'PUERTA BLOQUEADA · E para consultar':'E · Cruzar puerta → '+door.name):'Acércate a la estación o puerta señalizada';
+    $('interact').textContent=near?'E · '+near.name+(near.id==='suit'?' · '+mission.checks+'/3':''):door?(door.locked?"DOOR LOCKED · Press E for details":"E · Cross door → "+door.name):"Approach the marked station or door";
     $('exercise').hidden=!(mission.target==='ared'&&near?.id==='ared');
     $('needle').style.left=mission.gauge*100+'%';$('rep-count').textContent=mission.reps+' / 6';
   }

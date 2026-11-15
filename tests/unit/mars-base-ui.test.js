@@ -17,10 +17,10 @@ test('mission remains playable for five turns when NASA is unavailable',async()=
   globalThis.fetch=async()=>({ok:false});
   await import('../../src/mars-base-ui.js');
   await new Promise(resolve=>setTimeout(resolve,0));
-  assert.equal(nodes['sol-label'].textContent,'SOL 1 DE 5');
-  assert.match(nodes.preview.textContent,/Previsto/);
+  assert.equal(nodes['sol-label'].textContent,'SOL 1 OF 5');
+  assert.match(nodes.preview.textContent,/Forecast/);
   for(let i=0;i<5;i++)nodes.advance.click();
-  assert.equal(nodes['mission-status'].textContent,'COMPLETADA');
+  assert.equal(nodes['mission-status'].textContent,'COMPLETE');
   assert.equal(nodes.reports.children.length,5);
-  nodes['restart-mars'].click();assert.equal(nodes['sol-label'].textContent,'SOL 1 DE 5');
+  nodes['restart-mars'].click();assert.equal(nodes['sol-label'].textContent,'SOL 1 OF 5');
 });

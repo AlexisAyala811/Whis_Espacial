@@ -9,7 +9,7 @@ export function createReport(session) {
     completedChecklists: completed.map(({ id }) => id),
     decisions: session.events.filter((event) => event.type === 'checklist-confirmed'),
     incidents,
-    recommendations: incidents.length ? ['Revisar los avisos de fatiga antes de la próxima sesión.'] : ['Mantener la disciplina de checklist y la comunicación operacional.'],
+    recommendations: incidents.length ? ["Review fatigue alerts before the next session."] : ["Maintain checklist discipline and operational communication."],
     completedAt: new Date().toISOString(),
   };
 }

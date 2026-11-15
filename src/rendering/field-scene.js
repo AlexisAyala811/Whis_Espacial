@@ -1,7 +1,7 @@
 import * as THREE from 'three';
 
 export const STATIONS = [
-  { id: 'suit', name: '01 / TRAJE', x: 0, z: -8, color: 0x72e4d2 },
+  { id: 'suit', name: "01 / SUIT", x: 0, z: -8, color: 0x72e4d2 },
   { id: 'ared', name: '02 / ARED', x: -7, z: -3, color: 0xffbd71 },
   { id: 'mental', name: '03 / ECLSS', x: 7, z: -3, color: 0x72bfff },
 ];
@@ -265,7 +265,7 @@ export function createFieldScene(container) {
   const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)');
   let stride=0,controlsActive=false;
   const canvas=renderer.domElement;
-  canvas.tabIndex=0; canvas.setAttribute('aria-label','Base terrestre en primera persona. WASD para caminar; flechas para mirar.');
+  canvas.tabIndex=0; canvas.setAttribute('aria-label','First-person Earth base. WASD to walk; arrows to look.');
   const down=e=>{if(e.target.closest('input,textarea,button,select'))return; if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code))e.preventDefault();keys.add(e.code);};
   const up=e=>keys.delete(e.code);
   const clear=()=>{keys.clear();dragging=false;velocity.set(0,0);};

@@ -57,7 +57,7 @@ export function playLaunchSequence({container, canvas, phase, skip, reducedMotio
         ctx.strokeStyle='#a7e4ff';ctx.lineWidth=4;ctx.stroke();
         rocket(w*.52,h*.42,.78,0);
       }
-      const label=t<.22?'VERIFICACIÓN DE SISTEMAS':t<.32?'CUENTA REGRESIVA':t<.74?'DESPEGUE SIMULADO':'ASCENSO · VISTA ORBITAL';
+      const label=t<.22?"SYSTEMS CHECK":t<.32?'COUNTDOWN':t<.74?'SIMULATED LIFTOFF':'ASCENT · ORBITAL VIEW';
       if(label!==lastPhase){phase.textContent=label;lastPhase=label;}
       if(t>=1){finish();return;}
       frameId=requestAnimationFrame(draw);

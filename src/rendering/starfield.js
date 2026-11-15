@@ -24,7 +24,7 @@ export function makeStarfield() {
   }
   // Educational overlay: recognizable star patterns, drawn as a fictional composition.
   const constellations = [
-    {name:'ORIÓN',points:[[1160,170],[1260,205],[1175,300],[1205,325],[1235,350],[1150,445],[1290,455]],edges:[[0,1],[0,2],[1,4],[2,3],[3,4],[2,5],[4,6],[5,6]]},
+    {name:'ORION',points:[[1160,170],[1260,205],[1175,300],[1205,325],[1235,350],[1150,445],[1290,455]],edges:[[0,1],[0,2],[1,4],[2,3],[3,4],[2,5],[4,6],[5,6]]},
     {name:'OSA MAYOR',points:[[1460,105],[1520,120],[1580,140],[1640,170],[1680,220],[1595,225],[1550,185]],edges:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,3]]},
   ];
   ctx.lineWidth=2;ctx.strokeStyle='rgba(154,211,239,.46)';

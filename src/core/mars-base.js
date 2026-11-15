@@ -29,15 +29,15 @@ export class MarsBase {
     this.resources.air=clamp(this.resources.air+allocation.life*4-16);
     this.resources.water=clamp(this.resources.water-6-allocation.crop);
     this.resources.food=clamp(this.resources.food-9);
-    if(allocation.crop){this.growth+=allocation.crop;notes.push(`El cultivo recibió ${allocation.crop} unidades de energía.`);}
-    if(this.growth>=6){this.resources.food=clamp(this.resources.food+18);this.growth-=6;notes.push('Cosecha: +18 alimentos simulados.');}
+    if(allocation.crop){this.growth+=allocation.crop;notes.push(`Crops received ${allocation.crop} units of power.`);}
+    if(this.growth>=6){this.resources.food=clamp(this.resources.food+18);this.growth-=6;notes.push("Harvest: +18 simulated food.");}
     if(sol===2){
-      if(allocation.shield>=this.solar.shieldNeeded)notes.push('Ejercicio solar: el refugio protegido mantuvo segura a la tripulación.');
-      else{this.resources.health=clamp(this.resources.health-18);notes.push('Ejercicio solar: faltó energía para proteger el refugio; la salud bajó 18.');}
-    } else if(allocation.shield)notes.push('El refugio recibió energía de protección.');
-    if(this.message&&this.message.due<=sol){notes.push('Llegó la respuesta de la Tierra: revisa aire, agua y alimentos antes del próximo turno.');this.message=null;}
-    if(allocation.comms&&!this.message&&sol<4){this.message={sent:sol,due:sol+2};notes.push('Mensaje enviado: la respuesta llegará en dos soles simulados.');}
-    if(this.resources.air<25||this.resources.water<20||this.resources.food<20){this.resources.health=clamp(this.resources.health-15);notes.push('Una reserva está baja: la salud bajó 15.');}
+      if(allocation.shield>=this.solar.shieldNeeded)notes.push("Solar exercise: the protected shelter kept the crew safe.");
+      else{this.resources.health=clamp(this.resources.health-18);notes.push("Solar exercise: insufficient shelter power; health fell by 18.");}
+    } else if(allocation.shield)notes.push("The shelter received protection power.");
+    if(this.message&&this.message.due<=sol){notes.push("Earth’s reply arrived: check air, water and food before the next turn.");this.message=null;}
+    if(allocation.comms&&!this.message&&sol<4){this.message={sent:sol,due:sol+2};notes.push("Message sent: the reply will arrive in two simulated sols.");}
+    if(this.resources.air<25||this.resources.water<20||this.resources.food<20){this.resources.health=clamp(this.resources.health-15);notes.push("A reserve is low: health fell by 15.");}
     this.failed=Object.values(this.resources).some(v=>v===0);
     this.finished=this.failed||sol===5;
     const changes=Object.fromEntries(Object.keys(before).map(key=>[key,this.resources[key]-before[key]]));

@@ -34,7 +34,7 @@ export function decorateRoom(index,{box,cylinder,display,textPanel,obstacles}) {
     box(4.3,1.2,3.3,.12,1.6,.12,0xa4b4b6);box(4.3,1.75,3.3,.8,.12,.14,0x4d6369);
     box(4.3,1.35,4.1,.65,.16,.48,0x26383f);
     obstacles.push({x:4.3,z:3.8,w:1.6,d:2.2});
-    textPanel('FUERZA / RESISTENCIA / CONTROL',0,3.9,-9.3,7);
+    textPanel("STRENGTH / ENDURANCE / CONTROL",0,3.9,-9.3,7);
   }else if(index===2){
     // Control room: desks in rows, carpet, a full-width display wall and acoustic ribs.
     box(0,.025,0,19,.025,18.5,0x394b55);
@@ -47,7 +47,7 @@ export function decorateRoom(index,{box,cylinder,display,textPanel,obstacles}) {
       for(const x of [-5.5,-3.1]){box(x,.6,z+1.4,.85,.16,.8,0x34434c);box(x,1.15,z+1.7,.85,1,.14,0x34434c);obstacles.push({x,z:z+1.4,w:.9,d:.9});}
     }
     for(const x of [-6,-2,2,6])box(x,5.5,0,.1,.05,15,0x8cb4c5,true);
-    textPanel('CENTRO DE CONTROL / TELEMETRIA',0,5,-9.05,8.8);
+    textPanel("MISSION CONTROL / TELEMETRY",0,5,-9.05,8.8);
   }else if(index===3){
     // Underwater pool: tiled basin, raised rim, ladders and a suspended training module.
     for(let x=-9;x<=9;x+=1)box(x,.035,0,.025,.025,19.5,0xa0c6c9);
@@ -61,7 +61,7 @@ export function decorateRoom(index,{box,cylinder,display,textPanel,obstacles}) {
     for(let y=.3;y<4.8;y+=.45)box(-7.25,y,5.9,1,.06,.1,0xa8bbc1);
     obstacles.push({x:-7.25,z:5.9,w:1.2,d:.3});
     for(const x of [2.3,6.1])cylinder(x,4.4,-2.8,.035,.035,3,0x72a4b2);
-    textPanel('PISCINA / ENSAYO DE ACTIVIDAD EXTERIOR',0,4,-9.25,7.8);
+    textPanel("POOL / EXTRAVEHICULAR TRAINING",0,4,-9.25,7.8);
   }else if(index===4){
     // Habitation module: warm lower ceiling, ribbed bulkheads, dining and food storage.
     for(const z of [-7,-3,1,5]){
@@ -73,7 +73,7 @@ export function decorateRoom(index,{box,cylinder,display,textPanel,obstacles}) {
     obstacles.push({x:-4.3,z:4.5,w:3.4,d:1.9});
     box(-5.9,1.5,-5.8,1.3,2.9,1.8,0xb8b3a1);obstacles.push({x:-5.9,z:-5.8,w:1.4,d:1.9});
     for(const z of [-6.4,-5.8,-5.2])box(-5.2,1.4,z,.05,.6,.4,0x696e62);
-    textPanel('DESCANSO / CULTIVOS / VIDA EN EQUIPO',0,3.5,-9.25,6.7);
+    textPanel("REST / CROPS / TEAM LIFE",0,3.5,-9.25,6.7);
   }else if(index===6){
     for(const z of [-7,-3,1,5]){
       for(const side of [-1,1]){

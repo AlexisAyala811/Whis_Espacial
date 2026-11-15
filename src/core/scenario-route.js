@@ -1,11 +1,11 @@
 export const SCENARIOS = Object.freeze([
-  { id: 'suit', title: 'Preparación de traje', station: 'suit' },
-  { id: 'ared', title: 'Acondicionamiento físico', station: 'ared' },
-  { id: 'mental', title: 'Control de misión', station: 'mental' },
-  { id: 'eva', title: 'Entrenamiento EVA · NBL', station: 'eva' },
-  { id: 'habitat', title: 'Hábitat de investigación', station: 'habitat' },
-  { id: 'vab', title: 'Preparación de lanzamiento', station: 'vab' },
-  { id: 'ship', title: 'Cabina de la nave · puesto marciano', station: 'ship' },
+  { id: 'suit', title: "Suit preparation", station: 'suit' },
+  { id: 'ared', title: "Physical conditioning", station: 'ared' },
+  { id: 'mental', title: "Mission control", station: 'mental' },
+  { id: 'eva', title: "EVA training · NBL", station: 'eva' },
+  { id: 'habitat', title: "Research habitat", station: 'habitat' },
+  { id: 'vab', title: "Launch preparation", station: 'vab' },
+  { id: 'ship', title: "Spacecraft cabin · Mars outpost", station: 'ship' },
 ]);
 
 export function canEnterScenario(index, completedStage) {

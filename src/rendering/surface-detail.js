@@ -89,5 +89,5 @@ export function drawTelemetry(canvas, seed, time = 0) {
     ctx.fillStyle='#1d4151';ctx.fillRect(390,60+i*48,100,27);
     ctx.fillStyle=['#80e6c3','#eac978','#87bde4'][i];ctx.fillRect(395,65+i*48,35+((seed*17+i*19)%55),17);
   }
-  ctx.fillStyle='#c1d8dc';ctx.font='14px monospace';ctx.fillText('ENTRENAMIENTO  /  DATOS SIMULADOS',16,242);
+  ctx.fillStyle='#c1d8dc';ctx.font='14px monospace';ctx.fillText("TRAINING  /  SIMULATED DATA",16,242);
 }
