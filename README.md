@@ -1,5 +1,24 @@
 # Lunar Command 3D
 
+## Exploración educativa y escenarios
+
+La revisión del audio del 15 de noviembre de 2026 incorpora 19 objetos educativos
+distribuidos entre siete salas. Acércate a un punto y pulsa **F** para consultar su
+nombre, función y una pregunta con explicación. **I** libera el cursor para elegir
+un punto con el ratón; vuelve a pulsarlo para caminar. **Esc** cierra la ficha.
+Las preguntas permiten reintentar y cada aprendizaje se cuenta una sola vez.
+La ficha detiene el movimiento y el reloj del entrenamiento mientras se lee.
+
+Cada sala tiene una identidad espacial propia: vestuario con armarios y esclusa,
+gimnasio con pistas y bicicleta, centro de control con filas de consolas,
+piscina con módulo sumergido y escalera, hábitat con costillas estructurales y
+comedor, edificio de ensamblaje alto y cabina con instrumentos. La geometría es
+un blockout original para futuras mejoras visuales; no reproduce una instalación
+NASA exacta. Cada objeto enlaza una fuente NASA, ESA o CSA cuando corresponde.
+
+El título superior identifica la sala y una franja explica su función. Las puertas,
+la pantalla de carga y las actividades principales del recorrido siguen disponibles.
+
 ## Experiencia en primera persona
 
 La página inicial ahora abre una base 3D a pantalla completa inspirada en la interacción

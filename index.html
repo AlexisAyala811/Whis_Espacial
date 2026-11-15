@@ -21,6 +21,13 @@
 </section>
 <section id="game-hud" hidden>
 <div class="objective"><small>OBJETIVO ACTUAL <span id="step-count">01 / 07</span></small><h2 id="objective-title"></h2><p id="objective-detail"></p><span id="distance"></span></div>
+<p id="room-purpose" class="room-purpose"></p>
+<div id="learning-points" aria-label="Objetos del escenario"></div>
+<button id="inspect-toggle" class="inspect-toggle">I · Explorar objetos</button>
+<section id="object-card" class="object-card" hidden role="dialog" aria-modal="true" aria-labelledby="object-name">
+<small id="object-room"></small><h2 id="object-name"></h2><p id="object-purpose"></p>
+<h3 id="object-question"></h3><div id="object-answers"></div><p id="object-feedback" role="status"></p>
+<a id="object-source" target="_blank" rel="noopener noreferrer">Leer la fuente ↗</a><button id="object-close">Volver a explorar · Esc</button></section>
 <div class="crosshair" aria-hidden="true">+</div>
 <div class="interaction"><button id="interact" class="primary" disabled>Acércate a una estación</button></div>
 <div id="exercise" class="exercise" hidden><small>COORDINACIÓN / <span id="rep-count">0 / 6</span></small><div class="gauge"><div class="target-zone"></div><span id="needle"></span></div><p>Pulsa E cuando la aguja entre en la zona verde.</p></div>
@@ -35,5 +42,5 @@
 <section id="results" class="modal" hidden><small>DEBRIEF / FASE 0</small><h2>Entrenamiento completado</h2><strong id="score" class="score"></strong><p id="result-detail"></p><button id="again" class="primary">Volver a entrenar</button><p class="hint"><a href="./resources.html" target="_blank" rel="noopener noreferrer">Revisar las fuentes y los objetivos ↗</a></p></section>
 <p id="fatal" class="modal" hidden role="alert"></p>
 </main>
-<footer><span>BASE TERRESTRE / SECTOR 07</span><span>FASE 00 ━━━━ ASCAN</span><span>WASD + RATÓN · E INTERACTUAR</span></footer>
+<footer><span>BASE TERRESTRE / SECTOR 07</span><span>FASE 00 ━━━━ ASCAN</span><span>WASD + RATÓN · E TAREA · F INSPECCIONAR · I CURSOR</span></footer>
 </body></html>
