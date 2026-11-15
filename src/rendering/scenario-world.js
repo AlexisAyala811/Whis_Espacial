@@ -3,7 +3,7 @@ import { SCENARIOS, canEnterScenario } from '../core/scenario-route.js';
 import { LEARNING_ROOMS } from '../core/learning-catalog.js';
 import { decorateRoom } from './room-identity.js';
 import { makeSurfaceTextures, drawTelemetry } from './surface-detail.js';
-import { makeStarfield } from './starfield.js';
+import { buildCabinDetails } from './cabin-details.js';
 
 export const STATIONS = [
   { id: 'suit', name: '01 / TRAJE', scene: 0, x: -3.7, z: -1.4, color: 0x91d9c2 },
@@ -58,8 +58,8 @@ export function createScenarioWorld(container) {
     const colors = [0x626e70, 0x666b68, 0x575f5e, 0x164e65, 0x747c79, 0x4c5658, 0x36444d];
     scene.background = new THREE.Color(colors[index]);
     scene.fog = new THREE.FogExp2(colors[index], index === 3 ? .035 : .008);
-    scene.add(new THREE.HemisphereLight(index === 3 ? 0xa8e8f5 : 0xf2f4ec, index === 3 ? 0x24516b : 0x6d7774, index === 3 ? 2 : 1.55));
-    const light = new THREE.DirectionalLight(0xf5f2e8, 1.25);
+    scene.add(new THREE.HemisphereLight(index === 3 ? 0xa8e8f5 : 0xf2f4ec, index === 3 ? 0x24516b : 0x6d7774, index === 3 ? 2 : index === 6 ? .95 : 1.55));
+    const light = new THREE.DirectionalLight(0xf5f2e8, index === 6 ? .8 : 1.25);
     light.position.set(-4, 8, 6); scene.add(light);
     // Gentle accent lighting separates training spaces while keeping signs readable.
     const accents = [0xb6dce6,0xe4c891,0x75bdde,0x59c7e7,0xe8c998,0xf0b46d,0x83b7ed];
@@ -67,7 +67,7 @@ export function createScenarioWorld(container) {
     accent.position.set(3, index === 5 ? 8 : 4, -2); scene.add(accent);
     const obstacles = [], materials = new Map(), textures = makeSurfaceTextures(index);
     const animatedScreens = [], screenMaps = new Map(), bubbles = [], animatedParts = [];
-    let ambientTime = 0, screenTime = 0;
+    let ambientTime = 0, screenTime = 0, disposeCabin = null;
     function material(color, glow = false, kind = 'metal') {
       const key = `${color}-${glow}-${kind}`;
       if (!materials.has(key)) materials.set(key, new THREE.MeshStandardMaterial({ color, map: glow ? null : textures[kind], roughness: glow ? .4 : kind==='metal' ? .68 : .92, metalness: glow ? .05 : kind==='metal' ? .32 : .03, emissive: glow ? color : 0, emissiveIntensity: glow ? 1.1 : 0 }));
@@ -138,8 +138,8 @@ export function createScenarioWorld(container) {
       mesh.position.set(x, y, z + .02); scene.add(mesh);
     }
     function consoleUnit(x, z, seed, width = 2.45) {
-      box(x, .57, z, width, 1.1, 1.4, 0x858e87);
-      box(x, 1.15, z + .55, width + .05, .1, .45, 0xb3bab0);
+      box(x, .57, z, width, 1.1, 1.4, index===6 ? 0x536870 : 0x858e87);
+      box(x, 1.15, z + .55, width + .05, .1, .45, index===6 ? 0x809ca0 : 0xb3bab0);
       display(x, 1.78, z - .22, width - .35, .78, seed);
       const panel = new THREE.Mesh(new THREE.PlaneGeometry(width - .2, .85), new THREE.MeshStandardMaterial({ map: telemetryTexture(seed, true), roughness: .8, side: THREE.DoubleSide }));
       panel.rotation.x = -.55; panel.position.set(x, 1.28, z + .4); scene.add(panel);
@@ -198,18 +198,18 @@ export function createScenarioWorld(container) {
 
     // Each scenario owns its own room, geometry and textures; the next one is built on demand.
     box(0, -.16, 0, halfWidth*2, .32, 20, 0x454d4c);
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(halfWidth*2, 20), new THREE.MeshStandardMaterial({ color: [0xa7b4b1, 0x849997, 0x758c91, 0x599da6, 0xc9c6ad, 0x899b99, 0x7d969c][index], map: textures.floor, metalness: .15, roughness: .82 }));
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(halfWidth*2, 20), new THREE.MeshStandardMaterial({ color: [0xa7b4b1, 0x849997, 0x758c91, 0x599da6, 0xc9c6ad, 0x899b99, 0x536b72][index], map: textures.floor, metalness: index===6 ? .38 : .15, roughness: index===6 ? .48 : .82 }));
     floor.rotation.x = -Math.PI / 2; floor.position.y = .005; scene.add(floor);
     for (let x = -halfWidth+1; x < halfWidth; x += 2) box(x, .02, 0, .025, .016, 19.5, 0x646e6a);
     for (let z = -9; z <= 9; z += 2) box(0, .02, z, halfWidth*2-.5, .016, .025, 0x646e6a);
     const roomHeight = [5.4,5.8,6,7,4.9,17,6][index];
-    const wallColor = [0xc1d1ce,0xa4b8b2,0x77949b,0x397f93,0xd8d4bd,0x8fa3a4,0x9fb8ba][index];
+    const wallColor = [0xc1d1ce,0xa4b8b2,0x77949b,0x397f93,0xd8d4bd,0x8fa3a4,0x617881][index];
     box(-halfWidth, roomHeight / 2, 0, .35, roomHeight, 20, wallColor, false, 'wall'); box(halfWidth, roomHeight / 2, 0, .35, roomHeight, 20, wallColor, false, 'wall');
     for (const side of [-1, 1]) {
       box(side * (halfWidth+1.2)/2, roomHeight / 2, -9.9, halfWidth-1.2, roomHeight, .3, wallColor, false, 'wall');
       box(side * (halfWidth+1.2)/2, roomHeight / 2, 9.9, halfWidth-1.2, roomHeight, .3, wallColor, false, 'wall');
     }
-    box(0, roomHeight, 0, halfWidth*2, .2, 20, index === 5 ? 0x66716e : 0xc5cac2, false, 'wall');
+    box(0, roomHeight, 0, halfWidth*2, .2, 20, index === 5 ? 0x66716e : index === 6 ? 0x536a72 : 0xc5cac2, false, 'wall');
     if ([0,2].includes(index)) for (let x = -halfWidth+1; x < halfWidth; x += 2) for (let z = -9; z < 10; z += 2) {
       box(x, roomHeight-.13, z, 1.94, .024, 1.94, index === 3 ? 0x427888 : 0xd0d3ca);
       if (((x + z) / 2) % 3 === 0) box(x, roomHeight-.17, z, 1.3, .02, .42, index === 3 ? 0x8cd7ec : 0xf4f3e8, true);
@@ -360,21 +360,13 @@ export function createScenarioWorld(container) {
         for(const x of [-6,-2,2,6]) box(x,5.45,z,3.5,.1,.08,0x78909a);
         box(0,5.35,z,1.4,.08,.45,0xd8e7e5,true);
       }
-      for(const x of [2.5,5.7]){
-        box(x,.42,-2.1,1.4,.55,1.8,0x5a6a70);
-        box(x,1.32,-2.55,1.35,1.5,.3,0x879698);
-        box(x,1.08,-1.6,1.3,.17,.8,0x9daaa9);
-        box(x,2.03,-2.68,1.22,.15,.11,0x394b52);
-        obstacles.push({x,z:-2.1,w:1.5,d:2});
-      }
+      for(const x of [2.5,5.7]) obstacles.push({x,z:-2.1,w:1.5,d:2});
       box(4.1,1.03,-5.8,5.8,1.6,1.1,0x586a71);
       box(4.1,1.82,-5.23,5.75,.12,.52,0x9caeaa);
       for(const x of [2.5,4.1,5.7]) display(x,2.45,-6.31,1.35,.64,6);
       obstacles.push({x:4.1,z:-5.8,w:6,d:1.4});
-      // A wide observation window behind the flight deck. The view is fictional.
-      const panorama = new THREE.Mesh(new THREE.PlaneGeometry(5.9, 3.1),
-        new THREE.MeshBasicMaterial({ map: makeStarfield() }));
-      panorama.position.set(4.15,3.65,-9.25);scene.add(panorama);
+      // The forward display shows telemetry; side windows show the exterior.
+      display(4.15,3.65,-9.3,5.9,3.1,6);
       for(const x of [1.15,7.15]) box(x,3.65,-9.08,.18,3.35,.2,0x48636d);
       for(const y of [2.02,5.28]) box(4.15,y,-9.08,6.2,.16,.2,0x48636d);
       for(const x of [3.15,5.15]) box(x,3.65,-9.05,.06,3.1,.12,0x6a8791);
@@ -382,15 +374,7 @@ export function createScenarioWorld(container) {
       const starlight=new THREE.PointLight(0x80b9e6,14,12,2);
       starlight.position.set(4.1,4.1,-7.9);scene.add(starlight);
 
-      // Observation windows built into the cabin sides, facing the central aisle.
-      const sideView = makeStarfield();
-      for(const side of [-1,1]) {
-        const view=new THREE.Mesh(new THREE.PlaneGeometry(7.8,2.5),new THREE.MeshBasicMaterial({map:sideView}));
-        view.position.set(side*7.66,3.15,1);view.rotation.y=-side*Math.PI/2;scene.add(view);
-        for(const z of [-3,1,5])box(side*7.58,3.15,z,.16,2.8,.12,0x5d7f8b);
-        for(const y of [1.8,4.5])box(side*7.58,y,1,.16,.14,8.1,0x526e7a);
-        box(side*7.5,1.78,1,.12,.06,8.1,0x6cb4c8,true);
-      }
+      disposeCabin=buildCabinDetails({scene,box,display,obstacles});
 
       // An original three-dimensional spacecraft model on an illuminated display plinth.
       box(4.8,.62,4.15,1.6,1.24,1.4,0x3d5967);
@@ -430,7 +414,7 @@ export function createScenarioWorld(container) {
         if(part.type==='ship-model')part.mesh.rotation.y=ambientTime*.3;
       }
     }
-    return { scene, obstacles, beacon, forwardLeaves, backLeaves, doorLamp, halfWidth, animate, textures };
+    return { scene, obstacles, beacon, forwardLeaves, backLeaves, doorLamp, halfWidth, animate, textures, disposeCabin };
   }
 
   let room = makeRoom(0);
@@ -454,6 +438,7 @@ export function createScenarioWorld(container) {
   window.addEventListener('resize', resize); resize();
 
   function disposeRoom(oldRoom) {
+    oldRoom.disposeCabin?.();
     oldRoom.scene.remove(camera);
     const geometries = new Set(), materials = new Set();
     oldRoom.scene.traverse(object => {
@@ -463,8 +448,10 @@ export function createScenarioWorld(container) {
     });
     geometries.forEach(item => item.dispose());
     const maps = new Set(Object.values(oldRoom.textures));
-    materials.forEach(item => { if (item.map) maps.add(item.map); item.dispose(); });
-    maps.forEach(texture => texture.dispose());
+    materials.forEach(item => { for(const value of Object.values(item)) if(value?.isTexture) maps.add(value); item.dispose(); });
+    const bitmaps = new Set();
+    maps.forEach(texture => { if(texture.image?.close)bitmaps.add(texture.image); texture.dispose(); });
+    bitmaps.forEach(bitmap => bitmap.close());
   }
   function blocked(x, z, stage) {
     if (Math.abs(x) > room.halfWidth-.5) return true;

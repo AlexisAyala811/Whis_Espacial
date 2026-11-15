@@ -15,6 +15,16 @@ La cabina tiene una ventana panorámica con la Tierra, la Luna, el Sol, estrella
 y representaciones de Orión y la Osa Mayor. Es una composición artística: las
 distancias, posiciones y tamaños no corresponden a una vista astronómica real.
 
+## Cabina de observación
+
+La cabina conserva la navegación, la consola de misión y las fichas, y utiliza
+asientos biselados, paneles de metal y luces cálidas y frías. La ventana izquierda
+muestra la imagen de Tierra y Luna proporcionada; la derecha, la imagen de estrellas.
+Son composiciones artísticas, no datos astronómicos en vivo ni vistas a escala.
+El modelo de instrumento glTF y la iluminación HDR se cargan al entrar en la cabina;
+si fallan, la cabina permanece utilizable. Véase [créditos](assets/cabin/CREDITS.md).
+Las manos mantienen sus formas y animaciones existentes: no hay rig articulado.
+
 ## Texturas por espacio
 
 Las superficies usan texturas procedurales originales para metal cepillado,
