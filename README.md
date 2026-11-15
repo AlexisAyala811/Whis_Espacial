@@ -1,5 +1,13 @@
 # Lunar Command 3D
 
+## Secuencia de despegue
+
+La primera vez que cruces del VAB a la cabina aparece una animación sin voz que
+representa la verificación, cuenta regresiva, despegue y ascenso. Puedes omitirla
+con el botón o Esc; se reproduce de nuevo al reiniciar el entrenamiento. Es una
+representación original del juego, no un video de un lanzamiento real. Con la
+opción de movimiento reducido se muestra una versión corta.
+
 ## Controles y vista desde la nave
 
 Mantén Ctrl + W para correr hacia delante; Shift también permite correr.

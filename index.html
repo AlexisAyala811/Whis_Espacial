@@ -37,6 +37,10 @@
 <div class="telemetry"><div><small>MET</small><strong id="clock">00:00</strong></div><div><small>PROTOCOLO</small><strong id="progress">0 / 7</strong></div><div><small>ERRORES</small><strong id="errors">0</strong></div></div>
 <div class="coordinates" id="position"></div>
 </section>
+<section id="launch-sequence" class="launch-sequence" hidden role="dialog" aria-modal="true" aria-labelledby="launch-title">
+<canvas id="launch-canvas" width="1280" height="720" aria-label="Animación ficticia del lanzamiento de un cohete"></canvas>
+<div class="launch-overlay"><div><small>CONTROL DE MISIÓN / SECUENCIA SIMULADA</small><h2 id="launch-title">DESPEGUE</h2><p id="launch-phase" role="status">VERIFICACIÓN DE SISTEMAS</p></div><p class="launch-caption">Simulación visual · Sin voz</p><button id="launch-skip">Omitir secuencia y entrar a la nave</button></div>
+</section>
 <section id="loading" class="loading" hidden role="status" aria-live="polite"><div class="loading-content"><small>TRANSICIÓN DE ESCENARIO // BASE TERRESTRE</small><h2 id="loading-title">Cargando escenario</h2><p>Preparando geometría, iluminación y sistemas de la siguiente sala.</p><div class="loading-track" aria-hidden="true"><span></span></div><small>Permanece en la zona de transferencia</small></div></section>
 <section id="pause" class="modal" hidden><small>CONTROL DE MISIÓN</small><h2>Exploración en pausa</h2><p>WASD para moverte. Ctrl + W o Shift para correr. Ratón capturado o arrastre para mirar. También puedes usar las flechas. E para interactuar y cruzar puertas abiertas. En NBL, Espacio sube y Ctrl sin W baja; Ctrl + W avanza más rápido.</p><button id="resume" class="primary">Continuar</button><button id="restart">Reiniciar entrenamiento</button></section>
 <section id="results" class="modal" hidden><small>DEBRIEF / FASE 0</small><h2>Entrenamiento completado</h2><strong id="score" class="score"></strong><p id="result-detail"></p><button id="again" class="primary">Volver a entrenar</button><p class="hint"><a href="./resources.html" target="_blank" rel="noopener noreferrer">Revisar las fuentes y los objetivos ↗</a></p></section>

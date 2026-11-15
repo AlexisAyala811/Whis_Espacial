@@ -1,3 +1,4 @@
+import { playLaunchSequence } from './launch-sequence.js';
 import { showSolar } from './nasa-panel.js';
 import { FieldTraining } from './core/field-training.js';
 import { createScenarioWorld, STATIONS } from './rendering/scenario-world.js';
@@ -7,7 +8,7 @@ import { OUTPOST_QUESTIONS } from './core/outpost-training.js';
 import { LEARNING_ROOMS, LearningProgress } from './core/learning-catalog.js';
 let learning=new LearningProgress(), inspectMode=false, inspected=null, visiblePoints=[];
 const $=id=>document.getElementById(id);
-let mission=new FieldTraining(),running=false,started=false,transitioning=false,pauseAfterTransition=false,selectedCable=null,world;
+let mission=new FieldTraining(),running=false,started=false,transitioning=false,pauseAfterTransition=false,launchSeen=false,selectedCable=null,world;
 const titles=['Verifica tu traje','Controla cada repetición','Prioriza el soporte vital','Conecta el módulo EVA','Equilibra los recursos','Restablece la energía','Dirige el puesto marciano'];
 const details=['Acércate a la consola 01. Confirma presión, agua y telemetría con E.','Completa seis repeticiones en ARED pulsando E en la zona verde.','Resuelve los avisos de la consola ECLSS.','En NBL, une cada línea con su puerto. Espacio sube; Ctrl sin W baja. Ctrl + W avanza más rápido.','Ajusta oxígeno, agua y energía del hábitat.','Activa los tres buses eléctricos del cohete.','En la cabina, toma cinco decisiones sobre un puesto marciano y observa sus consecuencias.'];
 try { world=createScenarioWorld($('world')); }
@@ -127,13 +128,18 @@ function play(){
   world.focus();if($('mental').hidden)world.capture();
 }
 function pause(){if(!started||mission.complete)return;if(transitioning){pauseAfterTransition=true;return;}closeInspection(false);running=false;$('task').hidden=true;$('mental').hidden=true;world.release();$('pause').hidden=false;$('resume').focus();}
-function reset(){learning=new LearningProgress();closeInspection(false);mission=new FieldTraining();world.reset();$('results').hidden=true;$('mental').hidden=true;$('task').hidden=true;$('loading').hidden=true;selectedCable=null;pauseAfterTransition=false;say('Comandante, dirígete al punto de verificación del traje.');play();}
+function reset(){launchSeen=false;learning=new LearningProgress();closeInspection(false);mission=new FieldTraining();world.reset();$('results').hidden=true;$('mental').hidden=true;$('task').hidden=true;$('loading').hidden=true;selectedCable=null;pauseAfterTransition=false;say('Comandante, dirígete al punto de verificación del traje.');play();}
 async function transitionTo(index){
   if(transitioning||!running||index<0||index>=SCENARIOS.length)return;
   transitioning=true;
-  $('loading-title').textContent=SCENARIOS[index].title;
-  $('loading').hidden=false;
   try{
+    if(index===6 && world.currentIndex===5 && !launchSeen){
+      world.release();
+      await playLaunchSequence({container:$('launch-sequence'),canvas:$('launch-canvas'),phase:$('launch-phase'),skip:$('launch-skip')});
+      launchSeen=true;
+    }
+    $('loading-title').textContent=SCENARIOS[index].title;
+    $('loading').hidden=false;
     await world.load(index);
     say('Escenario cargado: '+SCENARIOS[index].title+'. Continúa con el protocolo.');
     world.focus();
@@ -180,6 +186,7 @@ $('inspect-toggle').addEventListener('click',()=>{inspectMode=!inspectMode;if(in
 $('task-close').addEventListener('click',()=>closeTask());
 window.addEventListener('keydown',e=>{
   if(e.repeat||e.target.closest('input,textarea'))return;
+  if(!$('launch-sequence').hidden){if(e.code==='Escape')$('launch-skip').click();return;}
   if(e.code==='KeyI'&&running&&!inspected&&$('task').hidden&&$('mental').hidden){$('inspect-toggle').click();return;}
   if(e.code==='KeyF'&&running&&!inspected&&$('task').hidden&&$('mental').hidden){const point=[...visiblePoints].sort((a,b)=>a.aim-b.aim)[0];if(point)openInspection(point);return;}
   if(inspected){

@@ -376,6 +376,38 @@ export function createScenarioWorld(container) {
       box(4.15,1.99,-8.98,6.2,.09,.13,0x82c6d5,true);
       const starlight=new THREE.PointLight(0x80b9e6,14,12,2);
       starlight.position.set(4.1,4.1,-7.9);scene.add(starlight);
+
+      // Observation windows built into the cabin sides, facing the central aisle.
+      const sideView = makeStarfield();
+      for(const side of [-1,1]) {
+        const view=new THREE.Mesh(new THREE.PlaneGeometry(7.8,2.5),new THREE.MeshBasicMaterial({map:sideView}));
+        view.position.set(side*7.66,3.15,1);view.rotation.y=-side*Math.PI/2;scene.add(view);
+        for(const z of [-3,1,5])box(side*7.58,3.15,z,.16,2.8,.12,0x5d7f8b);
+        for(const y of [1.8,4.5])box(side*7.58,y,1,.16,.14,8.1,0x526e7a);
+        box(side*7.5,1.78,1,.12,.06,8.1,0x6cb4c8,true);
+      }
+
+      // An original three-dimensional spacecraft model on an illuminated display plinth.
+      box(4.8,.62,4.15,1.6,1.24,1.4,0x3d5967);
+      box(4.8,1.25,4.15,1.7,.06,1.5,0x80bdc8,true);
+      const model=new THREE.Group();model.position.set(4.8,2.05,4.15);scene.add(model);
+      const hull=new THREE.Mesh(new THREE.CylinderGeometry(.2,.34,1.3,16),material(0xd7e5e3));
+      hull.rotation.z=Math.PI/2;model.add(hull);
+      const nose=new THREE.Mesh(new THREE.ConeGeometry(.2,.42,16),material(0xe7eee9));
+      nose.rotation.z=-Math.PI/2;nose.position.x=.84;model.add(nose);
+      const service=new THREE.Mesh(new THREE.CylinderGeometry(.3,.3,.4,16),material(0x809ba5));
+      service.rotation.z=Math.PI/2;service.position.x=-.68;model.add(service);
+      for(const side of [-1,1]){
+        const panel=new THREE.Mesh(new THREE.BoxGeometry(.75,.035,1.25),material(0x315b83));
+        panel.position.set(-.15,0,side*.85);model.add(panel);
+        for(const stripe of [-.25,0,.25]){
+          const rail=new THREE.Mesh(new THREE.BoxGeometry(.025,.04,1.22),material(0x8ac0d2,true));
+          rail.position.set(stripe-.15,.03,side*.85);model.add(rail);
+        }
+      }
+      textPanel('MODELO / NAVE DE MISION',4.8,2.9,3.35,2.8);
+      obstacles.push({x:4.8,z:4.15,w:1.7,d:1.5});
+      animatedParts.push({type:'ship-model',mesh:model});
     }
     decorateRoom(index,{box,cylinder,display,textPanel,obstacles});
     scene.add(camera);
@@ -390,6 +422,7 @@ export function createScenarioWorld(container) {
       for(const part of animatedParts){
         if(part.type==='belt')part.mesh.position.z=-3.45+(((part.base+3.45+ambientTime*.25)%2.7)+2.7)%2.7;
         if(part.type==='earth')part.mesh.rotation.y=ambientTime*.08;
+        if(part.type==='ship-model')part.mesh.rotation.y=ambientTime*.3;
       }
     }
     return { scene, obstacles, beacon, forwardLeaves, backLeaves, doorLamp, halfWidth, animate, textures };
