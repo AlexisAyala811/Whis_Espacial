@@ -17,7 +17,7 @@ $('leave-ship').addEventListener('click',()=>{$('landing').hidden=true;active=tr
 function enterBase(){
   if(!active||loading||Math.hypot(camera.position.x-door.x,camera.position.z-door.z)>2.4)return;
   active=false;loading=true;$('loading').hidden=false;
-  setTimeout(()=>{window.location.href='./outpost.html?origen=marte';},reduced.matches?0:900);
+  setTimeout(()=>{window.location.href='./habitat.html';},reduced.matches?0:900);
 }
 $('enter-base').addEventListener('click',enterBase);
 try{
