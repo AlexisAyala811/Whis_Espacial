@@ -154,7 +154,7 @@ export function createFieldScene(container) {
   }
   label('ASCAN  /  EARTH OPERATIONS',0,4.45,-11.35,'#152d37',9);
   label('TRAINING SECTOR 07',0,3.72,-11.34,'#365e66',5);
-  label('LUNAR COMMAND',0,4,13.67,'#d6e9e9',6);
+  label('PROJECT ARES 3D',0,4,13.67,'#d6e9e9',6);
   const obstacles=[];
   const beacons=[];
   for (const station of STATIONS) {

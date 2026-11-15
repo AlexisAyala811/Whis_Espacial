@@ -6,7 +6,7 @@ Secciones incorporadas: restricciones técnicas, flujo SDD y gobernanza.
 Secciones eliminadas: ninguna. Plantillas de Spec Kit: se consultan en tiempo de ejecución.
 Marcadores pendientes: ninguno.
 -->
-# Constitución de Lunar Command 3D
+# Constitución de Project Ares 3D
 
 ## Principios fundamentales
 

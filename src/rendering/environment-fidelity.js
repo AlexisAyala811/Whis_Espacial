@@ -20,7 +20,7 @@ export function addRoomFidelity(index, scene, box, halfWidth) {
   c.strokeStyle='#78979b';c.lineWidth=3;c.strokeRect(8,8,1008,240);
   c.fillStyle=accent;c.fillRect(26,27,8,200);c.font='bold 44px sans-serif';c.fillText(title,58,88);
   c.fillStyle='#b5cecd';c.font='23px monospace';c.fillText(subtitle,58,130);
-  c.fillStyle='#819da0';c.font='19px monospace';c.fillText("LUNAR COMMAND  /  SIMULATED TRAINING",58,205);
+  c.fillStyle='#819da0';c.font='19px monospace';c.fillText("PROJECT ARES 3D  /  SIMULATED TRAINING",58,205);
   c.strokeStyle=accent;c.lineWidth=3;c.beginPath();
   for(let i=0;i<14;i++){const x=755+i*17,y=116+Math.sin(i*.9+index)*25; i?c.lineTo(x,y):c.moveTo(x,y)}c.stroke();
   for(let i=0;i<5;i++){c.fillStyle=i===3?'#edbe72':accent;c.fillRect(756+i*44,167,30,7);}

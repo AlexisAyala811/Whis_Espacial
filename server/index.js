@@ -67,5 +67,5 @@ export const server = createServer(async (request, response) => {
 });
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  server.listen(port, '127.0.0.1', () => console.log(`Lunar Command 3D listening on http://127.0.0.1:${port}`));
+  server.listen(port, '127.0.0.1', () => console.log(`Project Ares 3D listening on http://127.0.0.1:${port}`));
 }

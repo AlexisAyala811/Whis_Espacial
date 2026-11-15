@@ -13,34 +13,51 @@ export function createFirstPersonArms(camera,fabric,reducedMotion){
  const white=new THREE.MeshStandardMaterial({color:0xd6dfdc,map:fabric,normalMap:textileMaps.normal,normalScale:new THREE.Vector2(.38,.38),roughnessMap:textileMaps.roughness,roughness:.9});
  const seam=new THREE.MeshStandardMaterial({color:0x71878b,roughness:.72,metalness:.22});
  const rubber=new THREE.MeshStandardMaterial({color:0x394f55,roughness:.85});
- const palmGeo=new RoundedBoxGeometry(.19,.105,.22,3,.038),segmentGeo=new THREE.CapsuleGeometry(.022,.045,4,10);
- const cuffGeo=new THREE.TorusGeometry(.094,.012,10,32),knuckleGeo=new THREE.SphereGeometry(.024,12,10);
- const padGeo=new RoundedBoxGeometry(.155,.028,.065,3,.014),panelGeo=new RoundedBoxGeometry(.12,.018,.085,3,.008),stitchGeo=new THREE.BoxGeometry(.16,.004,.004),rivetGeo=new THREE.SphereGeometry(.006,8,6);
- const sleeveGeo=new THREE.CylinderGeometry(.105,.145,.42,16,1),jointGeo=new THREE.SphereGeometry(.095,16,12);
+ // Soft, layered pressure gloves: rounded palms, shaped digits and wrist seals.
+ // Geometries and materials are shared between both hands.
+ const shell=new THREE.MeshStandardMaterial({color:0xe2e2d8,map:fabric,normalMap:textileMaps.normal,normalScale:new THREE.Vector2(.28,.28),roughnessMap:textileMaps.roughness,roughness:.96});
+ const reinforcement=new THREE.MeshStandardMaterial({color:0x9ea8a4,roughness:.9});
+ const stitching=new THREE.MeshStandardMaterial({color:0xa9b6b3,roughness:1});
+ const sphere=new THREE.SphereGeometry(1,24,16);
+ const fingerSegment=new THREE.CapsuleGeometry(.022,.048,8,16);
+ const fineSeam=new THREE.TorusGeometry(.022,.0018,5,20);
+ const cuffGeo=new THREE.TorusGeometry(.092,.009,10,32);
+ const sleeveGeo=new THREE.CylinderGeometry(.101,.14,.42,24,1);
+ const stitchGeo=new THREE.BoxGeometry(.002,.002,.012);
  const arms=[];let time=0,gesture='',gestureTime=0;
+ function part(parent,geometry,mat,x,y,z,sx=1,sy=1,sz=1){const mesh=new THREE.Mesh(geometry,mat);mesh.position.set(x,y,z);mesh.scale.set(sx,sy,sz);parent.add(mesh);return mesh;}
  for(const side of [-1,1]){
   const rig=new THREE.Group();rig.name=side<0?'left-suit-arm':'right-suit-arm';rig.position.set(side*.55,-.5,-1.03);camera.add(rig);
-  const sleeve=new THREE.Mesh(sleeveGeo,white);sleeve.rotation.z=side*.5;sleeve.position.set(side*.1,-.28,.09);rig.add(sleeve);
-  const wrist=new THREE.Mesh(jointGeo,seam);wrist.position.set(0,-.1,.08);wrist.scale.set(1,.8,1);rig.add(wrist);
-  const cuff=new THREE.Mesh(cuffGeo,rubber);cuff.position.set(0,0,.11);rig.add(cuff);
-  const palm=new THREE.Mesh(palmGeo,white);rig.add(palm);
-  const pad=new THREE.Mesh(padGeo,seam);pad.position.set(0,.055,-.075);rig.add(pad);const panel=new THREE.Mesh(panelGeo,white);panel.position.set(0,.056,.035);rig.add(panel);
-  for(const z of [-.04,.025,.075]){const stitch=new THREE.Mesh(stitchGeo,seam);stitch.position.set(0,.058,z);rig.add(stitch);}
-  for(const x of [-.065,.065]){const rivet=new THREE.Mesh(rivetGeo,rubber);rivet.position.set(x,.073,-.075);rig.add(rivet);}
-  const innerCuff=new THREE.Mesh(cuffGeo,seam);innerCuff.scale.set(.83,.83,1);innerCuff.position.set(0,0,.13);rig.add(innerCuff);
-  for(const offset of [-.025,.025]){const band=new THREE.Mesh(cuffGeo,seam);band.scale.set(.9,.9,.5);band.position.set(0,offset,.14);rig.add(band);}
-  for(const x of [-.055,-.02,.02,.055]){const stitch=new THREE.Mesh(new THREE.BoxGeometry(.003,.005,.045),seam);stitch.position.set(x,.07,.03);rig.add(stitch);}
+  const sleeve=part(rig,sleeveGeo,white,side*.10,-.28,.09);sleeve.rotation.z=side*.5;
+  const wrist=part(rig,sphere,white,0,-.08,.08,.095,.085,.105);
+  part(rig,cuffGeo,rubber,0,0,.12);
+  const outerSeal=part(rig,cuffGeo,seam,0,0,.105,.88,.88,.7);
+  part(rig,cuffGeo,reinforcement,0,0,.127,.76,.76,.55);
+  // The tapered palm is an ellipsoid, with a padded fabric layer over the back.
+  part(rig,sphere,shell,0,0,-.012,.102,.052,.14);
+  const back=part(rig,sphere,white,0,.034,-.015,.088,.025,.112);back.rotation.x=-.06;
+  part(rig,sphere,reinforcement,0,.052,-.081,.074,.009,.032);
+  for(const sideEdge of [-1,1]){
+   const seamLine=part(rig,new THREE.CapsuleGeometry(.002,.12,3,6),stitching,sideEdge*.075,.04,-.012);seamLine.rotation.x=Math.PI/2;
+   for(let i=0;i<6;i++)part(rig,stitchGeo,seam,sideEdge*.069,.047,-.062+i*.022);
+  }
   const fingers=[];
   for(let i=0;i<4;i++){
-    const pivot=new THREE.Group();pivot.position.set((i-1.5)*.044,0,-.105);pivot.rotation.y=(i-1.5)*.035;pivot.scale.z=[.87,1,.96,.78][i];rig.add(pivot);
-    const proximal=new THREE.Mesh(segmentGeo,white);proximal.rotation.x=Math.PI/2;proximal.position.z=-.042;pivot.add(proximal);
-    const joint=new THREE.Mesh(knuckleGeo,seam);joint.scale.set(.8,.35,.5);joint.position.set(0,.015,-.072);pivot.add(joint);
-    const distal=new THREE.Group();distal.position.z=-.075;pivot.add(distal);
-    const tip=new THREE.Mesh(segmentGeo,white);tip.rotation.x=Math.PI/2;tip.position.z=-.035;distal.add(tip);
-    const grip=new THREE.Mesh(knuckleGeo,rubber);grip.position.set(0,-.018,-.06);grip.scale.set(.7,.35,.8);distal.add(grip);
+    const pivot=new THREE.Group();pivot.position.set((i-1.5)*.043,0,-.116);pivot.rotation.y=(i-1.5)*.045;pivot.scale.z=[.85,1,.96,.78][i];rig.add(pivot);
+    const proximal=part(pivot,fingerSegment,shell,0,0,-.035);proximal.rotation.x=Math.PI/2;
+    const pad=part(pivot,sphere,white,0,.014,-.041,.020,.012,.043);
+    const seamRing=part(pivot,fineSeam,stitching,0,0,-.065);seamRing.scale.set(1,.82,1);
+    const distal=new THREE.Group();distal.position.z=-.07;pivot.add(distal);
+    const tip=part(distal,fingerSegment,shell,0,-.001,-.035,.92,.85,.92);tip.rotation.x=Math.PI/2;
+    part(distal,sphere,reinforcement,0,-.012,-.062,.018,.011,.025);
+    const tipSeam=part(distal,fineSeam,stitching,0,0,-.044,.91,.75,1);
     fingers.push({pivot,distal});
   }
-  const thumb=new THREE.Group();thumb.position.set(side*.105,-.005,-.015);thumb.rotation.y=side*.65;rig.add(thumb);const thumbMesh=new THREE.Mesh(segmentGeo,white);thumbMesh.rotation.x=Math.PI/2;thumbMesh.position.z=-.045;thumb.add(thumbMesh);
+  // The thumb emerges from the side of the palm and bends toward the fingers.
+  const thumb=new THREE.Group();thumb.position.set(side*.089,-.008,-.005);thumb.rotation.y=side*.65;thumb.rotation.z=side*.12;rig.add(thumb);
+  const thumbBase=part(thumb,fingerSegment,shell,0,0,-.033,1.12,.9,1);thumbBase.rotation.x=Math.PI/2;
+  const thumbTip=part(thumb,sphere,shell,0,0,-.074,.022,.019,.031);
+  part(thumb,sphere,reinforcement,0,-.012,-.086,.018,.009,.02);
   arms.push({side,rig,fingers,thumb});
  }
  function trigger(name){if(['interact','inspect','grab','sit'].includes(name)){gesture=name;gestureTime=.65;}}
