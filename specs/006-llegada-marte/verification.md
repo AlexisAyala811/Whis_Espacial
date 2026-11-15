@@ -1,0 +1,10 @@
+# Verificación de la llegada a Marte
+
+- Pruebas de las nuevas reglas y de la interfaz sin NASA: `node --test tests/unit/mars-base.test.js tests/unit/mars-base-ui.test.js`, siete pruebas aprobadas. Cubren presupuesto, previsión, cosecha, demora, fracaso, observación histórica, fallback y cinco turnos de interfaz.
+- Edge en Windows, GPU Intel UHD: prueba de navegador con final de cabina, descenso, salida por rampa, caminata a la puerta, pantalla de carga, primer sol, regreso al exterior, recuperación del sol y retorno al informe. NASA se simuló como no disponible para verificar la recuperación; no se afirma disponibilidad del servicio real en esa prueba.
+- Medición de superficie inmóvil en Edge con Intel UHD Direct3D 11, 1920 × 1080 CSS, DPR 1: 10 segundos de calentamiento y 60 segundos de muestra; mediana 6,1 ms y percentil 95 de 6,3 ms. Cumple 33,3 ms en ese equipo y escena, no es garantía para otras configuraciones; no se midió la GPU NVIDIA.
+- Las capturas de superficie y panel se tomaron en el navegador de prueba. La geometría sigue estilizada; no representa datos de localización ni un paisaje fotográfico real de Marte. El descenso es una transición narrativa ficticia que puede omitirse, no un video ni una simulación física de aterrizaje.
+- Las reglas de recursos, ritmos de cultivo, retraso de mensajes, salud y protección son ficticias. La clase de una observación histórica DONKI selecciona un umbral didáctico arbitrario, explícito en pantalla; no es alerta ni predicción para Marte. OSD-684 se cita como contexto y RadLab queda enlazado, sin integración dinámica.
+- El entrenamiento existente y su informe permanecen en memoria mientras se explora Marte. El estado del puesto se guarda en sessionStorage y se reconstruye validando las decisiones; si el navegador lo bloquea, sigue siendo jugable durante la estancia actual. No se ha validado con estudiantes de 7 a 12 años ni se dispone de controles táctiles para la superficie.
+
+- Tras integrar, npm test: 34 de 34 pruebas aprobadas. En el servidor local 127.0.0.1:8000 se comprobó la superficie, la puerta, la carga y el primer turno de la base con NASA simulada como no disponible.

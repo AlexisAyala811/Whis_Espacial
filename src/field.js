@@ -180,14 +180,17 @@ function act(answer){
   if(mission.complete){
     running=false;world.release();$('mental').hidden=true;$('task').hidden=true;$('results').hidden=false;
     $('score').textContent=mission.score+' / 100';
-    $('result-detail').textContent='Siete escenarios y cinco soles de misión completados en '+Math.floor(mission.elapsed)+' segundos. '+mission.errors+' errores registrados. '+(mission.score>=70?'Apto para continuar entrenando.':'Repite el entrenamiento para afianzar el procedimiento.');
+    $('result-detail').textContent='Siete escenarios y la simulación de cinco soles completados en '+Math.floor(mission.elapsed)+' segundos. '+mission.errors+' errores registrados. '+(mission.score>=70?'Apto para continuar entrenando.':'Repite el entrenamiento para afianzar el procedimiento.');
     $('result-detail').textContent+=` Aprendizaje: ${learning.mastered.size} de 19 objetos comprendidos.`;
-    $('again').focus();
+    $('begin-mars').focus();
     try{localStorage.setItem('lunar-command-field-report',JSON.stringify({score:mission.score,errors:mission.errors,seconds:mission.elapsed}));}catch{say('Entrenamiento completado. El navegador no permite guardar el informe.');}
   }
 }
 $('deploy').addEventListener('click',play);$('resume').addEventListener('click',play);
 $('restart').addEventListener('click',reset);$('again').addEventListener('click',reset);
+$('begin-mars').addEventListener('click',()=>{$('mars-shell').hidden=false;$('mars-shell-loading').hidden=false;$('mars-frame').hidden=true;$('mars-frame').src='./mars.html';$('close-mars').focus();});
+$('mars-frame').addEventListener('load',()=>{if($('mars-shell').hidden||!$('mars-frame').getAttribute('src'))return;$('mars-shell-loading').hidden=true;$('mars-frame').hidden=false;$('mars-frame').focus();});
+$('close-mars').addEventListener('click',()=>{$('mars-shell').hidden=true;$('mars-frame').hidden=true;$('mars-frame').removeAttribute('src');$('begin-mars').focus();});
 $('menu-button').addEventListener('click',pause);$('interact').addEventListener('click',()=>act());
 $('answer-air').addEventListener('click',()=>act('atmosphere'));
 $('answer-power').addEventListener('click',()=>act('power'));

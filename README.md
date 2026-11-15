@@ -149,3 +149,11 @@ npm test
 
 Spec Kit incluye la integración de Claude Code y los scripts para PowerShell. La
 habilidad `/speckit-constitution` permite consultar el flujo de enmienda de la Constitución.
+
+## Descenso y base marciana
+
+Después de completar el entrenamiento y la simulación de cabina, pulsa **Descender a Marte** en el informe. Puedes saltar la secuencia de descenso, salir de la nave, caminar por la rampa y usar **E** junto a la puerta iluminada para entrar al hábitat. La superficie es una escena 3D ficticia: WASD camina, Ctrl + W o Shift corre y el arrastre del ratón o las flechas permiten mirar. El botón superior vuelve al informe sin reiniciar el entrenamiento.
+
+La puerta muestra una pantalla de carga y abre un panel para administrar cinco soles. Reparte diez unidades de energía entre aire, cultivo, refugio y comunicaciones; consulta la previsión y la bitácora. Las decisiones guardadas se recuperan en la misma pestaña al volver a la superficie y entrar otra vez. La simulación funciona si no hay conexión a NASA. Si existe un registro DONKI válido, una regla del juego ajusta el ejercicio solar según su clase; el panel aclara que el umbral es ficticio, no una predicción ni una dosis real. Se enlaza el estudio NASA OSD-684 como contexto, sin convertirlo en valores de salud. La fotografía estelar se acredita en `assets/cabin/CREDITS.md`.
+
+El escenario exterior y el planeta ilustrado son estilizados, no recreaciones fotográficas ni datos de ubicación en Marte. No se ha validado la experiencia con estudiantes de 7 a 12 años.
