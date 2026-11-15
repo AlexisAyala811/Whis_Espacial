@@ -1,4 +1,5 @@
 import { PREPARATION_SUIT_POSITIONS } from './preparation-layout.js';
+import { OBJECT_DETAILS } from './object-details.js';
 
 const sources = {
   suit: 'https://www.nasa.gov/directorates/esdmd/hhp/space-suits-and-exploration-operations/',
@@ -9,7 +10,7 @@ const sources = {
   food: 'https://www.asc-csa.gc.ca/eng/youth-educators/toolkits/food-production/',
   mission: 'https://www.spaceappschallenge.org/2026/challenges/junior-astronaut-mission-trainer/',
 };
-const object = (id, name, position, purpose, question, options, answer, explanation, source) => ({id,name,position,purpose,question,options,answer,explanation,source});
+const object = (id, name, position, purpose, question, options, answer, explanation, source) => ({id,name,position,purpose,details:OBJECT_DETAILS[id] ?? '',question,options,answer,explanation,source});
 export const LEARNING_ROOMS = [
   { name:'Vestuario y esclusa de preparación', purpose:'Inspecciona el equipo que protege al astronauta antes de salir.', objects:[
     object('suit-console','Banco de verificación',[-3.7,2.2,-1.4],'Compara las lecturas del traje antes de autorizar una actividad.','¿Qué haces si una lectura no coincide con la lista?',['Ignorar la lectura','Detener la revisión y comprobarla'],1,'Una lista de comprobación sirve para detectar diferencias antes de continuar.',sources.training),

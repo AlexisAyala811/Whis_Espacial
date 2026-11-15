@@ -24,8 +24,12 @@
 <p id="room-purpose" class="room-purpose"></p>
 <div id="learning-points" aria-label="Objetos del escenario"></div>
 <button id="inspect-toggle" class="inspect-toggle">I · Explorar objetos</button>
+<aside id="nearby-object" class="nearby-object" hidden aria-label="Información de objeto cercano" aria-live="polite">
+<small>OBJETO CERCANO</small><h2 id="nearby-name"></h2><p id="nearby-purpose"></p><p id="nearby-details"></p>
+<button id="nearby-open" type="button">F · Conocer más y responder</button></aside>
 <section id="object-card" class="object-card" hidden role="dialog" aria-modal="true" aria-labelledby="object-name">
 <small id="object-room"></small><h2 id="object-name"></h2><p id="object-purpose"></p>
+<p id="object-details"></p>
 <h3 id="object-question"></h3><div id="object-answers"></div><p id="object-feedback" role="status"></p>
 <a id="object-source" target="_blank" rel="noopener noreferrer">Leer la fuente ↗</a><button id="object-close">Volver a explorar · Esc</button></section>
 <div class="crosshair" aria-hidden="true">+</div>

@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { SCENARIOS, canEnterScenario } from '../core/scenario-route.js';
 import { LEARNING_ROOMS } from '../core/learning-catalog.js';
 import { PREPARATION_SUIT_POSITIONS } from '../core/preparation-layout.js';
+import { findNearbyLearningObject } from '../core/object-proximity.js';
 import { decorateRoom } from './room-identity.js';
 import { makeSurfaceTextures, drawTelemetry } from './surface-detail.js';
 import { buildCabinDetails } from './cabin-details.js';
@@ -544,6 +545,14 @@ export function createScenarioWorld(container) {
       }
       renderer.render(room.scene, camera);
       return null;
+    },
+    nearbyLearningPoint() {
+      camera.updateMatrixWorld();
+      const nearest=findNearbyLearningObject(LEARNING_ROOMS[sceneIndex].objects,camera.position);
+      if(!nearest)return null;
+      const screen=new THREE.Vector3(...nearest.position).project(camera);
+      const visible=screen.z>=-1&&screen.z<=1&&Math.abs(screen.x)<=1&&Math.abs(screen.y)<=1;
+      return {...nearest,x:visible?(screen.x+1)*window.innerWidth/2:window.innerWidth/2,y:visible?(1-screen.y)*window.innerHeight/2:window.innerHeight/2};
     },
     learningPoints() {
       camera.updateMatrixWorld();

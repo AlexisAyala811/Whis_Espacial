@@ -6,7 +6,7 @@ import { SCENARIOS } from './core/scenario-route.js';
 import { OUTPOST_QUESTIONS } from './core/outpost-training.js';
 
 import { LEARNING_ROOMS, LearningProgress } from './core/learning-catalog.js';
-let learning=new LearningProgress(), inspectMode=false, inspected=null, visiblePoints=[];
+let learning=new LearningProgress(), inspectMode=false, inspected=null, visiblePoints=[], nearbyPoint=null;
 const $=id=>document.getElementById(id);
 let mission=new FieldTraining(),running=false,started=false,transitioning=false,pauseAfterTransition=false,launchSeen=false,selectedCable=null,world;
 const titles=['Verifica tu traje','Controla cada repetición','Prioriza el soporte vital','Conecta el módulo EVA','Equilibra los recursos','Restablece la energía','Dirige el puesto marciano'];
@@ -21,6 +21,8 @@ function openInspection(point){
   inspected=point;learning.visited.add(point.id);world.release();
   $('object-room').textContent=LEARNING_ROOMS[world.currentIndex].name;
   $('object-name').textContent=point.name;$('object-purpose').textContent=point.purpose;
+  $('object-details').textContent=point.details;
+  $('nearby-object').hidden=true;
   $('object-question').textContent=point.question;$('object-source').href=point.source;
   $('object-feedback').textContent=learning.mastered.has(point.id)?'Ya resolviste esta pregunta. Puedes repasarla.':'';
   const answers=$('object-answers');answers.replaceChildren();
@@ -40,6 +42,14 @@ function updateLearning(){
   $('inspect-toggle').hidden=!allowed||!!inspected;
   $('room-purpose').textContent=LEARNING_ROOMS[world.currentIndex].purpose;
   $('inspect-toggle').textContent=inspectMode?'I · Volver a caminar':`I · Explorar objetos (${learning.mastered.size}/19)`;
+  nearbyPoint=allowed&&!inspected?world.nearbyLearningPoint():null;
+  const nearby=$('nearby-object');nearby.hidden=!nearbyPoint;
+  if(nearbyPoint&&nearby.dataset.id!==nearbyPoint.id){
+    nearby.dataset.id=nearbyPoint.id;
+    $('nearby-name').textContent=nearbyPoint.name;
+    $('nearby-purpose').textContent=nearbyPoint.purpose;
+    $('nearby-details').textContent=nearbyPoint.details;
+  }
   visiblePoints=allowed?world.learningPoints():[];
   const signature=visiblePoints.map(point=>point.id).join(',');
   if(container.dataset.signature!==signature){
@@ -182,13 +192,14 @@ $('menu-button').addEventListener('click',pause);$('interact').addEventListener(
 $('answer-air').addEventListener('click',()=>act('atmosphere'));
 $('answer-power').addEventListener('click',()=>act('power'));
 $('object-close').addEventListener('click',()=>closeInspection());
+$('nearby-open').addEventListener('click',()=>{const point=world.nearbyLearningPoint();if(point&&running&&!transitioning&&!inspected&&$('task').hidden&&$('mental').hidden)openInspection(point);});
 $('inspect-toggle').addEventListener('click',()=>{inspectMode=!inspectMode;if(inspectMode)world.release();else{world.focus();world.capture();}});
 $('task-close').addEventListener('click',()=>closeTask());
 window.addEventListener('keydown',e=>{
   if(e.repeat||e.target.closest('input,textarea'))return;
   if(!$('launch-sequence').hidden){if(e.code==='Escape')$('launch-skip').click();return;}
   if(e.code==='KeyI'&&running&&!inspected&&$('task').hidden&&$('mental').hidden){$('inspect-toggle').click();return;}
-  if(e.code==='KeyF'&&running&&!inspected&&$('task').hidden&&$('mental').hidden){visiblePoints=world.learningPoints();const point=[...visiblePoints].sort((a,b)=>a.aim-b.aim)[0];if(point)openInspection(point);return;}
+  if(e.code==='KeyF'&&running&&!inspected&&$('task').hidden&&$('mental').hidden){visiblePoints=world.learningPoints();const point=world.nearbyLearningPoint()??[...visiblePoints].sort((a,b)=>a.aim-b.aim)[0];if(point)openInspection(point);return;}
   if(inspected){
     if(e.code==='Escape'){closeInspection();return;}
     if(e.code==='Tab'){const list=[...$('object-card').querySelectorAll('button,a')];const index=list.indexOf(document.activeElement);e.preventDefault();list[(index+(e.shiftKey?-1:1)+list.length)%list.length].focus();}

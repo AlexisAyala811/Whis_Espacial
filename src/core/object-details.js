@@ -1,0 +1,22 @@
+// Educational context: equipment and operations are simplified for this game.
+export const OBJECT_DETAILS = {
+  'suit-console':'Antes de una actividad se contrastan identificaciones y lecturas con la lista prevista. Si un valor no coincide, se detiene la secuencia y se informa al equipo; los valores de esta consola son simulados.',
+  'suit-display':'Un traje espacial combina protección y soporte vital. El entrenamiento ayuda a familiarizarse con la movilidad, la comunicación y las conexiones; este modelo es una representación didáctica.',
+  'suit-locker':'Organizar el material por identificación y ubicación facilita comprobar qué está disponible. Una revisión de inventario también ayuda a detectar piezas que faltan antes del entrenamiento.',
+  'ared-device':'El ejercicio de resistencia ayuda a trabajar los músculos durante las misiones. ARED representa una forma de ejercitarse frente a una carga; el ritmo de esta actividad es una mecánica del juego.',
+  't2-device':'En microgravedad la tripulación utiliza un sistema de sujeción para mantenerse en contacto con la cinta. La marcha y la carrera forman parte del entrenamiento cardiovascular.',
+  'exercise-bike':'La bicicleta permite entrenar la capacidad cardiovascular con un movimiento repetitivo. En una misión, la actividad física se coordina con el equipo médico y las necesidades de cada persona.',
+  'control-air':'El sistema de soporte vital debe controlar el oxígeno y retirar dióxido de carbono, además de gestionar otros factores de la atmósfera. Ante una alarma se revisan las lecturas y el procedimiento aplicable.',
+  'control-wall':'La telemetría reúne mediciones enviadas por los sistemas. Comparar tendencias y límites ayuda al equipo a detectar cambios; las gráficas de esta pantalla son simuladas.',
+  'control-desk':'Cada puesto representa una responsabilidad del equipo de misión. Una comunicación útil identifica el sistema, la lectura y el momento de la observación antes de proponer una acción.',
+  'eva-panel':'Una actividad exterior requiere identificar equipos y conexiones antes de actuar. Los puertos de oxígeno, datos y energía se representan aquí mediante un ejercicio simplificado, no como un procedimiento real.',
+  'eva-module':'Las maquetas sumergidas permiten practicar el acceso y el uso de herramientas. La flotabilidad puede compensar el peso, pero el agua sigue ofreciendo resistencia y no reproduce todas las condiciones espaciales.',
+  'eva-rail':'Los puntos de apoyo ayudan a planificar dónde sujetarse y cómo alcanzar el lugar de trabajo. En una actividad real se revisan rutas, herramientas y sujeciones antes de comenzar.',
+  'habitat-rack':'Un hábitat necesita gestionar aire, agua y energía como sistemas relacionados. En este juego las reservas son ficticias y cada decisión puede tener consecuencias sobre otras.',
+  'habitat-bunks':'Un espacio de descanso ayuda a separar las horas de trabajo y recuperación. Los entornos análogos permiten estudiar cómo influyen el aislamiento y la convivencia en una tripulación.',
+  'habitat-crops':'Los cultivos requieren agua, luz, nutrientes y cuidados. Producir alimentos también consume tiempo y recursos; la bandeja es una representación de un experimento, no una fuente ilimitada.',
+  'vab-check':'La integración reúne comprobaciones de varios equipos antes de avanzar. Una lista permite registrar lo revisado y comunicar los puntos que todavía necesitan atención.',
+  'vab-rocket':'Las plataformas de acceso permiten llegar a distintas alturas del vehículo durante el ensamblaje y la revisión. El cohete mostrado es un modelo simplificado de entrenamiento.',
+  'ship-console':'Esta consola presenta un ejercicio de cinco soles: cada elección intercambia beneficios y costos entre recursos. Los resultados son una simulación educativa, no una predicción de una misión.',
+  'ship-seat':'El puesto de tripulación organiza las pantallas y controles para que puedan consultarse durante las operaciones. La posición y la accesibilidad de los instrumentos forman parte del diseño de cabina.',
+};
