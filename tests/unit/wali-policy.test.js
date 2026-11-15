@@ -26,3 +26,14 @@ test('Wali adapts hints to mission progress and solar exercise',()=>{
 test('every scenario has a short educational fact',()=>{
   for(const id of ['suit','ared','mental','eva','habitat','vab','ship','mars-surface','mars-habitat','mars-base'])assert.ok(WALI_FACTS[id]?.length>20,id);
 });
+import {WALI_NASA_FACTS} from '../../src/core/wali-nasa-facts.js';
+test('los escenarios con Wali ofrecen datos variados y fuentes de NASA',()=>{
+  for(const scene of ['suit','ared','mental','habitat','vab','ship','mars-surface','mars-habitat','mars-base']){
+    assert.ok(WALI_NASA_FACTS[scene]?.length>=2, scene);
+    for(const fact of WALI_NASA_FACTS[scene]){
+      assert.ok(fact.text.length>35);
+      assert.ok(new URL(fact.url).hostname.endsWith('.nasa.gov'));
+    }
+  }
+  assert.equal(WALI_NASA_FACTS.eva,undefined);
+});

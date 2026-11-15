@@ -12,3 +12,10 @@ test('Wali busca otro sitio cuando hay un obstáculo', () => {
   assert.ok(point && point.x<0 && point.z<0);
   assert.equal(waliTarget({x:0,z:0},0,()=>true),null);
 });
+
+test('Wali puede variar su posición mientras el jugador está quieto', () => {
+  const start=waliTarget({x:0,z:0},0,()=>false,0);
+  const later=waliTarget({x:0,z:0},0,()=>false,3);
+  assert.notDeepEqual(start,later);
+  assert.ok(later.z<0);
+});

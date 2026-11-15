@@ -28,7 +28,7 @@ try{
   scene=new THREE.Scene();scene.background=new THREE.Color(0xb07962);scene.fog=new THREE.Fog(0xb07962,32,92);
   camera=new THREE.PerspectiveCamera(70,1,.08,140);camera.rotation.order='YXZ';camera.position.set(0,fromBase?1.7:2.75,fromBase?-4.4:7.7);scene.add(camera);
   const waliCompanion=createWaliCompanion(scene,camera,reduced);
-  createWali({showAvatar:false,getContext:()=>({scene:'mars-surface',active:active&&!loading,near:Math.hypot(camera.position.x-door.x,camera.position.z-door.z)<=2.4})});
+  const wali=createWali({showAvatar:false,getContext:()=>({scene:'mars-surface',active:active&&!loading,near:Math.hypot(camera.position.x-door.x,camera.position.z-door.z)<=2.4})});
   scene.add(new THREE.HemisphereLight(0xffd8b6,0x76503c,1.45));const sun=new THREE.DirectionalLight(0xffdcbd,2.2);sun.position.set(-14,30,12);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-26;sun.shadow.camera.right=26;sun.shadow.camera.top=26;sun.shadow.camera.bottom=-26;sun.shadow.camera.far=100;sun.shadow.bias=-.0003;scene.add(sun);
   const metal=new THREE.MeshStandardMaterial({color:0xc5c5b8,roughness:.64,metalness:.35}),dark=new THREE.MeshStandardMaterial({color:0x293e42,roughness:.72,metalness:.35});
   const orange=new THREE.MeshStandardMaterial({color:0xb8663d,roughness:.9}),glow=new THREE.MeshBasicMaterial({color:0xb9e8b2});
@@ -107,7 +107,7 @@ try{
       const rampHeight=Math.abs(camera.position.x)<1.15?THREE.MathUtils.clamp((camera.position.z-5)*.39,0,1.15):0;camera.position.y=1.7+rampHeight;
       camera.rotation.set(pitch,yaw,0);const distance=Math.hypot(camera.position.x-door.x,camera.position.z-door.z);$('distance').textContent=`HÁBITAT · ${distance.toFixed(1)} m`;$('enter-base').hidden=distance>2.4;
     }
-    waliCompanion.update(dt,active&&!loading,(x,z)=>Math.abs(x)>15.7||z<minZ||z>8);
-    renderer.render(scene,camera);requestAnimationFrame(frame);
+    waliCompanion.update(dt,active&&!loading,(x,z)=>Math.abs(x)>15.7||z<minZ||z>8,wali?.isInteracting());
+    wali?.setAnchor(waliCompanion.anchor());renderer.render(scene,camera);requestAnimationFrame(frame);
   }requestAnimationFrame(frame);
 }catch(error){$('landing').hidden=true;$('fatal').hidden=false;console.error('No se pudo iniciar la superficie marciana:',error);}

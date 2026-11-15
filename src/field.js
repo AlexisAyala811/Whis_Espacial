@@ -222,7 +222,8 @@ function frame(now){
   const dt=Math.min((now-last)/1000,.05);last=now;
   if(world){
     if(running&&!transitioning&&!inspected&&!inspectMode)mission.advance(dt);
-    const next=world.update(dt,running&&!transitioning&&!inspected&&!inspectMode&&$('mental').hidden&&$('task').hidden,mission.target,mission.stage);
+    const next=world.update(dt,running&&!transitioning&&!inspected&&!inspectMode&&$('mental').hidden&&$('task').hidden,mission.target,mission.stage,wali?.isInteracting());
+    wali?.setAnchor(world.waliAnchor());
     if(next!==null&&!transitioning)transitionTo(next);
     // Marker visibility requires scene raycasts; update at most 20 times per second.
     if(now-lastLearning>=50){updateLearning();lastLearning=now;}

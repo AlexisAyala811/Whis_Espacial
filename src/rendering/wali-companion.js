@@ -20,18 +20,19 @@ export function createWaliCompanion(scene, camera, reducedMotion) {
   add(trim, 0,.53,0, .17,.055,.14);
   add(shell, 0,.72,0, .27,.25,.22);
   add(face, 0,.72,.178, .205,.127,.075);
+  const arms=[];
   for (const side of [-1,1]) {
     add(eye, side*.09,.73,.245, .047,.021,.012);
     const arm=add(shell,side*.23,.36,0,.075,.19,.075);
-    arm.rotation.z=side*.25;
+    arm.rotation.z=side*.25; arms.push(arm);
   }
   add(eye,0,.32,.148,.025,.025,.009);
   scene.add(group);
   let elapsed=0, needsSnap=true;
   const target = new THREE.Vector3();
   const forward = new THREE.Vector3();
-  function update(dt, active, blocked) {
-    const point=waliTarget(camera.position,camera.rotation.y,blocked);
+  function update(dt, active, blocked, interacting = false) {
+    const point=waliTarget(camera.position,camera.rotation.y,blocked,reducedMotion.matches ? 0 : elapsed);
     camera.getWorldDirection(forward);
     if(point){
       const bob = reducedMotion.matches ? 0 : Math.sin(elapsed*2.1)*.035;
@@ -41,7 +42,15 @@ export function createWaliCompanion(scene, camera, reducedMotion) {
       needsSnap=false;
     }
     group.lookAt(camera.position.x,group.position.y+.5,camera.position.z);
-    if(active && !reducedMotion.matches) elapsed+=Math.min(.05,Math.max(0,dt));
+    arms.forEach((arm,i)=>{arm.rotation.z=(i ? 1 : -1)*(.25+(reducedMotion.matches ? 0 : Math.sin(elapsed*2+i)*.13));});
+    if(active && !interacting && !reducedMotion.matches) elapsed+=Math.min(.05,Math.max(0,dt));
   }
-  return {group, update, attach(nextScene){nextScene.add(group);needsSnap=true;}, snap(){needsSnap=true;}};
+  function anchor(){
+    if(!group.visible) return null;
+    camera.updateMatrixWorld(); group.updateWorldMatrix(true,false);
+    const point=group.localToWorld(new THREE.Vector3(0,1.04,0)).project(camera);
+    if(point.z < -1 || point.z > 1) return null;
+    return {x:(point.x+1)*innerWidth/2,y:(1-point.y)*innerHeight/2};
+  }
+  return {group, update, anchor, attach(nextScene){nextScene.add(group);needsSnap=true;}, snap(){needsSnap=true;}};
 }

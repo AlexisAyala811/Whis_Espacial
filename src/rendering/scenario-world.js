@@ -492,6 +492,7 @@ export function createScenarioWorld(container) {
   return {
     camera,
     get currentIndex() { return sceneIndex; },
+    waliAnchor() { return sceneIndex === 3 ? null : waliCompanion.anchor(); },
     focus() { canvas.focus(); },
     async capture() { try { await canvas.requestPointerLock(); } catch { /* Drag and arrows remain available. */ } },
     release() { if (document.pointerLockElement === canvas) document.exitPointerLock(); clear(); },
@@ -507,7 +508,7 @@ export function createScenarioWorld(container) {
       camera.position.set(0, 1.7, backwards ? -arrivalZ : arrivalZ);
       camera.rotation.set(0, backwards ? Math.PI : 0, 0); waliCompanion.snap(); hoverY = 1.7; stride = 0; clear();
     },
-    update(dt, active, target, stage) {
+    update(dt, active, target, stage, waliInteracting = false) {
       controlsActive = active;
       room.animate(dt,active);
       const open = canEnterScenario(sceneIndex + 1, stage);
@@ -545,7 +546,8 @@ export function createScenarioWorld(container) {
         camera.position.y = THREE.MathUtils.lerp(camera.position.y, hoverY, Math.min(1, dt * 12));
         arms.forEach(arm => { arm.position.y = THREE.MathUtils.lerp(arm.position.y, 0, Math.min(1, dt * 12)); });
       }
-      waliCompanion.update(dt, active, (x,z) => blocked(x,z,stage));
+      waliCompanion.group.visible = sceneIndex !== 3;
+      if(waliCompanion.group.visible) waliCompanion.update(dt, active, (x,z) => blocked(x,z,stage), waliInteracting);
       renderer.render(room.scene, camera);
       return null;
     },
