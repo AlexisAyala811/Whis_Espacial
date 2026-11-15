@@ -17,5 +17,13 @@ test('NASA routes return data, reject cross-origin requests and protect local co
     assert.equal((await originalFetch(base+'/api/nasa/solar',{headers:{Origin:'https://example.org'}})).status,403);
     assert.equal((await originalFetch(base+'/.env')).status,403);
     assert.equal((await originalFetch(base+'/.env.example')).status,403);
+    for (const path of ['/server/index.js','/tests/unit/nasa-server.test.js','/package.json','/work/']) {
+      assert.equal((await originalFetch(base+path)).status,403, `private file exposed: ${path}`);
+    }
+    for (const path of ['/','/src/field.js','/src/glass-ui.css','/node_modules/three/build/three.module.js','/assets/models/ares-glove/ares-glove.glb']) {
+      assert.equal((await originalFetch(base+path)).status,200, `public file unavailable: ${path}`);
+    }
+    const glb = await originalFetch(base+'/assets/models/ares-glove/ares-glove.glb');
+    assert.equal(glb.headers.get('content-type'),'model/gltf-binary');
   } finally {await new Promise(resolve=>server.close(resolve));globalThis.fetch=originalFetch;}
 });

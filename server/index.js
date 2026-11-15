@@ -12,8 +12,10 @@ const envFile = join(root, '.env');
 if (existsSync(envFile)) loadEnvFile(envFile);
 const nasa = createNasaClient();
 const port = Number(process.env.PORT ?? 8000);
-const allowedOrigin = process.env.ALLOWED_ORIGIN ?? `http://127.0.0.1:${port}`;
-const contentTypes = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.md': 'text/plain; charset=utf-8' };
+const allowedOrigin = process.env.ALLOWED_ORIGIN || process.env.RENDER_EXTERNAL_URL || `http://127.0.0.1:${port}`;
+const host = process.env.RENDER === 'true' ? '0.0.0.0' : '127.0.0.1';
+const contentTypes = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json; charset=utf-8', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.webp': 'image/webp', '.svg': 'image/svg+xml', '.gltf': 'model/gltf+json', '.glb': 'model/gltf-binary' };
+const publicPages = new Set(['index.html', 'mars.html', 'habitat.html', 'outpost.html', 'resources.html']);
 
 function sendJson(response, status, body) {
   response.writeHead(status, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
@@ -30,6 +32,10 @@ async function serveFile(response, requestPath) {
   try { decoded = decodeURIComponent(requestPath); } catch { response.writeHead(400); response.end('Bad request'); return; }
   if (decoded.split(/[\\/]/).some(part => part.startsWith('.'))) { response.writeHead(403); response.end('Forbidden'); return; }
   const relative = decoded === '/' ? 'index.html' : decoded.replace(/^\//, '');
+  // Publish only browser-facing files, not server code, tests, or local work.
+  const normalizedPath = relative.replace(/\\/g, '/');
+  const allowed = publicPages.has(normalizedPath) || normalizedPath.startsWith('src/') || normalizedPath.startsWith('assets/') || normalizedPath.startsWith('node_modules/three/build/') || normalizedPath.startsWith('node_modules/three/examples/jsm/');
+  if (!allowed) { response.writeHead(403); response.end('Forbidden'); return; }
   const absolute = normalize(join(root, relative));
   const rootPath = normalize(root);
   if (absolute !== rootPath && !absolute.startsWith(`${rootPath}${process.platform === 'win32' ? '\\' : '/'}`)) {
@@ -67,5 +73,5 @@ export const server = createServer(async (request, response) => {
 });
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  server.listen(port, '127.0.0.1', () => console.log(`Project Ares 3D listening on http://127.0.0.1:${port}`));
+  server.listen(port, host, () => console.log(`Project Ares 3D listening on ${host}:${port}`));
 }

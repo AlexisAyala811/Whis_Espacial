@@ -173,3 +173,16 @@ Las habitaciones combinan sus texturas procedurales con fotografías locales de 
 Use the **Graphics** control in the header of any 3D scene to choose Low, Medium, High or Ultra. The setting is stored locally and shared across scenes. Low uses a lower internal resolution and reduces decorative detail; Medium retains the pool effect without shadows; High and Ultra enable shadows at increasing shadow-map resolutions. Texture filtering and draw distance also vary; the Mars surface keeps its full sky within the camera range. No post-processing is enabled. Missing storage falls back to Medium.
 
 The articulated first-person arms are a provisional procedural rig. They respond to walking, running, floating and interaction; reduced-motion settings suppress optional motion. Wali remains absent in the underwater training scene. If WebGL is lost, a visible message describes recovery. New 1K metallic PBR maps and an electrical-equipment glTF are locally hosted, licensed CC0 and credited in their asset folders; the original procedural surfaces and equipment remain the fallback.
+
+## Despliegue en Render
+
+Crea un **Web Service** para este repositorio, selecciona la rama `main` y usa:
+
+- Runtime: **Node** (la versión se fija en `.node-version`).
+- Build Command: `npm ci`.
+- Start Command: `npm start`.
+- Root Directory: dejar vacío si se usa la raíz del repositorio.
+
+Render proporciona `PORT` automáticamente. El servidor escucha en `0.0.0.0` en Render y conserva `127.0.0.1` al ejecutar el proyecto localmente. Si no se establece `ALLOWED_ORIGIN`, usa automáticamente la URL pública que Render proporciona. Para un dominio personalizado, establece `ALLOWED_ORIGIN` como el origen HTTPS exacto de ese dominio, sin barra final.
+
+Opcionalmente, configura `NASA_API_KEY` como variable de entorno privada de Render para APOD; si no se configura, se usa `DEMO_KEY`, sujeto a sus límites. No copies la clave en el código ni en Git. La simulación funciona sin configurar voz ni `GEMINI_API_KEY`.
