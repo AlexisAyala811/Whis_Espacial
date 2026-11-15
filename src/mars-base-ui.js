@@ -1,5 +1,6 @@
 import {MarsBase,SYSTEMS,POWER_PER_SOL} from './core/mars-base.js';
 import {solarData} from './nasa-panel.js';
+import {createWali} from './wali.js';
 
 const $=id=>document.getElementById(id);
 const labels={air:'Aire',water:'Agua',food:'Alimentos',health:'Salud'};
@@ -21,6 +22,7 @@ function saveMission(){
   }catch{/* The current session remains playable when storage is unavailable. */}
 }
 let solar=null,mission=restoreMission()??new MarsBase(),locked=mission.history.length>0,allocation={life:3,crop:2,shield:2,comms:1};
+createWali({getContext:()=>({scene:'mars-base',active:!mission.finished,finished:mission.finished,sol:mission.sol,shield:allocation.shield,shieldNeeded:mission.solar.shieldNeeded,air:mission.resources.air})});
 const resourceNodes={},systemNodes={};
 function el(tag,text,className){const node=document.createElement(tag);if(text!==undefined)node.textContent=text;if(className)node.className=className;return node;}
 for(const [key,label] of Object.entries(labels)){

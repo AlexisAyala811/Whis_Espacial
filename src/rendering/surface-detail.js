@@ -1,5 +1,7 @@
 import * as THREE from 'three';
 
+const FLOOR_PHOTOS=['metal_plate','rubber_tiles','dirty_carpet','floor_tiles_02','painted_plaster_wall','concrete_floor_painted','metal_plate'];
+
 // Room-local procedural textures: deterministic, lightweight and original.
 export function makeSurfaceTextures(room) {
   function texture(kind) {
@@ -19,6 +21,7 @@ export function makeSurfaceTextures(room) {
       ctx.fillStyle=g;ctx.fillRect(0,0,size,size);
       noise(3000,.13,20);
       for(let y=0;y<size;y+=4){ctx.fillStyle=y%8?'rgba(90,102,102,.025)':'rgba(255,255,255,.10)';ctx.fillRect(0,y,size,1);}
+      for(let i=0;i<90;i++){ctx.strokeStyle='rgba(89,105,108,.06)';ctx.lineWidth=.5;const x=rnd()*size,y=rnd()*size;ctx.beginPath();ctx.moveTo(x,y);ctx.lineTo(x+8+rnd()*35,y+rnd());ctx.stroke();}
     }else if(kind==='wall'){
       ctx.fillStyle=room===3?'#dbe9e9':room===4?'#f1f0e5':'#e2e9e7';ctx.fillRect(0,0,size,size);
       noise(2500,.12,3);
@@ -51,7 +54,17 @@ export function makeSurfaceTextures(room) {
     const map=new THREE.CanvasTexture(canvas);map.colorSpace=THREE.SRGBColorSpace;
     map.wrapS=map.wrapT=THREE.RepeatWrapping;
     if(kind==='floor')map.repeat.set(room===3?2:4,room===3?2:5);
-    map.anisotropy=2;return map;
+    map.anisotropy=2;
+    const photo=kind==='floor'?FLOOR_PHOTOS[room]:kind==='wall'?'painted_plaster_wall':null;
+    if(photo){
+      // Blend a room-appropriate local photo into the procedural base.
+      // If it fails or the room is disposed, the existing fallback remains valid.
+      let alive=true;const image=new Image();
+      map.addEventListener('dispose',()=>{alive=false;image.onload=null;image.onerror=null;});
+      image.onload=()=>{if(!alive)return;ctx.save();ctx.globalAlpha=kind==='wall'?.1:room===1?.25:.17;ctx.drawImage(image,0,0,size,size);ctx.restore();map.userData[kind==='floor'?'floorPhoto':'wallPhoto']=photo;map.needsUpdate=true;};
+      image.onerror=()=>{};image.src='./assets/interiors/'+photo+'.jpg';
+    }
+    return map;
   }
   return {metal:texture('metal'),floor:texture('floor'),wall:texture('wall'),fabric:texture('fabric'),rubber:texture('rubber')};
 }

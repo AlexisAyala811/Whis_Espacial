@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from '../../node_modules/three/examples/jsm/geometries/RoundedBoxGeometry.js';
+import { createWali } from './wali.js';
 
 const $=id=>document.getElementById(id), reduced=matchMedia('(prefers-reduced-motion: reduce)'),fromBase=new URLSearchParams(location.search).get('regreso')==='base';
 let active=fromBase,loading=false,landed=fromBase,dragging=false,yaw=0,pitch=0;
@@ -25,6 +26,7 @@ try{
   canvasHost.append(renderer.domElement);renderer.domElement.tabIndex=0;renderer.domElement.setAttribute('aria-label','Superficie marciana 3D. Camina por la rampa y pulsa E cerca de la puerta del hábitat.');
   scene=new THREE.Scene();scene.background=new THREE.Color(0xb07962);scene.fog=new THREE.Fog(0xb07962,32,92);
   camera=new THREE.PerspectiveCamera(70,1,.08,140);camera.rotation.order='YXZ';camera.position.set(0,fromBase?1.7:2.75,fromBase?-4.4:7.7);scene.add(camera);
+  createWali({getContext:()=>({scene:'mars-surface',active:active&&!loading,near:Math.hypot(camera.position.x-door.x,camera.position.z-door.z)<=2.4})});
   scene.add(new THREE.HemisphereLight(0xffd8b6,0x76503c,1.45));const sun=new THREE.DirectionalLight(0xffdcbd,2.2);sun.position.set(-14,30,12);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);sun.shadow.camera.left=-26;sun.shadow.camera.right=26;sun.shadow.camera.top=26;sun.shadow.camera.bottom=-26;sun.shadow.camera.far=100;sun.shadow.bias=-.0003;scene.add(sun);
   const metal=new THREE.MeshStandardMaterial({color:0xc5c5b8,roughness:.64,metalness:.35}),dark=new THREE.MeshStandardMaterial({color:0x293e42,roughness:.72,metalness:.35});
   const orange=new THREE.MeshStandardMaterial({color:0xb8663d,roughness:.9}),glow=new THREE.MeshBasicMaterial({color:0xb9e8b2});

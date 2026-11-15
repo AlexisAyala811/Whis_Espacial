@@ -4,11 +4,12 @@ import { FieldTraining } from './core/field-training.js';
 import { createScenarioWorld, STATIONS } from './rendering/scenario-world.js';
 import { SCENARIOS } from './core/scenario-route.js';
 import { OUTPOST_QUESTIONS } from './core/outpost-training.js';
+import { createWali } from './wali.js';
 
 import { LEARNING_ROOMS, LearningProgress } from './core/learning-catalog.js';
 let learning=new LearningProgress(), inspectMode=false, inspected=null, visiblePoints=[], nearbyPoint=null;
 const $=id=>document.getElementById(id);
-let mission=new FieldTraining(),running=false,started=false,transitioning=false,pauseAfterTransition=false,launchSeen=false,selectedCable=null,world;
+let mission=new FieldTraining(),running=false,started=false,transitioning=false,pauseAfterTransition=false,launchSeen=false,selectedCable=null,world,wali;
 const titles=['Verifica tu traje','Controla cada repetición','Prioriza el soporte vital','Conecta el módulo EVA','Equilibra los recursos','Restablece la energía','Dirige el puesto marciano'];
 const details=['Acércate a la consola 01. Confirma presión, agua y telemetría con E.','Completa seis repeticiones en ARED pulsando E en la zona verde.','Resuelve los avisos de la consola ECLSS.','En NBL, une cada línea con su puerto. Espacio sube; Ctrl sin W baja. Ctrl + W avanza más rápido.','Ajusta oxígeno, agua y energía del hábitat.','Activa los tres buses eléctricos del cohete.','En la cabina, toma cinco decisiones sobre un puesto marciano y observa sus consecuencias.'];
 try { world=createScenarioWorld($('world')); }
@@ -135,6 +136,7 @@ function closeTask(recapture=true){$('task').hidden=true;selectedCable=null;if(r
 function play(){
   if(!world)return;
   closeInspection(false);started=true;running=true;document.body.classList.add('playing');$('briefing').hidden=true;$('pause').hidden=true;$('game-hud').hidden=false;
+  if(!wali)wali=createWali({getContext:()=>({scene:SCENARIOS[world.currentIndex].id,sceneIndex:world.currentIndex,stage:mission.stage,completed:mission.complete,checks:mission.checks,reps:mission.reps,errors:mission.errors,buses:[...mission.powerBuses],active:running&&!transitioning&&!inspected&&$('task').hidden&&$('mental').hidden})});
   world.focus();if($('mental').hidden)world.capture();
 }
 function pause(){if(!started||mission.complete)return;if(transitioning){pauseAfterTransition=true;return;}closeInspection(false);running=false;$('task').hidden=true;$('mental').hidden=true;world.release();$('pause').hidden=false;$('resume').focus();}

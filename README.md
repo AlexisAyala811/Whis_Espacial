@@ -161,3 +161,9 @@ El escenario exterior y el planeta ilustrado son estilizados, no recreaciones fo
 ## Mejoras visuales de Marte
 
 La superficie utiliza una panorámica histórica recortada del rover Spirit como fondo artístico, y textura 1K de suelo con mapas de normales y rugosidad. El hábitat incorpora sombras, detalles metálicos y paneles solares. Si no se cargan los recursos, permanece disponible el terreno procedural. No representa una vista en directo ni el lugar exacto de una misión real. Consulta fuentes y licencias en [créditos de Marte](assets/mars/CREDITS.md).
+
+## Wali y materiales interiores
+
+Wali acompaña en los siete escenarios de entrenamiento, la superficie, el hábitat y el panel de Marte. Pulsa **H** para pedir una pista, selecciona **Un dato** para aprender algo o usa el botón − para minimizar su nube. Wali reacciona a errores y muestra datos ocasionalmente. Sus respuestas son texto local predefinido, no voz ni una conversación con IA; no completa actividades por el jugador.
+
+Las habitaciones combinan sus texturas procedurales con fotografías locales de superficies, adaptadas a cada espacio; el suelo y las paredes conservan alternativas si no cargan los archivos. Los modelos siguen siendo estilizados. Consulta [créditos de interiores](assets/interiors/CREDITS.md).

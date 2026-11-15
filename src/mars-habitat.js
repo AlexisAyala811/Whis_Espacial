@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { RoundedBoxGeometry } from '../../node_modules/three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { makeSurfaceTextures, drawTelemetry } from './rendering/surface-detail.js';
+import { createWali } from './wali.js';
 
 const $=id=>document.getElementById(id),reduced=matchMedia('(prefers-reduced-motion: reduce)'),returned=new URLSearchParams(location.search).get('regreso')==='panel';
 const keys=new Set(),obstacles=[];let renderer,camera,scene,dragging=false,loading=false,yaw=0,pitch=0,last=performance.now(),screenTime=0,nearAction=null,lastMessage='';
@@ -12,6 +13,7 @@ try{
   renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   const canvas=renderer.domElement;$('habitat-world').append(canvas);canvas.tabIndex=0;canvas.setAttribute('aria-label','Interior 3D del hábitat marciano. Camina hasta la consola o vuelve a la esclusa.');
   scene=new THREE.Scene();scene.background=new THREE.Color(0x667d82);camera=new THREE.PerspectiveCamera(70,1,.08,80);camera.rotation.order='YXZ';camera.position.set(0,1.7,returned?-2.3:5.9);scene.add(camera);
+  createWali({getContext:()=>({scene:'mars-habitat',active:!loading,near:nearAction?.id})});
   scene.add(new THREE.HemisphereLight(0xe8f4f0,0x63767b,1.5));const light=new THREE.DirectionalLight(0xf4ede2,1.45);light.position.set(-3,7,5);light.castShadow=true;light.shadow.mapSize.set(1024,1024);light.shadow.camera.left=-12;light.shadow.camera.right=12;light.shadow.camera.top=12;light.shadow.camera.bottom=-12;light.shadow.bias=-.0003;scene.add(light);
   const textures=makeSurfaceTextures(4);
   const wall=new THREE.MeshStandardMaterial({color:0xc1ccca,map:textures.wall,roughness:.85}),floor=new THREE.MeshStandardMaterial({color:0x83999c,map:textures.floor,roughness:.7,metalness:.18}),metal=new THREE.MeshStandardMaterial({color:0x718a90,map:textures.metal,roughness:.58,metalness:.36}),dark=new THREE.MeshStandardMaterial({color:0x233c48,roughness:.72,metalness:.2}),fabric=new THREE.MeshStandardMaterial({color:0x385e70,map:textures.fabric,roughness:.9}),leaf=new THREE.MeshStandardMaterial({color:0x6d9e66,roughness:.9}),glow=new THREE.MeshBasicMaterial({color:0xccebdc});
