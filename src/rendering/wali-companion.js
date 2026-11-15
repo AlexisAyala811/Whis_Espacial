@@ -6,27 +6,32 @@ import { waliTarget, waliLooksAtPlayer } from '../core/wali-follow.js';
 export function createWaliCompanion(scene, camera, reducedMotion) {
   const group = new THREE.Group();
   group.name = 'wali-companion';
-  const shell = new THREE.MeshStandardMaterial({ color: 0xe8f1ef, roughness: .3, metalness: .12 });
+  const shell = new THREE.MeshPhysicalMaterial({ color: 0xe8f1ef, roughness: .28, metalness: .12, clearcoat:.45, clearcoatRoughness:.25 });
   const trim = new THREE.MeshStandardMaterial({ color: 0x778e96, roughness: .38, metalness: .55 });
   const face = new THREE.MeshStandardMaterial({ color: 0x07131c, roughness: .22, metalness: .3 });
-  const eye = new THREE.MeshBasicMaterial({ color: 0x36ddff });
+  const eye = new THREE.MeshStandardMaterial({color:0x42caff,emissive:0x25bfff,emissiveIntensity:2,roughness:.3});
   const sphere = new THREE.SphereGeometry(1, 24, 16);
   const add = (material, x, y, z, sx, sy, sz, parent = group) => {
     const mesh = new THREE.Mesh(sphere, material);
     mesh.position.set(x,y,z); mesh.scale.set(sx,sy,sz);
-    mesh.raycast = () => {}; parent.add(mesh); return mesh;
+    mesh.raycast = () => {}; mesh.castShadow=material===shell;mesh.receiveShadow=true;parent.add(mesh); return mesh;
   };
   add(shell, 0,.31,0, .19,.27,.15);
   add(trim, 0,.53,0, .17,.055,.14);
-  add(shell, 0,.72,0, .27,.25,.22);
-  add(face, 0,.72,.178, .205,.127,.075);
+  const head=new THREE.Group();head.position.y=.54;group.add(head);
+  add(shell, 0,.18,0, .27,.25,.22,head);
+  add(face, 0,.18,.178, .205,.127,.075,head);
   const arms=[];
   for (const side of [-1,1]) {
-    add(eye, side*.09,.73,.245, .047,.021,.012);
+    add(eye, side*.09,.19,.245, .047,.021,.012,head);
+    add(trim,side*.19,.45,0,.065,.065,.065);
     const arm=add(shell,side*.23,.36,0,.075,.19,.075);
     arm.rotation.z=side*.25; arms.push(arm);
+    add(trim,side*.15,.24,.09,.025,.035,.035);
   }
-  add(eye,0,.32,.148,.025,.025,.009);
+  add(trim,0,.32,.14,.09,.075,.025);
+  add(eye,0,.32,.16,.025,.025,.009);
+  const collar=new THREE.Mesh(new THREE.TorusGeometry(.155,.009,8,32),trim);collar.rotation.x=Math.PI/2;collar.position.y=.535;collar.raycast=()=>{};group.add(collar);
   scene.add(group);
   let elapsed=0, needsSnap=true, goalAge=Infinity, goal=null;
   const forward = new THREE.Vector3();
@@ -63,6 +68,7 @@ export function createWaliCompanion(scene, camera, reducedMotion) {
       const turn=Math.atan2(Math.sin(desired-group.rotation.y),Math.cos(desired-group.rotation.y));
       group.rotation.y+=turn*(1-Math.exp(-3*step));
     }
+    head.rotation.y=reducedMotion.matches?0:Math.sin(elapsed*.65)*.12;head.rotation.z=reducedMotion.matches?0:(interacting?.09:Math.sin(elapsed*.9)*.035);
     arms.forEach((arm,i)=>{arm.rotation.z=(i ? 1 : -1)*(.25+(reducedMotion.matches ? 0 : Math.sin(elapsed*2+i)*.13));});
     if(active && !interacting){goalAge+=step;if(!reducedMotion.matches)elapsed+=step;}
   }

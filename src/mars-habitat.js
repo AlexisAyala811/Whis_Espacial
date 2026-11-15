@@ -1,14 +1,16 @@
 import * as THREE from 'three';
+import {createGraphicsQuality,applySceneQuality} from './rendering/graphics-quality.js';
+import {createFirstPersonArms} from './rendering/first-person-arms.js';
 import { createWaliCompanion } from './rendering/wali-companion.js';
 import { RoundedBoxGeometry } from '../../node_modules/three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { makeSurfaceTextures, drawTelemetry } from './rendering/surface-detail.js';
 import { createWali } from './wali.js';
 
 const $=id=>document.getElementById(id),reduced=matchMedia('(prefers-reduced-motion: reduce)'),returned=new URLSearchParams(location.search).get('regreso')==='panel';
-const keys=new Set(),obstacles=[];let renderer,camera,scene,dragging=false,loading=false,yaw=0,pitch=0,last=performance.now(),screenTime=0,nearAction=null,lastMessage='';
+const keys=new Set(),obstacles=[];let renderer,camera,scene,arms,dragging=false,loading=false,yaw=0,pitch=0,last=performance.now(),screenTime=0,nearAction=null,lastMessage='';
 const consolePoint={x:0,z:-5.1},exitPoint={x:0,z:8.6};
 function say(message){if(message!==lastMessage){lastMessage=message;$('message').textContent=message;}}
-function transition(target){if(loading||!nearAction||nearAction.id!==target)return;loading=true;keys.clear();$('loading-title').textContent=target==='console'?"Opening mission control":"Returning to the surface";$('loading-detail').textContent=target==='console'?"Loading the resource dashboard…":"Preparing the airlock…";$('loading').hidden=false;setTimeout(()=>{location.href=target==='console'?'./outpost.html?origen=habitat':'./mars.html?regreso=base';},reduced.matches?0:800);}
+function transition(target){if(loading||!nearAction||nearAction.id!==target)return;arms?.trigger('interact');loading=true;keys.clear();$('loading-title').textContent=target==='console'?"Opening mission control":"Returning to the surface";$('loading-detail').textContent=target==='console'?"Loading the resource dashboard…":"Preparing the airlock…";$('loading').hidden=false;setTimeout(()=>{location.href=target==='console'?'./outpost.html?origen=habitat':'./mars.html?regreso=base';},reduced.matches?0:800);}
 $('interact').addEventListener('click',()=>{if(nearAction)transition(nearAction.id);});
 try{
   renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.1;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
@@ -60,11 +62,11 @@ try{
   const ring=new THREE.Mesh(new THREE.TorusGeometry(1.7,.025,8,48),glow);ring.rotation.x=-Math.PI/2;ring.position.set(0,.055,-5.1);scene.add(ring);
   // Photographic Mars view is a wall display, not an accurate live window.
   const image=new Image();image.onload=()=>{const tex=new THREE.Texture(image);tex.colorSpace=THREE.SRGBColorSpace;tex.needsUpdate=true;const pane=new THREE.Mesh(new THREE.PlaneGeometry(3.1,1.15),new THREE.MeshBasicMaterial({map:tex}));pane.position.set(-5.84,3.1,4.1);pane.rotation.y=Math.PI/2;scene.add(pane);};image.src='./assets/mars/spirit-panorama.jpg';
-  const handMat=new THREE.MeshStandardMaterial({color:0xdce2db,roughness:.9}),handGeom=new RoundedBoxGeometry(.18,.1,.19,3,.03),fingerGeom=new THREE.CapsuleGeometry(.022,.065,3,8);
-  for(const side of [-1,1]){const hand=new THREE.Group();hand.position.set(side*.54,-.5,-1.05);hand.rotation.z=side*.12;hand.add(new THREE.Mesh(handGeom,handMat));for(let i=0;i<4;i++){const finger=new THREE.Mesh(fingerGeom,handMat);finger.rotation.x=Math.PI/2;finger.position.set((i-1.5)*.043,0,-.13);hand.add(finger);}camera.add(hand);}
+  arms=createFirstPersonArms(camera,textures.fabric,reduced);
+  const quality=createGraphicsQuality(renderer,camera,preset=>applySceneQuality(scene,preset,renderer,light));
   const resize=()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);};window.addEventListener('resize',resize);resize();canvas.focus();
   canvas.addEventListener('pointerdown',()=>{if(!loading){dragging=true;canvas.focus();}});window.addEventListener('pointerup',()=>dragging=false);document.addEventListener('mousemove',event=>{if(!dragging||loading)return;yaw-=event.movementX*.003;pitch=THREE.MathUtils.clamp(pitch-event.movementY*.003,-1,1);});
-  window.addEventListener('keydown',event=>{if(event.target.closest('button,a,input'))return;if(['KeyW','KeyS','KeyA','KeyD','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','ControlLeft','ControlRight','ShiftLeft','ShiftRight'].includes(event.code))event.preventDefault();keys.add(event.code);if(event.code==='KeyE'&&!event.repeat&&nearAction)transition(nearAction.id);});
+  window.addEventListener('keydown',event=>{if(event.target.closest('button,a,input,select,textarea'))return;if(['KeyW','KeyS','KeyA','KeyD','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','ControlLeft','ControlRight','ShiftLeft','ShiftRight'].includes(event.code))event.preventDefault();keys.add(event.code);if(event.code==='KeyE'&&!event.repeat&&nearAction)transition(nearAction.id);});
   window.addEventListener('keyup',event=>keys.delete(event.code));window.addEventListener('blur',()=>{keys.clear();dragging=false;});
   function blocked(x,z){return Math.abs(x)>5.55||Math.abs(z)>8.65||obstacles.some(o=>Math.abs(x-o.x)<o.w/2+.32&&Math.abs(z-o.z)<o.d/2+.32);}
   function frame(now){const dt=Math.min((now-last)/1000,.05);last=now;
@@ -78,6 +80,9 @@ try{
       $('interact').hidden=!nearAction;if(nearAction)$('interact').textContent=nearAction.label;$('distance').textContent=`CONSOLE · ${cDist.toFixed(1)} m`;
       if(nearAction?.id==='console')say("Mission console nearby. Press E to manage the base.");else if(nearAction?.id==='exit')say("Airlock nearby. Press E to return to the surface.");else if(Math.hypot(camera.position.x+4.35,camera.position.z+1.2)<2.7)say("Sleeping area: bunks separate rest from work.");else if(Math.hypot(camera.position.x-4.45,camera.position.z+2.4)<2.5)say("Growing area: food production requires water, energy and time.");else if(Math.hypot(camera.position.x-4.6,camera.position.z-3.8)<2.5)say("Life support: monitor the air and crew resources.");else say("Explore the habitat. The central console controls the base resources.");
       if(!reduced.matches){screenTime+=dt;if(screenTime>=1){screenTime=0;drawTelemetry(screenCanvas,4,now/1000);screenMap.needsUpdate=true;}}
-    }waliCompanion.update(dt,!loading,blocked,wali?.isInteracting());wali?.setAnchor(waliCompanion.anchor());renderer.render(scene,camera);requestAnimationFrame(frame);
+    }
+    const moving=!loading&&['KeyW','KeyA','KeyS','KeyD'].some(k=>keys.has(k));
+    arms.update(dt,{active:!loading,moving:moving?1:0,sprint:keys.has('ControlLeft')||keys.has('ControlRight')||keys.has('ShiftLeft')||keys.has('ShiftRight')});
+    waliCompanion.update(dt,!loading,blocked,wali?.isInteracting());wali?.setAnchor(waliCompanion.anchor());renderer.render(scene,camera);requestAnimationFrame(frame);
   }requestAnimationFrame(frame);
 }catch(error){$('fatal').hidden=false;console.error('Unable to start habitat:',error);}

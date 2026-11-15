@@ -1,11 +1,12 @@
 import * as THREE from 'three';
+import {createGraphicsQuality,applySceneQuality} from './rendering/graphics-quality.js';
+import {createFirstPersonArms} from './rendering/first-person-arms.js';
 import { createWaliCompanion } from './rendering/wali-companion.js';
-import { RoundedBoxGeometry } from '../../node_modules/three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { createWali } from './wali.js';
 
 const $=id=>document.getElementById(id), reduced=matchMedia('(prefers-reduced-motion: reduce)'),fromBase=new URLSearchParams(location.search).get('regreso')==='base';
 let active=fromBase,loading=false,landed=fromBase,dragging=false,yaw=0,pitch=0;
-const keys=new Set(),canvasHost=$('mars-world');let renderer,scene,camera,last=performance.now();
+const keys=new Set(),canvasHost=$('mars-world');let renderer,scene,camera,arms,last=performance.now();
 const door={x:0,z:-7.35},minZ=-7.35;
 function finishLanding(){
   if(landed)return;landed=true;$('landing-title').textContent="Landing complete";
@@ -18,7 +19,7 @@ else setTimeout(finishLanding,reduced.matches?0:4000);
 $('leave-ship').addEventListener('click',()=>{$('landing').hidden=true;active=true;$('message').textContent="Welcome to Mars. Walk down the ramp toward the habitat.";renderer?.domElement.focus();});
 function enterBase(){
   if(!active||loading||Math.hypot(camera.position.x-door.x,camera.position.z-door.z)>2.4)return;
-  active=false;loading=true;$('loading').hidden=false;
+  arms?.trigger('interact');active=false;loading=true;$('loading').hidden=false;
   setTimeout(()=>{window.location.href='./habitat.html';},reduced.matches?0:900);
 }
 $('enter-base').addEventListener('click',enterBase);
@@ -103,19 +104,12 @@ try{
     const map=new THREE.CanvasTexture(c);map.colorSpace=THREE.SRGBColorSpace;
     const horizon=new THREE.Mesh(new THREE.CylinderGeometry(54,54,18,64,1,true),new THREE.MeshBasicMaterial({map,side:THREE.BackSide,fog:false,transparent:true,depthWrite:false}));horizon.name='mars-nasa-horizon';horizon.position.y=5.5;scene.add(horizon);fallbackRidges.forEach(ridge=>ridge.visible=false);
   };panorama.src='./assets/mars/spirit-panorama.jpg';
-  const glove=new THREE.MeshStandardMaterial({color:0xd4d9d2,roughness:.9}),cuffMat=new THREE.MeshStandardMaterial({color:0x738b8b,roughness:.8});
-  const palmGeometry=new RoundedBoxGeometry(.18,.10,.19,3,.03),fingerGeometry=new THREE.CapsuleGeometry(.022,.065,3,8),cuffGeometry=new THREE.TorusGeometry(.09,.009,8,18);
-  for(const side of [-1,1]){
-    const arm=new THREE.Group(),sleeve=new THREE.Mesh(new THREE.CapsuleGeometry(.09,.34,3,10),glove);sleeve.rotation.z=side*.5;sleeve.position.set(side*.64,-.75,-.95);arm.add(sleeve);
-    const hand=new THREE.Group();hand.position.set(side*.54,-.5,-1.05);hand.rotation.z=side*.12;hand.add(new THREE.Mesh(palmGeometry,glove));
-    for(let i=0;i<4;i++){const finger=new THREE.Mesh(fingerGeometry,glove);finger.rotation.x=Math.PI/2;finger.position.set((i-1.5)*.043,-.003,-.13-(i===1||i===2?.01:0));hand.add(finger);}
-    const thumb=new THREE.Mesh(fingerGeometry,glove);thumb.rotation.set(Math.PI/2,side*.7,side*.2);thumb.position.set(side*.115,-.005,-.03);hand.add(thumb);
-    const cuff=new THREE.Mesh(cuffGeometry,cuffMat);cuff.position.z=.1;hand.add(cuff);arm.add(hand);camera.add(arm);
-  }
+  arms=createFirstPersonArms(camera,null,reduced);
+  const quality=createGraphicsQuality(renderer,camera,preset=>{camera.far=Math.max(140,preset.far);camera.updateProjectionMatrix();applySceneQuality(scene,preset,renderer,sun);stones.count=preset.detail===0?30:90;pebbles.count=[0,120,240,320][preset.detail];});
   const resize=()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight);};window.addEventListener('resize',resize);resize();
   const canvas=renderer.domElement;if(fromBase)canvas.focus();canvas.addEventListener('pointerdown',()=>{if(active){dragging=true;canvas.focus();}});window.addEventListener('pointerup',()=>dragging=false);
   document.addEventListener('mousemove',event=>{if(!active||!dragging)return;yaw-=event.movementX*.003;pitch=THREE.MathUtils.clamp(pitch-event.movementY*.003,-1,1);});
-  window.addEventListener('keydown',event=>{if(event.target.closest('button,a,input'))return;if(['KeyW','KeyS','KeyA','KeyD','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','ControlLeft','ControlRight','ShiftLeft','ShiftRight'].includes(event.code))event.preventDefault();keys.add(event.code);if(event.code==='KeyE'&&!event.repeat)enterBase();});
+  window.addEventListener('keydown',event=>{if(event.target.closest('button,a,input,select,textarea'))return;if(['KeyW','KeyS','KeyA','KeyD','ArrowLeft','ArrowRight','ArrowUp','ArrowDown','ControlLeft','ControlRight','ShiftLeft','ShiftRight'].includes(event.code))event.preventDefault();keys.add(event.code);if(event.code==='KeyE'&&!event.repeat)enterBase();});
   window.addEventListener('keyup',event=>keys.delete(event.code));window.addEventListener('blur',()=>{keys.clear();dragging=false;});
   function frame(now){const dt=Math.min((now-last)/1000,.05);last=now;
     if(active){yaw+=((keys.has('ArrowLeft')?1:0)-(keys.has('ArrowRight')?1:0))*dt*1.5;pitch=THREE.MathUtils.clamp(pitch+((keys.has('ArrowUp')?1:0)-(keys.has('ArrowDown')?1:0))*dt,-1,1);
@@ -126,6 +120,8 @@ try{
       const rampHeight=Math.abs(camera.position.x)<1.15?THREE.MathUtils.clamp((camera.position.z-5)*.39,0,1.15):0;camera.position.y=1.7+rampHeight;
       camera.rotation.set(pitch,yaw,0);const distance=Math.hypot(camera.position.x-door.x,camera.position.z-door.z);$('distance').textContent=`HABITAT · ${distance.toFixed(1)} m`;$('enter-base').hidden=distance>2.4;
     }
+    const moving=active&&['KeyW','KeyA','KeyS','KeyD'].some(k=>keys.has(k));
+    arms.update(dt,{active,moving:moving?1:0,sprint:keys.has('ControlLeft')||keys.has('ControlRight')||keys.has('ShiftLeft')||keys.has('ShiftRight')});
     waliCompanion.update(dt,active&&!loading,(x,z)=>Math.abs(x)>15.7||z<minZ||z>8,wali?.isInteracting());
     wali?.setAnchor(waliCompanion.anchor());renderer.render(scene,camera);requestAnimationFrame(frame);
   }requestAnimationFrame(frame);

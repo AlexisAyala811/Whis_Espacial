@@ -19,6 +19,7 @@ function closeInspection(recapture=true){
   if(recapture&&running){world.focus();world.capture();}
 }
 function openInspection(point){
+  world.poseArms('inspect');
   inspected=point;learning.visited.add(point.id);world.release();
   $('object-room').textContent=LEARNING_ROOMS[world.currentIndex].name;
   $('object-name').textContent=point.name;$('object-purpose').textContent=point.purpose;
@@ -166,6 +167,7 @@ async function transitionTo(index){
 function act(answer){
   if(!running||transitioning||mission.complete||inspected||inspectMode)return;
   const near=world.near(),door=world.door(mission.stage);
+  if(near||door)world.poseArms('interact');
   if(!near&&door&&!answer){
     if(door.locked)say("Door locked. Complete this room’s objective before proceeding.");
     else transitionTo(door.target);
@@ -201,7 +203,7 @@ $('nearby-open').addEventListener('click',()=>{const point=world.nearbyLearningP
 $('inspect-toggle').addEventListener('click',()=>{inspectMode=!inspectMode;if(inspectMode)world.release();else{world.focus();world.capture();}});
 $('task-close').addEventListener('click',()=>closeTask());
 window.addEventListener('keydown',e=>{
-  if(e.repeat||e.target.closest('input,textarea'))return;
+  if(e.repeat||e.target.closest('input,textarea,select,[contenteditable="true"]'))return;
   if(!$('launch-sequence').hidden){if(e.code==='Escape')$('launch-skip').click();return;}
   if(e.code==='KeyI'&&running&&!inspected&&$('task').hidden&&$('mental').hidden){$('inspect-toggle').click();return;}
   if(e.code==='KeyF'&&running&&!inspected&&$('task').hidden&&$('mental').hidden){visiblePoints=world.learningPoints();const point=world.nearbyLearningPoint()??[...visiblePoints].sort((a,b)=>a.aim-b.aim)[0];if(point)openInspection(point);return;}

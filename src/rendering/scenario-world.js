@@ -1,4 +1,8 @@
 import * as THREE from 'three';
+import {HDRLoader} from '../../node_modules/three/examples/jsm/loaders/HDRLoader.js';
+import {createGraphicsQuality,applySceneQuality} from './graphics-quality.js';
+import {createFirstPersonArms} from './first-person-arms.js';
+import {addElectricalEquipment} from './equipment-props.js';
 import { addRoomFidelity } from './environment-fidelity.js';
 import { createWaliCompanion } from './wali-companion.js';
 import { SCENARIOS, canEnterScenario } from '../core/scenario-route.js';
@@ -10,7 +14,6 @@ import { makeSurfaceTextures, drawTelemetry } from './surface-detail.js';
 import { buildCabinDetails } from './cabin-details.js';
 import { finishScenario } from './scenario-finish.js';
 import { makePreparationSuits } from './preparation-suits.js';
-import { RoundedBoxGeometry } from '../../node_modules/three/examples/jsm/geometries/RoundedBoxGeometry.js';
 
 export const STATIONS = [
   { id: 'suit', name: "01 / SUIT", scene: 0, x: -3.7, z: -1.4, color: 0x91d9c2 },
@@ -45,32 +48,7 @@ export function createScenarioWorld(container) {
 
   const playerTextures = makeSurfaceTextures(0);
   for (const kind of ['metal','floor','wall','rubber']) playerTextures[kind].dispose();
-  const suitWhite = new THREE.MeshStandardMaterial({ color: 0xdce3df, map: playerTextures.fabric, roughness: .9 });
-  const suitGray = new THREE.MeshStandardMaterial({ color: 0x829698, map: playerTextures.fabric, roughness: .88 });
-  const arms = [];
-  const palmGeometry = new RoundedBoxGeometry(.19,.10,.22,3,.035);
-  const fingerGeometry = new THREE.CapsuleGeometry(.022,.065,3,8);
-  const cuffGeometry = new THREE.TorusGeometry(.09,.009,8,18);
-  const grip = new THREE.MeshStandardMaterial({ color: 0x475e64, roughness: .92 });
-  for (const side of [-1, 1]) {
-    const arm = new THREE.Group();
-    const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(.09, .14, .38, 10), suitWhite);
-    sleeve.rotation.z = side * .55; sleeve.position.set(side * .64, -.74, -.94); arm.add(sleeve);
-    const wrist = new THREE.Mesh(new THREE.CylinderGeometry(.11, .11, .09, 10), suitGray);
-    wrist.rotation.z = side * .55; wrist.position.set(side * .57, -.56, -1); arm.add(wrist);
-    const glove = new THREE.Group();glove.position.set(side * .54, -.49, -1.04);glove.rotation.z=side*.12;
-    glove.add(new THREE.Mesh(palmGeometry,suitWhite));
-    for(let i=0;i<4;i++){
-      const finger=new THREE.Mesh(fingerGeometry,suitWhite);
-      finger.rotation.x=Math.PI/2;finger.position.set((i-1.5)*.044,-.004,-.135-(i===1||i===2?.01:0));glove.add(finger);
-      const pad=new THREE.Mesh(new THREE.SphereGeometry(.018,8,6),grip);
-      pad.position.set((i-1.5)*.044,-.026,-.18-(i===1||i===2?.01:0));glove.add(pad);
-    }
-    const thumb=new THREE.Mesh(fingerGeometry,suitWhite);thumb.rotation.set(Math.PI/2,side*.7,side*.25);thumb.position.set(side*.12,-.005,-.03);glove.add(thumb);
-    const cuff=new THREE.Mesh(cuffGeometry,suitGray);cuff.position.set(0,0,.105);glove.add(cuff);
-    arm.add(glove);
-    camera.add(arm); arms.push(arm);
-  }
+  const arms = createFirstPersonArms(camera,playerTextures.fabric,reducedMotion);
 
   function makeRoom(index) {
     const scene = new THREE.Scene();
@@ -80,12 +58,14 @@ export function createScenarioWorld(container) {
     scene.fog = new THREE.FogExp2(colors[index], index === 3 ? .035 : .008);
     scene.add(new THREE.HemisphereLight(index === 3 ? 0xa8e8f5 : 0xf2f4ec, index === 3 ? 0x24516b : 0x6d7774, index === 3 ? 2 : index === 6 ? .95 : 1.55));
     const light = new THREE.DirectionalLight(0xf5f2e8, index === 6 ? .8 : 1.25);
-    light.position.set(-4, 8, 6); scene.add(light);
+    light.position.set(-4, 8, 6);light.shadow.camera.left=-11;light.shadow.camera.right=11;light.shadow.camera.top=11;light.shadow.camera.bottom=-11;light.shadow.camera.near=.5;light.shadow.camera.far=45;light.shadow.bias=-.0003;scene.add(light);
+    let roomAlive=true,roomEnvironment=null;
+    if(index!==6)new HDRLoader().load('./assets/cabin/studio_small_09_1k.hdr',map=>{if(!roomAlive){map.dispose();return;}map.mapping=THREE.EquirectangularReflectionMapping;roomEnvironment=map;scene.environment=map;scene.environmentIntensity=.16;},undefined,()=>{});
     // Gentle accent lighting separates training spaces while keeping signs readable.
     const accents = [0xb6dce6,0xe4c891,0x75bdde,0x59c7e7,0xe8c998,0xf0b46d,0x83b7ed];
     const accent = new THREE.PointLight(accents[index], index === 5 ? 22 : 12, 16, 2);
     accent.position.set(3, index === 5 ? 8 : 4, -2); scene.add(accent);
-    const obstacles = [], materials = new Map(), textures = makeSurfaceTextures(index);
+    const obstacles = [], materials = new Map(), textures = makeSurfaceTextures(index,{pbr:true});
     const animatedScreens = [], screenMaps = new Map(), bubbles = [], animatedParts = [], staticBoxes = [];
     let ambientTime = 0, screenTime = 0, disposeCabin = null;
     function material(color, glow = false, kind = 'metal') {
@@ -197,8 +177,8 @@ export function createScenarioWorld(container) {
     }
     // Each scenario owns its own room, geometry and textures; the next one is built on demand.
     box(0, -.16, 0, halfWidth*2, .32, 20, 0x454d4c);
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(halfWidth*2, 20), new THREE.MeshStandardMaterial({ color: [0xa7b4b1, 0x849997, 0x758c91, 0x599da6, 0xc9c6ad, 0x899b99, 0x536b72][index], map: textures.floor, metalness: index===6 ? .38 : .15, roughness: index===6 ? .48 : .82, bumpMap: textures.floor, bumpScale: .035 }));
-    floor.rotation.x = -Math.PI / 2; floor.position.y = .005; scene.add(floor);
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(halfWidth*2, 20), new THREE.MeshStandardMaterial({ color: [0xa7b4b1, 0x849997, 0x758c91, 0x599da6, 0xc9c6ad, 0x899b99, 0x536b72][index], map: textures.floor, metalness: index===6 ? .38 : .15, roughness: index===6 ? .48 : .82, bumpMap: textures.floor, bumpScale: .025, normalMap:textures.floorNormal??null, normalScale:new THREE.Vector2(.3,.3), roughnessMap:textures.floorRoughness??null, metalnessMap:textures.floorMetalness??null }));
+    floor.rotation.x = -Math.PI / 2; floor.position.y = .005; floor.receiveShadow=true;scene.add(floor);
     for (let x = -halfWidth+1; x < halfWidth; x += 2) box(x, .02, 0, .025, .016, 19.5, 0x646e6a);
     for (let z = -9; z <= 9; z += 2) box(0, .02, z, halfWidth*2-.5, .016, .025, 0x646e6a);
     const roomHeight = [5.4,5.8,6,7,4.9,17,6][index];
@@ -287,6 +267,16 @@ export function createScenarioWorld(container) {
       }
       for (const x of [-6.8, -3.6, 3.6, 6.8]) display(x, 3.35, -9.35, 2.3, 1.2, 2);
     } else if (index === 3) {
+      // Lightweight simulated caustics, visible only on the training-pool floor.
+      const causticCanvas=document.createElement('canvas');causticCanvas.width=causticCanvas.height=256;
+      const causticContext=causticCanvas.getContext('2d');causticContext.clearRect(0,0,256,256);causticContext.lineWidth=2;
+      for(let row=0;row<7;row++)for(let col=0;col<7;col++){
+        causticContext.strokeStyle='rgba(190,244,250,.18)';causticContext.beginPath();causticContext.ellipse(col*42+8,row*42+8,12+(row%3)*3,6+(col%3)*2,.35,0,Math.PI*2);causticContext.stroke();
+      }
+      const causticMap=new THREE.CanvasTexture(causticCanvas);causticMap.colorSpace=THREE.SRGBColorSpace;causticMap.wrapS=causticMap.wrapT=THREE.RepeatWrapping;causticMap.repeat.set(3,3);
+      const caustics=new THREE.Mesh(new THREE.PlaneGeometry(19,19),new THREE.MeshBasicMaterial({map:causticMap,transparent:true,opacity:.35,depthWrite:false,blending:THREE.AdditiveBlending}));
+      caustics.name='pool-caustics';caustics.rotation.x=-Math.PI/2;caustics.position.y=.042;caustics.userData.graphicsDetail=1;scene.add(caustics);
+      animatedParts.push({type:'caustics',mesh:caustics});
       const module = cylinder(4.2, 2.35, -2.4, 1.55, 1.55, 4.2, 0xc2d4d7);
       module.rotation.x = Math.PI / 2;
       for (const z of [-4, -2.4, -.8]) {
@@ -410,6 +400,7 @@ export function createScenarioWorld(container) {
     decorateRoom(index,{box,cylinder,display,textPanel,obstacles});
     finishScenario(index,{box,display});
     addRoomFidelity(index,scene,box,halfWidth);
+    const disposeEquipment=addElectricalEquipment(scene,index);
     // Group static boxes by material. Moving doors, lamps and exercise parts stay separate.
     const dynamic=new Set([...forwardLeaves,...backLeaves,doorLamp,...animatedParts.map(part=>part.mesh)]);
     const groups=new Map();
@@ -439,16 +430,19 @@ export function createScenarioWorld(container) {
       }
       for(const bubble of bubbles){bubble.mesh.position.y=.2+((bubble.base+ambientTime*.24+bubble.phase)%4.5);bubble.mesh.position.x+=Math.sin(ambientTime+bubble.phase)*dt*.015;}
       for(const part of animatedParts){
+        if(part.type==='caustics')part.mesh.material.map.offset.set(ambientTime*.008,ambientTime*.005);
         if(part.type==='belt')part.mesh.position.z=-3.45+(((part.base+3.45+ambientTime*.25)%2.7)+2.7)%2.7;
         if(part.type==='earth')part.mesh.rotation.y=ambientTime*.08;
         if(part.type==='ship-model')part.mesh.rotation.y=ambientTime*.3;
       }
     }
-    return { scene, obstacles, beacon, forwardLeaves, backLeaves, doorLamp, halfWidth, animate, textures, disposeCabin };
+    scene.traverse(object=>{let ancestor=object;while(ancestor&&ancestor!==camera)ancestor=ancestor.parent;if(ancestor===camera)return;if(object.isMesh&&!object.isInstancedMesh&&object.geometry.type!=='PlaneGeometry'&&object.material?.isMeshStandardMaterial&&object.material.emissiveIntensity===0){object.castShadow=true;object.receiveShadow=true;}});
+    return { scene, obstacles, beacon, forwardLeaves, backLeaves, doorLamp, halfWidth, animate, textures, disposeCabin, disposeEquipment, light, bubbles, disposeEnvironment(){roomAlive=false;scene.environment=null;roomEnvironment?.dispose();} };
   }
 
   let room = makeRoom(0);
   const waliCompanion = createWaliCompanion(room.scene, camera, reducedMotion);
+  const quality = createGraphicsQuality(renderer,camera,preset=>{applySceneQuality(room.scene,preset,renderer,room.light);for(const bubble of room.bubbles)bubble.mesh.visible=preset.effects;});
   const clear = () => { keys.clear(); velocity.set(0, 0); dragging = false; };
   const down = event => {
     if (event.target.closest('input,textarea,button,select')) return;
@@ -469,7 +463,7 @@ export function createScenarioWorld(container) {
   window.addEventListener('resize', resize); resize();
 
   function disposeRoom(oldRoom) {
-    oldRoom.disposeCabin?.();
+    oldRoom.disposeCabin?.();oldRoom.disposeEnvironment?.();oldRoom.disposeEquipment?.();
     oldRoom.scene.remove(camera);
     const geometries = new Set(), materials = new Set();
     oldRoom.scene.traverse(object => {
@@ -494,11 +488,12 @@ export function createScenarioWorld(container) {
   return {
     camera,
     get currentIndex() { return sceneIndex; },
+    poseArms(name) { arms.trigger(name); },
     waliAnchor() { return sceneIndex === 3 ? null : waliCompanion.anchor(); },
     focus() { canvas.focus(); },
     async capture() { try { await canvas.requestPointerLock(); } catch { /* Drag and arrows remain available. */ } },
     release() { if (document.pointerLockElement === canvas) document.exitPointerLock(); clear(); },
-    reset() { room.scene.remove(waliCompanion.group); disposeRoom(room); sceneIndex = 0; room = makeRoom(0); waliCompanion.attach(room.scene); camera.position.set(0, 1.7, arrivalZ); camera.rotation.set(0, 0, 0); waliCompanion.snap(); hoverY = 1.7; stride = 0; clear(); },
+    reset() { room.scene.remove(waliCompanion.group); disposeRoom(room); sceneIndex = 0; room = makeRoom(0); waliCompanion.attach(room.scene); quality.apply(); camera.position.set(0, 1.7, arrivalZ); camera.rotation.set(0, 0, 0); waliCompanion.snap(); hoverY = 1.7; stride = 0; clear(); },
     async load(index) {
       if (index === sceneIndex || index < 0 || index >= SCENARIOS.length) return;
       const backwards = index < sceneIndex;
@@ -506,7 +501,7 @@ export function createScenarioWorld(container) {
       await new Promise(resolve => requestAnimationFrame(resolve));
       const nextRoom = makeRoom(index);
       await new Promise(resolve => setTimeout(resolve, Math.max(0, 650 - (performance.now() - start))));
-      room.scene.remove(waliCompanion.group); disposeRoom(room); room = nextRoom; sceneIndex = index; waliCompanion.attach(room.scene);
+      room.scene.remove(waliCompanion.group); disposeRoom(room); room = nextRoom; sceneIndex = index; waliCompanion.attach(room.scene); quality.apply();
       camera.position.set(0, 1.7, backwards ? -arrivalZ : arrivalZ);
       camera.rotation.set(0, backwards ? Math.PI : 0, 0); waliCompanion.snap(); hoverY = 1.7; stride = 0; clear();
     },
@@ -540,13 +535,13 @@ export function createScenarioWorld(container) {
         const bob = reducedMotion.matches ? 0 : Math.sin(stride) * .018 * motion;
         if (sceneIndex === 3) hoverY = THREE.MathUtils.clamp(hoverY + (Number(keys.has('Space')) - Number(control && forward <= 0)) * dt * .8, 1.4, 3.25);
         camera.position.y = THREE.MathUtils.lerp(camera.position.y, hoverY + bob, Math.min(1, dt * (sceneIndex === 3 ? 5 : 12)));
-        arms.forEach((arm, i) => { arm.position.y = reducedMotion.matches ? 0 : Math.sin(stride + (i ? Math.PI : 0)) * .012 * motion; });
+        arms.update(dt,{active:true,moving:motion,sprint,float:sceneIndex===3});
         if (z < exitZ && Math.abs(x) < 1.08 && open) return sceneIndex + 1;
         if (z > -exitZ && Math.abs(x) < 1.08 && sceneIndex > 0) return sceneIndex - 1;
       } else {
         velocity.set(0, 0);
         camera.position.y = THREE.MathUtils.lerp(camera.position.y, hoverY, Math.min(1, dt * 12));
-        arms.forEach(arm => { arm.position.y = THREE.MathUtils.lerp(arm.position.y, 0, Math.min(1, dt * 12)); });
+        arms.update(dt,{active:false,float:sceneIndex===3});
       }
       waliCompanion.group.visible = sceneIndex !== 3;
       if(waliCompanion.group.visible) waliCompanion.update(dt, active, (x,z) => blocked(x,z,stage), waliInteracting);

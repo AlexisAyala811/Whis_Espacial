@@ -167,3 +167,9 @@ La superficie utiliza una panorámica histórica recortada del rover Spirit como
 Wali acompaña en los siete escenarios de entrenamiento, la superficie, el hábitat y el panel de Marte. Pulsa **H** para pedir una pista, selecciona **Un dato** para aprender algo o usa el botón − para minimizar su nube. Wali reacciona a errores y muestra datos ocasionalmente. Sus respuestas son texto local predefinido, no voz ni una conversación con IA; no completa actividades por el jugador.
 
 Las habitaciones combinan sus texturas procedurales con fotografías locales de superficies, adaptadas a cada espacio; el suelo y las paredes conservan alternativas si no cargan los archivos. Los modelos siguen siendo estilizados. Consulta [créditos de interiores](assets/interiors/CREDITS.md).
+
+## Graphics quality and accessibility
+
+Use the **Graphics** control in the header of any 3D scene to choose Low, Medium, High or Ultra. The setting is stored locally and shared across scenes. Low uses a lower internal resolution and reduces decorative detail; Medium retains the pool effect without shadows; High and Ultra enable shadows at increasing shadow-map resolutions. Texture filtering and draw distance also vary; the Mars surface keeps its full sky within the camera range. No post-processing is enabled. Missing storage falls back to Medium.
+
+The articulated first-person arms are a provisional procedural rig. They respond to walking, running, floating and interaction; reduced-motion settings suppress optional motion. Wali remains absent in the underwater training scene. If WebGL is lost, a visible message describes recovery. New 1K metallic PBR maps and an electrical-equipment glTF are locally hosted, licensed CC0 and credited in their asset folders; the original procedural surfaces and equipment remain the fallback.

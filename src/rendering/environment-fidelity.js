@@ -28,7 +28,7 @@ export function addRoomFidelity(index, scene, box, halfWidth) {
   const material=new THREE.MeshBasicMaterial({map:texture});
   const geometry=new THREE.PlaneGeometry(2.8,.7);
   for(const side of [-1,1])for(const z of [-5.2,3.8]){
-    const mesh=new THREE.Mesh(geometry,material);mesh.position.set(side*(halfWidth-.36),3.75,z);mesh.rotation.y=-side*Math.PI/2;scene.add(mesh);
+    const mesh=new THREE.Mesh(geometry,material);mesh.userData.graphicsDetail=1;mesh.position.set(side*(halfWidth-.36),3.75,z);mesh.rotation.y=-side*Math.PI/2;scene.add(mesh);
     box(side*(halfWidth-.29),3.75,z,.08,.82,2.95,0x233f48);
     for(const dz of [-1.35,1.35])box(side*(halfWidth-.35),3.75,z+dz,.025,.58,.025,0xa6b9b6);
   }

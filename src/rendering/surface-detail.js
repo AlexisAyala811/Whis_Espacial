@@ -3,7 +3,7 @@ import * as THREE from 'three';
 const FLOOR_PHOTOS=['metal_plate','rubber_tiles','dirty_carpet','floor_tiles_02','painted_plaster_wall','concrete_floor_painted','metal_plate'];
 
 // Room-local procedural textures: deterministic, lightweight and original.
-export function makeSurfaceTextures(room) {
+export function makeSurfaceTextures(room, {pbr=false}={}) {
   function texture(kind) {
     const canvas=document.createElement('canvas');canvas.width=canvas.height=512;
     const ctx=canvas.getContext('2d'), size=512;
@@ -66,7 +66,12 @@ export function makeSurfaceTextures(room) {
     }
     return map;
   }
-  return {metal:texture('metal'),floor:texture('floor'),wall:texture('wall'),fabric:texture('fabric'),rubber:texture('rubber')};
+  const result={metal:texture('metal'),floor:texture('floor'),wall:texture('wall'),fabric:texture('fabric'),rubber:texture('rubber')};
+  if(pbr && [0,5,6].includes(room))for(const [key,file] of [['floorNormal','NormalGL'],['floorRoughness','Roughness'],['floorMetalness','Metalness']]){
+    let alive=true;const map=new THREE.TextureLoader().load('./assets/interiors/pbr/metal-plates-002/'+file+'.jpg',loaded=>{if(!alive)loaded.dispose();},undefined,()=>{if(!alive)return;const fallback=document.createElement('canvas');fallback.width=fallback.height=1;const c=fallback.getContext('2d');c.fillStyle=key==='floorNormal'?'#8080ff':'#ffffff';c.fillRect(0,0,1,1);map.image=fallback;map.needsUpdate=true;});
+    map.wrapS=map.wrapT=THREE.RepeatWrapping;map.repeat.set(4,5);map.anisotropy=2;map.addEventListener('dispose',()=>{alive=false;});result[key]=map;
+  }
+  return result;
 }
 
 export function drawTelemetry(canvas, seed, time = 0) {
