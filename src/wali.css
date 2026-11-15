@@ -3,3 +3,13 @@
 .wali-avatar[hidden]{display:none}
 
 .wali[hidden]{display:none}.wali-anchored{left:0;top:0;bottom:auto;transform:translate(-50%,-100%);align-items:end}.wali-anchored .wali-bubble:before{left:calc(50% - 6px);bottom:-11px}.wali-anchored .wali-bubble:after{left:calc(50% - 3px);bottom:-20px}.wali-source{display:inline-block;margin:0 0 7px;color:#225a61;font:700 11px Arial,sans-serif}.wali-source[hidden]{display:none}
+
+/* Wali's thought bubble uses the same glass treatment while staying readable. */
+.wali-bubble{background:rgba(9,31,42,.91);color:#f0faf7;border:1px solid rgba(174,219,220,.45);border-radius:18px;box-shadow:0 12px 36px #0007,inset 0 1px #e1fff214;-webkit-backdrop-filter:blur(12px) saturate(125%);backdrop-filter:blur(12px) saturate(125%)}
+.wali-bubble:before,.wali-bubble:after{background:#183e49}
+.wali-bubble strong,.wali-source{color:#bdebd9}.wali-message{color:#edf8f5}
+.wali-actions button,.wali-toggle{background:#183e49;color:#edf8f5;border-color:#84b9b4;border-radius:9px}
+.wali-actions button:hover,.wali-toggle:hover{background:#285a61}
+@media (prefers-contrast:more),(prefers-reduced-transparency:reduce){.wali-bubble{background:#102630;border-color:#c5e5dc;-webkit-backdrop-filter:none;backdrop-filter:none}}
+/* Keep mission dialogs unobstructed by Wali's world-anchored bubble. */
+body:has(#pause:not([hidden]), #results:not([hidden]), #task:not([hidden]), #object-card:not([hidden])) .wali{visibility:hidden;pointer-events:none}

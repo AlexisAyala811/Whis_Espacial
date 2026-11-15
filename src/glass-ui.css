@@ -1,0 +1,60 @@
+/* Project Ares: restrained, readable glass surfaces for mission interfaces. */
+:root {
+  --ares-glass: rgba(8, 24, 34, .87);
+  --ares-edge: rgba(174, 219, 220, .28);
+  --ares-highlight: rgba(196, 239, 232, .07);
+  --ares-text: #f2fbf8;
+}
+.objective, .lumine, .telemetry, .exercise, .decision, .nearby-object,
+.object-card, .task-modal, .modal, .loading-content, .overlay > div,
+.dashboard {
+  color: var(--ares-text);
+  background: linear-gradient(145deg, var(--ares-highlight), transparent 48%), var(--ares-glass);
+  border: 1px solid var(--ares-edge);
+  border-radius: 18px;
+  box-shadow: 0 14px 42px rgba(0, 8, 16, .28), inset 0 1px rgba(225, 255, 246, .06);
+  -webkit-backdrop-filter: blur(12px) saturate(125%);
+  backdrop-filter: blur(12px) saturate(125%);
+}
+/* Keep the modal scrim, but let the scene remain visible behind the card. */
+.modal, .task-modal { max-height: calc(100dvh - 40px); overflow-y: auto; box-shadow: 0 0 0 100vmax rgba(1, 9, 16, .56), 0 24px 65px rgba(0, 0, 0, .48), inset 0 1px rgba(225, 255, 246, .08); }
+.modal { padding: clamp(24px, 3vw, 36px); }
+.modal h2, .task-modal h2 { margin: 16px 0 12px; line-height: 1.1; }
+.modal p, .task-modal p { color: #d9e8e7; }
+.objective { border-left: 1px solid var(--ares-edge); padding: 18px 20px; }
+.objective h2 { margin: 12px 0 8px; }
+.objective p { color: #d9e8e7; }
+.room-purpose { border: 1px solid rgba(174,219,220,.17); border-radius: 10px; background: rgba(8,24,34,.82); }
+.portrait { border-radius: 10px; }
+.interaction button, .inspect-toggle, .object-point, .door-prompt button,
+.modal button, .task-modal button, .object-card button, .nearby-object button,
+.overlay button, .primary, .secondary, .stepper button, .graphics-quality select {
+  border-radius: 10px;
+}
+.modal button, .task-modal button, .object-card button { min-height: 44px; }
+.modal .primary, .task-modal .task-confirm { color: #102d28; }
+.modal button:not(.primary), .object-card button, .task-modal button:not(.task-confirm) { background-color: rgba(18, 43, 51, .8); }
+.modal button:hover, .object-card button:hover, .task-modal button:hover { border-color: #d6f7e6; }
+.task-grid button.selected, .task-modal button.selected { background: #b9e8b2; color: #142d28; }
+.task-grid button.done { color: #c9f6c2; }
+.graphics-quality select { padding: 7px 10px; background: rgba(8, 28, 38, .93); }
+.loading-content { border-left: 1px solid var(--ares-edge); }
+.loading-track { border-radius: 999px; }
+.dashboard .resource, .dashboard .allocation, .dashboard .event, .dashboard .data-note { border-radius: 12px; }
+.dashboard .event { border-left: 3px solid #b9e8b2; }
+@supports not ((-webkit-backdrop-filter: blur(1px)) or (backdrop-filter: blur(1px))) {
+  .objective, .lumine, .telemetry, .exercise, .decision, .nearby-object,
+  .object-card, .task-modal, .modal, .loading-content, .overlay > div, .dashboard { background: #102630; }
+}
+@media (prefers-contrast: more), (prefers-reduced-transparency: reduce) {
+  .objective, .lumine, .telemetry, .exercise, .decision, .nearby-object,
+  .object-card, .task-modal, .modal, .loading-content, .overlay > div, .dashboard { background: #102630; border-color: #c5e5dc; -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+@media (max-width: 700px) {
+  .objective, .lumine, .telemetry, .nearby-object, .overlay > div, .dashboard { border-radius: 14px; }
+  .modal, .task-modal { border-radius: 16px; max-height: calc(100dvh - 24px); }
+  .objective { padding: 12px 14px; }
+}
+/* Source cards share the same visual language as the in-game panels. */
+.note, .resources a { border-radius: 14px; background: rgba(13, 37, 46, .9); border-color: rgba(174, 219, 220, .28); }
+.nasa-apod-image { border-radius: 12px; }

@@ -1,5 +1,4 @@
 import * as THREE from 'three';
-import {RoundedBoxGeometry} from '../../node_modules/three/examples/jsm/geometries/RoundedBoxGeometry.js';
 
 // Provisional articulated suit arms. Each finger has independent pivot joints;
 // the game can replace this local rig with a licensed skinned GLB later.
@@ -21,7 +20,9 @@ export function createFirstPersonArms(camera,fabric,reducedMotion){
  const sphere=new THREE.SphereGeometry(1,24,16);
  const fingerSegment=new THREE.CapsuleGeometry(.022,.048,8,16);
  const fineSeam=new THREE.TorusGeometry(.022,.0018,5,20);
- const cuffGeo=new THREE.TorusGeometry(.092,.009,10,32);
+ const cuffGeo=new THREE.TorusGeometry(.084,.0055,10,32);
+ const foldGeo=new THREE.TorusGeometry(.019,.0015,5,16,Math.PI*.82);
+ const panelSeamGeo=new THREE.CapsuleGeometry(.0018,.12,3,6);
  const sleeveGeo=new THREE.CylinderGeometry(.101,.14,.42,24,1);
  const stitchGeo=new THREE.BoxGeometry(.002,.002,.012);
  const arms=[];let time=0,gesture='',gestureTime=0;
@@ -30,31 +31,33 @@ export function createFirstPersonArms(camera,fabric,reducedMotion){
   const rig=new THREE.Group();rig.name=side<0?'left-suit-arm':'right-suit-arm';rig.position.set(side*.55,-.5,-1.03);camera.add(rig);
   const sleeve=part(rig,sleeveGeo,white,side*.10,-.28,.09);sleeve.rotation.z=side*.5;
   const wrist=part(rig,sphere,white,0,-.08,.08,.095,.085,.105);
-  part(rig,cuffGeo,rubber,0,0,.12);
-  const outerSeal=part(rig,cuffGeo,seam,0,0,.105,.88,.88,.7);
-  part(rig,cuffGeo,reinforcement,0,0,.127,.76,.76,.55);
+  // Narrow concentric seals sit at the actual wrist, rather than floating above it.
+  part(rig,cuffGeo,seam,0,-.005,.125);
+  part(rig,cuffGeo,rubber,0,-.005,.145,.97,.97,.65);
+  part(rig,cuffGeo,reinforcement,0,-.005,.158,.9,.9,.6);
   // The tapered palm is an ellipsoid, with a padded fabric layer over the back.
   part(rig,sphere,shell,0,0,-.012,.102,.052,.14);
   const back=part(rig,sphere,white,0,.034,-.015,.088,.025,.112);back.rotation.x=-.06;
   part(rig,sphere,reinforcement,0,.052,-.081,.074,.009,.032);
   for(const sideEdge of [-1,1]){
-   const seamLine=part(rig,new THREE.CapsuleGeometry(.002,.12,3,6),stitching,sideEdge*.075,.04,-.012);seamLine.rotation.x=Math.PI/2;
+   const seamLine=part(rig,panelSeamGeo,stitching,sideEdge*.075,.04,-.012);seamLine.rotation.x=Math.PI/2;
    for(let i=0;i<6;i++)part(rig,stitchGeo,seam,sideEdge*.069,.047,-.062+i*.022);
   }
   const fingers=[];
   for(let i=0;i<4;i++){
-    const pivot=new THREE.Group();pivot.position.set((i-1.5)*.043,0,-.116);pivot.rotation.y=(i-1.5)*.045;pivot.scale.z=[.85,1,.96,.78][i];rig.add(pivot);
+    const pivot=new THREE.Group();pivot.position.set((i-1.5)*.043,0,-.116);pivot.rotation.y=(i-1.5)*.045;pivot.rotation.x=.06+i*.012;pivot.scale.z=[.85,1,.96,.78][i];rig.add(pivot);
     const proximal=part(pivot,fingerSegment,shell,0,0,-.035);proximal.rotation.x=Math.PI/2;
     const pad=part(pivot,sphere,white,0,.014,-.041,.020,.012,.043);
     const seamRing=part(pivot,fineSeam,stitching,0,0,-.065);seamRing.scale.set(1,.82,1);
-    const distal=new THREE.Group();distal.position.z=-.07;pivot.add(distal);
+    for(const z of [-.024,-.036,-.048]){const fold=part(pivot,foldGeo,reinforcement,0,.016,z,.8,.36,1);fold.rotation.z=.28;}
+    const distal=new THREE.Group();distal.position.z=-.07;distal.rotation.x=.08;pivot.add(distal);
     const tip=part(distal,fingerSegment,shell,0,-.001,-.035,.92,.85,.92);tip.rotation.x=Math.PI/2;
     part(distal,sphere,reinforcement,0,-.012,-.062,.018,.011,.025);
     const tipSeam=part(distal,fineSeam,stitching,0,0,-.044,.91,.75,1);
     fingers.push({pivot,distal});
   }
   // The thumb emerges from the side of the palm and bends toward the fingers.
-  const thumb=new THREE.Group();thumb.position.set(side*.089,-.008,-.005);thumb.rotation.y=side*.65;thumb.rotation.z=side*.12;rig.add(thumb);
+  const thumb=new THREE.Group();thumb.position.set(side*.085,-.008,-.016);thumb.rotation.y=side*.58;thumb.rotation.z=side*.12;rig.add(thumb);
   const thumbBase=part(thumb,fingerSegment,shell,0,0,-.033,1.12,.9,1);thumbBase.rotation.x=Math.PI/2;
   const thumbTip=part(thumb,sphere,shell,0,0,-.074,.022,.019,.031);
   part(thumb,sphere,reinforcement,0,-.012,-.086,.018,.009,.02);
@@ -75,7 +78,7 @@ export function createFirstPersonArms(camera,fabric,reducedMotion){
    rig.position.z=THREE.MathUtils.lerp(rig.position.z,-1.03-reach*.12,blend);
    rig.rotation.x=THREE.MathUtils.lerp(rig.rotation.x,-reach*.2,blend);rig.rotation.z=side*.12+side*wave*motion*.025;
    const curl=gesture==='grab'?reach*.5:gesture==='interact'?reach*.2:0;
-   fingers.forEach(({pivot,distal},i)=>{pivot.rotation.x=THREE.MathUtils.lerp(pivot.rotation.x,curl*(i===1?.4:1),blend);distal.rotation.x=THREE.MathUtils.lerp(distal.rotation.x,curl*.8,blend)});
+   fingers.forEach(({pivot,distal},i)=>{const rest=.06+i*.012;pivot.rotation.x=THREE.MathUtils.lerp(pivot.rotation.x,rest+curl*(i===1?.4:1),blend);distal.rotation.x=THREE.MathUtils.lerp(distal.rotation.x,.08+curl*.8,blend)});
    thumb.rotation.x=curl*.3;
   }
  }
