@@ -54,14 +54,14 @@ export function makeSurfaceTextures(room) {
     const map=new THREE.CanvasTexture(canvas);map.colorSpace=THREE.SRGBColorSpace;
     map.wrapS=map.wrapT=THREE.RepeatWrapping;
     if(kind==='floor')map.repeat.set(room===3?2:4,room===3?2:5);
-    map.anisotropy=2;
+    map.anisotropy=4;
     const photo=kind==='floor'?FLOOR_PHOTOS[room]:kind==='wall'?'painted_plaster_wall':null;
     if(photo){
       // Blend a room-appropriate local photo into the procedural base.
       // If it fails or the room is disposed, the existing fallback remains valid.
       let alive=true;const image=new Image();
       map.addEventListener('dispose',()=>{alive=false;image.onload=null;image.onerror=null;});
-      image.onload=()=>{if(!alive)return;ctx.save();ctx.globalAlpha=kind==='wall'?.1:room===1?.25:.17;ctx.drawImage(image,0,0,size,size);ctx.restore();map.userData[kind==='floor'?'floorPhoto':'wallPhoto']=photo;map.needsUpdate=true;};
+      image.onload=()=>{if(!alive)return;ctx.save();ctx.globalAlpha=kind==='wall'?.25:room===1?.42:.35;ctx.drawImage(image,0,0,size,size);ctx.restore();map.userData[kind==='floor'?'floorPhoto':'wallPhoto']=photo;map.needsUpdate=true;};
       image.onerror=()=>{};image.src='./assets/interiors/'+photo+'.jpg';
     }
     return map;

@@ -30,6 +30,13 @@ try{
   box(0,.025,0,.06,.025,17.7,glow);
   // Airlock and the return door.
   for(const side of [-1,1]){box(side*1.25,2.1,9.18,.22,4.2,.22,metal);box(side*.55,2.05,9.12,1.05,3.9,.12,dark);}box(0,4.28,9.18,2.7,.16,.22,metal);box(0,4.05,9.02,1.8,.08,.08,glow);
+  // Recessed rails, utility indicators and wall seams add detail without narrowing the aisle.
+  for(const side of [-1,1])for(const z of [-7,-4,0,4,7]){
+    box(side*5.80,.38,z,.05,.24,1.55,dark);
+    box(side*5.77,3.85,z,.05,.08,1.3,metal);
+    for(const dz of [-.55,.55])box(side*5.74,1.1,z+dz,.035,.4,.035,metal);
+  }
+  for(const z of [-7,-3,1,5]){box(-5.72,4.62,z,.06,.04,1.4,glow);box(5.72,4.62,z,.06,.04,1.4,glow);}
   // Sleeping berths on the left.
   for(const y of [.65,2.15]){rounded(-4.35,y,-1.2,2.8,.25,1.6,metal);rounded(-4.35,y+.18,-1.2,2.55,.18,1.4,fabric);rounded(-5.1,y+.3,-1.2,.65,.12,1.15,wall,.05);}
   for(const x of [-5.7,-3])for(const z of [-1.95,-.45])box(x,1.6,z,.09,3.2,.09,metal);
@@ -37,6 +44,9 @@ try{
   // Plant rack with individual leaves; the model is decorative, not a crop simulator.
   box(4.45,.55,-2.4,2.25,1.1,1.55,metal);box(4.45,1.15,-2.4,2.1,.12,1.4,dark);
   for(const x of [3.75,4.2,4.65,5.1])for(const z of [-2.8,-2.05]){const stem=new THREE.Mesh(new THREE.CylinderGeometry(.025,.035,.44,7),leaf);stem.position.set(x,1.43,z);scene.add(stem);const foliage=new THREE.Mesh(new THREE.SphereGeometry(.17,9,7),leaf);foliage.scale.set(1.25,.7,1);foliage.position.set(x,1.68,z);scene.add(foliage);}
+  for(const x of [3.75,4.2,4.65,5.1])for(const z of [-2.8,-2.05])for(const side of [-1,1]){
+    const blade=new THREE.Mesh(new THREE.SphereGeometry(.12,10,7),leaf);blade.scale.set(1.5,.32,.65);blade.rotation.z=side*.42;blade.position.set(x+side*.11,1.57,z);scene.add(blade);
+  }
   box(4.45,2.25,-2.4,2,.08,.35,glow);for(const x of [3.4,5.5])box(x,1.7,-2.4,.08,2.4,.08,metal);
   obstacles.push({x:4.45,z:-2.4,w:2.5,d:1.8});sign('CULTIVO',4.45,2.8,-3.24,2.4);
   // Environmental rack and storage on right side.

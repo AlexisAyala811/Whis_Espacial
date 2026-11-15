@@ -26,6 +26,13 @@ try{
   renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.25));renderer.outputColorSpace=THREE.SRGBColorSpace;renderer.toneMapping=THREE.ACESFilmicToneMapping;renderer.toneMappingExposure=1.05;renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
   canvasHost.append(renderer.domElement);renderer.domElement.tabIndex=0;renderer.domElement.setAttribute('aria-label','Superficie marciana 3D. Camina por la rampa y pulsa E cerca de la puerta del hábitat.');
   scene=new THREE.Scene();scene.background=new THREE.Color(0xb07962);scene.fog=new THREE.Fog(0xb07962,32,92);
+  // Soft, dusty sky gradient; the historical panorama remains a separate backdrop.
+  const skyCanvas=document.createElement('canvas');skyCanvas.width=8;skyCanvas.height=256;
+  const skyCtx=skyCanvas.getContext('2d'),skyGradient=skyCtx.createLinearGradient(0,0,0,256);
+  skyGradient.addColorStop(0,'#765c62');skyGradient.addColorStop(.52,'#bf806b');skyGradient.addColorStop(1,'#e1ac84');
+  skyCtx.fillStyle=skyGradient;skyCtx.fillRect(0,0,8,256);
+  const skyMap=new THREE.CanvasTexture(skyCanvas);skyMap.colorSpace=THREE.SRGBColorSpace;
+  const sky=new THREE.Mesh(new THREE.SphereGeometry(110,32,16),new THREE.MeshBasicMaterial({map:skyMap,side:THREE.BackSide,fog:false,depthWrite:false}));sky.name='mars-sky';sky.renderOrder=-10;scene.add(sky);
   camera=new THREE.PerspectiveCamera(70,1,.08,140);camera.rotation.order='YXZ';camera.position.set(0,fromBase?1.7:2.75,fromBase?-4.4:7.7);scene.add(camera);
   const waliCompanion=createWaliCompanion(scene,camera,reduced);
   const wali=createWali({showAvatar:false,getContext:()=>({scene:'mars-surface',active:active&&!loading,near:Math.hypot(camera.position.x-door.x,camera.position.z-door.z)<=2.4})});
@@ -65,15 +72,27 @@ try{
   for(const side of [-1,1]){box(side*4.25,.3,-12,.25,.6,7.2,dark);box(side*4.2,2.2,-12,.15,4.4,.18,dark);}
   // Recessed cladding, service racks and solar panels give the habitat depth.
   const trim=new THREE.MeshStandardMaterial({color:0x8a9993,roughness:.52,metalness:.5});
-  const solarMat=new THREE.MeshStandardMaterial({color:0x24445a,roughness:.34,metalness:.55});
+  const solarCanvas=document.createElement('canvas');solarCanvas.width=256;solarCanvas.height=256;const solarCtx=solarCanvas.getContext('2d');
+  solarCtx.fillStyle='#183449';solarCtx.fillRect(0,0,256,256);solarCtx.strokeStyle='#7293a4';solarCtx.lineWidth=2;
+  for(let i=0;i<=256;i+=32){solarCtx.beginPath();solarCtx.moveTo(i,0);solarCtx.lineTo(i,256);solarCtx.moveTo(0,i);solarCtx.lineTo(256,i);solarCtx.stroke();}
+  const solarMap=new THREE.CanvasTexture(solarCanvas);solarMap.colorSpace=THREE.SRGBColorSpace;
+  const solarMat=new THREE.MeshStandardMaterial({color:0xa9bfca,map:solarMap,roughness:.34,metalness:.55});
   for(const x of [-3.8,-2.1,2.1,3.8]){box(x,2.1,-8.29,.08,3.7,.09,trim);for(const y of [.45,1.35,3.45])box(x,y,-8.22,.14,.09,.05,dark);}
   for(const side of [-1,1]){box(side*3.85,.75,-8.23,.48,1.1,.24,dark);for(const y of [.47,.7,.93])box(side*3.85,y,-8.06,.3,.035,.04,glow);}
   for(const x of [-9,-6.8]){box(x,1.2,-12,.15,2.4,.15,trim);const panel=box(x,2.35,-12,1.9,.1,2.8,solarMat);panel.rotation.x=-.28;for(const offset of [-.6,0,.6]){const bar=box(x+offset,2.42,-12,.035,.035,2.65,trim);bar.rotation.x=-.28;}}
   for(const side of [-1,1]){box(side*.86,2.2,-8.12,.06,2.8,.06,trim);box(side*.55,.18,-7.95,.85,.08,.45,dark);}
+  // Exterior seams, fasteners and solar junction boxes remain outside the walkable route.
+  for(const x of [-3.45,-2.8,2.8,3.45])for(const y of [.55,1.35,3.25,3.8]){
+    const bolt=new THREE.Mesh(new THREE.SphereGeometry(.035,8,6),trim);bolt.position.set(x,y,-8.1);scene.add(bolt);
+  }
+  for(const x of [-9,-6.8]){box(x,1.15,-12.2,.48,.55,.35,dark);for(const y of [.98,1.12,1.26])box(x,y,-11.99,.25,.025,.03,glow);}
   // Visual guidance remains in the walkable central corridor.
   for(const z of [3,0,-3,-6]){box(-2.1,.08,z,.13,.16,.3,glow);box(2.1,.08,z,.13,.16,.3,glow);}
   const stones=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(1,0),new THREE.MeshStandardMaterial({color:0x80503f,roughness:1}),90),matrix=new THREE.Matrix4(),rotation=new THREE.Quaternion();let count=0;
   while(count<90){const x=(random()-.5)*70,z=(random()-.5)*70;if(Math.abs(x)<5&&z>-18&&z<17)continue;const scale=.16+random()*.9;matrix.compose(new THREE.Vector3(x,scale*.35,z),rotation,new THREE.Vector3(scale,scale*.55,scale));stones.setMatrixAt(count++,matrix);}stones.instanceMatrix.needsUpdate=true;stones.castShadow=true;stones.receiveShadow=true;scene.add(stones);
+  const pebbles=new THREE.InstancedMesh(new THREE.DodecahedronGeometry(1,0),new THREE.MeshStandardMaterial({color:0xa46b50,roughness:1}),320);
+  for(let i=0;i<320;i++){const x=(random()-.5)*45,z=(random()-.5)*45,scale=.035+random()*.12;matrix.compose(new THREE.Vector3(x,scale*.3,z),rotation,new THREE.Vector3(scale,scale*.5,scale));pebbles.setMatrixAt(i,matrix);}
+  pebbles.instanceMatrix.needsUpdate=true;pebbles.receiveShadow=true;scene.add(pebbles);
   const ridgeMat=new THREE.MeshStandardMaterial({color:0x98634e,roughness:1});
   const fallbackRidges=[];for(let i=0;i<10;i++){const peak=new THREE.Mesh(new THREE.ConeGeometry(7+random()*8,5+random()*7,5),ridgeMat);peak.position.set(-48+i*11,2,-42-random()*12);scene.add(peak);fallbackRidges.push(peak);}
   // NASA Spirit panorama is a distant artistic backdrop, not the landing location.

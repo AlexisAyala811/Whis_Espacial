@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { addRoomFidelity } from './environment-fidelity.js';
 import { createWaliCompanion } from './wali-companion.js';
 import { SCENARIOS, canEnterScenario } from '../core/scenario-route.js';
 import { LEARNING_ROOMS } from '../core/learning-catalog.js';
@@ -196,7 +197,7 @@ export function createScenarioWorld(container) {
     }
     // Each scenario owns its own room, geometry and textures; the next one is built on demand.
     box(0, -.16, 0, halfWidth*2, .32, 20, 0x454d4c);
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(halfWidth*2, 20), new THREE.MeshStandardMaterial({ color: [0xa7b4b1, 0x849997, 0x758c91, 0x599da6, 0xc9c6ad, 0x899b99, 0x536b72][index], map: textures.floor, metalness: index===6 ? .38 : .15, roughness: index===6 ? .48 : .82 }));
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(halfWidth*2, 20), new THREE.MeshStandardMaterial({ color: [0xa7b4b1, 0x849997, 0x758c91, 0x599da6, 0xc9c6ad, 0x899b99, 0x536b72][index], map: textures.floor, metalness: index===6 ? .38 : .15, roughness: index===6 ? .48 : .82, bumpMap: textures.floor, bumpScale: .035 }));
     floor.rotation.x = -Math.PI / 2; floor.position.y = .005; scene.add(floor);
     for (let x = -halfWidth+1; x < halfWidth; x += 2) box(x, .02, 0, .025, .016, 19.5, 0x646e6a);
     for (let z = -9; z <= 9; z += 2) box(0, .02, z, halfWidth*2-.5, .016, .025, 0x646e6a);
@@ -408,6 +409,7 @@ export function createScenarioWorld(container) {
     }
     decorateRoom(index,{box,cylinder,display,textPanel,obstacles});
     finishScenario(index,{box,display});
+    addRoomFidelity(index,scene,box,halfWidth);
     // Group static boxes by material. Moving doors, lamps and exercise parts stay separate.
     const dynamic=new Set([...forwardLeaves,...backLeaves,doorLamp,...animatedParts.map(part=>part.mesh)]);
     const groups=new Map();
