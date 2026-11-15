@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { SCENARIOS, canEnterScenario } from '../core/scenario-route.js';
 import { LEARNING_ROOMS } from '../core/learning-catalog.js';
 import { decorateRoom } from './room-identity.js';
+import { makeSurfaceTextures, drawTelemetry } from './surface-detail.js';
 
 export const STATIONS = [
   { id: 'suit', name: '01 / TRAJE', scene: 0, x: -3.7, z: -1.4, color: 0x91d9c2 },
@@ -57,10 +58,12 @@ export function createScenarioWorld(container) {
     scene.add(new THREE.HemisphereLight(index === 3 ? 0xa8e8f5 : 0xf2f4ec, index === 3 ? 0x24516b : 0x6d7774, index === 3 ? 2 : 1.55));
     const light = new THREE.DirectionalLight(0xf5f2e8, 1.25);
     light.position.set(-4, 8, 6); scene.add(light);
-    const obstacles = [], materials = new Map();
+    const obstacles = [], materials = new Map(), textures = makeSurfaceTextures(index);
+    const animatedScreens = [], screenMaps = new Map(), bubbles = [], animatedParts = [];
+    let ambientTime = 0, screenTime = 0;
     function material(color, glow = false) {
       const key = `${color}-${glow}`;
-      if (!materials.has(key)) materials.set(key, new THREE.MeshStandardMaterial({ color, roughness: glow ? .4 : .78, metalness: glow ? .05 : .25, emissive: glow ? color : 0, emissiveIntensity: glow ? 1.1 : 0 }));
+      if (!materials.has(key)) materials.set(key, new THREE.MeshStandardMaterial({ color, map: glow ? null : textures.metal, roughness: glow ? .4 : .68, metalness: glow ? .05 : .32, emissive: glow ? color : 0, emissiveIntensity: glow ? 1.1 : 0 }));
       return materials.get(key);
     }
     function box(x, y, z, w, h, d, color, glow = false) {
@@ -114,7 +117,14 @@ export function createScenarioWorld(container) {
     }
     function display(x, y, z, width, height, seed) {
       box(x, y, z - .08, width + .15, height + .16, .17, 0x34434a);
-      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshBasicMaterial({ map: telemetryTexture(seed) }));
+      if (!screenMaps.has(seed)) {
+        const surface = document.createElement('canvas'); surface.width = 512; surface.height = 256;
+        drawTelemetry(surface, seed);
+        const map = new THREE.CanvasTexture(surface); map.colorSpace = THREE.SRGBColorSpace;
+        screenMaps.set(seed, map); animatedScreens.push({ surface, map, seed });
+      }
+      const map = screenMaps.get(seed);
+      const mesh = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshBasicMaterial({ map }));
       mesh.position.set(x, y, z + .02); scene.add(mesh);
     }
     function consoleUnit(x, z, seed, width = 2.45) {
@@ -124,6 +134,15 @@ export function createScenarioWorld(container) {
       const panel = new THREE.Mesh(new THREE.PlaneGeometry(width - .2, .85), new THREE.MeshStandardMaterial({ map: telemetryTexture(seed, true), roughness: .8, side: THREE.DoubleSide }));
       panel.rotation.x = -.55; panel.position.set(x, 1.28, z + .4); scene.add(panel);
       for (const side of [-1, 1]) box(x + side * (width / 2 - .04), 1.47, z + .19, .07, .7, 1.03, 0xb4b9ae);
+      // Separate colored indicators make controls legible from the aisle.
+      for (let i=0; i<5; i++) {
+        const led = new THREE.Mesh(new THREE.SphereGeometry(.035,8,6), material([0x81d8b5,0x80c7e7,0xe5c179][i%3],true));
+        led.position.set(x-width*.32+i*width*.16,1.43,z+.61); scene.add(led);
+      }
+      for (const side of [-1,1]) for(const y of [.25,.9]){
+        const bolt=new THREE.Mesh(new THREE.SphereGeometry(.035,8,6),material(0x425b61));
+        bolt.position.set(x+side*(width/2-.12),y,z+.71);scene.add(bolt);
+      }
       obstacles.push({ x, z: z + .2, w: width, d: 1.75 });
     }
     function stationUnit(station, seed) {
@@ -148,6 +167,14 @@ export function createScenarioWorld(container) {
     }
     function mannequin(x, z) {
       box(x, 1.45, z, .72, 1.15, .44, 0xe5e8df);
+      box(x,1.48,z-.3,.68,.9,.24,0xa8bab9);
+      box(x,1.48,z+.24,.58,.42,.08,0x9db1b0);
+      box(x,1.6,z+.3,.36,.08,.04,0x426475);
+      for(const side of [-1,1]){
+        box(x+side*.3,1.95,z+.18,.14,.11,.08,0xd59556);
+        box(x+side*.48,.87,z+.02,.22,.12,.29,0x738e93);
+        box(x+side*.22,.16,z+.11,.27,.18,.52,0x617d81);
+      }
       const helmet = new THREE.Mesh(new THREE.SphereGeometry(.32, 18, 14), material(0xcbd9d6));
       helmet.position.set(x, 2.38, z); scene.add(helmet);
       box(x, 2.36, z + .31, .44, .19, .035, 0x3b5960);
@@ -161,12 +188,12 @@ export function createScenarioWorld(container) {
 
     // Each scenario owns its own room, geometry and textures; the next one is built on demand.
     box(0, -.16, 0, halfWidth*2, .32, 20, 0x454d4c);
-    const floor = new THREE.Mesh(new THREE.PlaneGeometry(halfWidth*2, 20), new THREE.MeshStandardMaterial({ color: [0x8b8d87, 0x777e7b, 0x85877e, 0x497a82, 0xb5b9ad, 0x727b76, 0x515b60][index], metalness: .08, roughness: .95 }));
+    const floor = new THREE.Mesh(new THREE.PlaneGeometry(halfWidth*2, 20), new THREE.MeshStandardMaterial({ color: [0xa7b4b1, 0x849997, 0x758c91, 0x599da6, 0xc9c6ad, 0x899b99, 0x7d969c][index], map: textures.floor, metalness: .15, roughness: .82 }));
     floor.rotation.x = -Math.PI / 2; floor.position.y = .005; scene.add(floor);
     for (let x = -halfWidth+1; x < halfWidth; x += 2) box(x, .02, 0, .025, .016, 19.5, 0x646e6a);
     for (let z = -9; z <= 9; z += 2) box(0, .02, z, halfWidth*2-.5, .016, .025, 0x646e6a);
     const roomHeight = [5.4,5.8,6,7,4.9,17,6][index];
-    const wallColor = index === 3 ? 0x397c8d : index === 4 ? 0xc6ccc0 : 0x98a5a2;
+    const wallColor = [0xc1d1ce,0xa4b8b2,0x77949b,0x397f93,0xd8d4bd,0x8fa3a4,0x9fb8ba][index];
     box(-halfWidth, roomHeight / 2, 0, .35, roomHeight, 20, wallColor); box(halfWidth, roomHeight / 2, 0, .35, roomHeight, 20, wallColor);
     for (const side of [-1, 1]) {
       box(side * (halfWidth+1.2)/2, roomHeight / 2, -9.9, halfWidth-1.2, roomHeight, .3, wallColor);
@@ -224,6 +251,10 @@ export function createScenarioWorld(container) {
       box(-3.7, .19, -3.8, 3.2, .15, 2.4, 0x424f4c);
       box(4, .22, -2.4, 2, .26, 3.15, 0x313e40);
       box(4, .38, -2.4, 1.6, .06, 2.7, 0x1c2b30);
+      for(let i=0;i<5;i++){
+        const stripe=box(4,.42,-3.45+i*.54,1.5,.018,.035,0x859b9c);
+        animatedParts.push({type:'belt',mesh:stripe,base:stripe.position.z});
+      }
       for (const x of [3.05, 4.95]) box(x, 1.1, -3.3, .09, 1.7, .12, 0xb5c7c3);
       display(4, 2.12, -3.5, 1, .55, 1);
       textPanel('T2 / CARDIO', 4, 3.1, -3.7, 2.3);
@@ -250,7 +281,7 @@ export function createScenarioWorld(container) {
       for (const x of [2.3, 6.1]) for (const z of [-5, .2]) box(x, 1.4, z, .1, 2.8, .12, 0xb0bdba);
       for (let i = 0; i < 26; i++) {
         const bubble = new THREE.Mesh(new THREE.SphereGeometry(.025 + (i % 3) * .018, 8, 6), new THREE.MeshBasicMaterial({ color: 0xbdebf3, transparent: true, opacity: .35 }));
-        bubble.position.set((i % 7) * 2.25 - 7.1, .65 + (i % 5) * .72, -6 + Math.floor(i / 7) * 3.3); scene.add(bubble);
+        bubble.position.set((i % 7) * 2.25 - 7.1, .65 + (i % 5) * .72, -6 + Math.floor(i / 7) * 3.3); scene.add(bubble); bubbles.push({mesh:bubble,base:bubble.position.y,phase:i*.47});
       }
       obstacles.push({ x: 4.2, z: -2.4, w: 4.4, d: 5.3 });
     } else if (index === 4) {
@@ -336,13 +367,26 @@ export function createScenarioWorld(container) {
       const voidDisc=new THREE.Mesh(new THREE.CircleGeometry(1.18,40),new THREE.MeshBasicMaterial({color:0x06142b}));
       voidDisc.position.set(5.4,3.65,-9.22);scene.add(voidDisc);
       const earth=new THREE.Mesh(new THREE.SphereGeometry(.68,32,20),new THREE.MeshStandardMaterial({color:0x3479a0,emissive:0x183a5a,emissiveIntensity:.5,roughness:.9}));
-      earth.position.set(5.65,3.43,-9.08);scene.add(earth);
+      earth.position.set(5.65,3.43,-9.08);scene.add(earth);animatedParts.push({type:'earth',mesh:earth});
       for(const x of [-.23,.12,.33]) box(5.65+x,3.55,-8.5,.06,.26,.025,0xd9e5e0);
       textPanel('CABIN / MARS OUTPOST SIM',2.5,4.55,-9.28,6.3);
     }
     decorateRoom(index,{box,cylinder,display,textPanel,obstacles});
     scene.add(camera);
-    return { scene, obstacles, beacon, forwardLeaves, backLeaves, doorLamp, halfWidth };
+    function animate(dt, active) {
+      if(!active || reducedMotion.matches)return;
+      ambientTime += dt; screenTime += dt;
+      if(screenTime >= .2){
+        screenTime=0;
+        for(const screen of animatedScreens){drawTelemetry(screen.surface,screen.seed,ambientTime);screen.map.needsUpdate=true;}
+      }
+      for(const bubble of bubbles){bubble.mesh.position.y=.2+((bubble.base+ambientTime*.24+bubble.phase)%4.5);bubble.mesh.position.x+=Math.sin(ambientTime+bubble.phase)*dt*.015;}
+      for(const part of animatedParts){
+        if(part.type==='belt')part.mesh.position.z=-3.45+(((part.base+3.45+ambientTime*.25)%2.7)+2.7)%2.7;
+        if(part.type==='earth')part.mesh.rotation.y=ambientTime*.08;
+      }
+    }
+    return { scene, obstacles, beacon, forwardLeaves, backLeaves, doorLamp, halfWidth, animate, textures };
   }
 
   let room = makeRoom(0);
@@ -374,7 +418,9 @@ export function createScenarioWorld(container) {
       items.forEach(item => materials.add(item));
     });
     geometries.forEach(item => item.dispose());
-    materials.forEach(item => { item.map?.dispose(); item.dispose(); });
+    const maps = new Set(Object.values(oldRoom.textures));
+    materials.forEach(item => { if (item.map) maps.add(item.map); item.dispose(); });
+    maps.forEach(texture => texture.dispose());
   }
   function blocked(x, z, stage) {
     if (Math.abs(x) > room.halfWidth-.5) return true;
@@ -403,6 +449,7 @@ export function createScenarioWorld(container) {
     },
     update(dt, active, target, stage) {
       controlsActive = active;
+      room.animate(dt,active);
       const open = canEnterScenario(sceneIndex + 1, stage);
       room.forwardLeaves.forEach((leaf, i) => { leaf.position.x = THREE.MathUtils.lerp(leaf.position.x, (i ? 1 : -1) * (open ? 1.68 : .64), Math.min(1, dt * 5)); });
       room.doorLamp.material.color.setHex(open ? 0x9ad7b2 : 0xbe6458);
@@ -414,7 +461,7 @@ export function createScenarioWorld(container) {
         const forward = Number(keys.has('KeyW')) - Number(keys.has('KeyS'));
         const right = Number(keys.has('KeyD')) - Number(keys.has('KeyA'));
         const length = Math.hypot(forward, right) || 1;
-        const pace = sceneIndex === 3 ? 1.15 : keys.has('ShiftLeft') ? 2.85 : 1.75;
+        const pace = sceneIndex === 3 ? 1.7 : keys.has('ShiftLeft') ? 4.1 : 2.7;
         const desiredX = (right * Math.cos(camera.rotation.y) - forward * Math.sin(camera.rotation.y)) * pace / length;
         const desiredZ = (-forward * Math.cos(camera.rotation.y) - right * Math.sin(camera.rotation.y)) * pace / length;
         const blend = 1 - Math.exp(-(forward || right ? 9 : 12) * dt);
@@ -423,7 +470,7 @@ export function createScenarioWorld(container) {
         const x = camera.position.x + velocity.x * dt, z = camera.position.z + velocity.y * dt;
         if (!blocked(x, camera.position.z, stage)) camera.position.x = x; else velocity.x = 0;
         if (!blocked(camera.position.x, z, stage)) camera.position.z = z; else velocity.y = 0;
-        const motion = velocity.length() / 2.85;
+        const motion = Math.min(1, velocity.length() / 4.1);
         if (motion > .02) stride += dt * (keys.has('ShiftLeft') ? 11 : 8);
         const bob = reducedMotion.matches ? 0 : Math.sin(stride) * .018 * motion;
         if (sceneIndex === 3) hoverY = THREE.MathUtils.clamp(hoverY + (Number(keys.has('Space')) - Number(keys.has('ControlLeft'))) * dt * .8, 1.4, 3.25);

@@ -1,5 +1,14 @@
 # Lunar Command 3D
 
+## Materiales y movimiento ambiental
+
+Los equipos incorporan superficies metálicas, indicadores de colores y detalles de
+traje; los suelos usan texturas generadas para cada sala. Las pantallas muestran
+telemetría animada simulada; en el gimnasio se mueve la cinta y en NBL ascienden
+burbujas. La caminata y la carrera son más rápidas, con desplazamiento más lento
+en el agua simulada. Las animaciones se detienen con las pausas y respetan la preferencia de
+movimiento reducido del sistema. Las texturas son originales y procedurales.
+
 ## Exploración educativa y escenarios
 
 La revisión del audio del 15 de noviembre de 2026 incorpora 19 objetos educativos
