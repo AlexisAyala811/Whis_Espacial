@@ -188,7 +188,7 @@ window.addEventListener('keydown',e=>{
   if(e.repeat||e.target.closest('input,textarea'))return;
   if(!$('launch-sequence').hidden){if(e.code==='Escape')$('launch-skip').click();return;}
   if(e.code==='KeyI'&&running&&!inspected&&$('task').hidden&&$('mental').hidden){$('inspect-toggle').click();return;}
-  if(e.code==='KeyF'&&running&&!inspected&&$('task').hidden&&$('mental').hidden){const point=[...visiblePoints].sort((a,b)=>a.aim-b.aim)[0];if(point)openInspection(point);return;}
+  if(e.code==='KeyF'&&running&&!inspected&&$('task').hidden&&$('mental').hidden){visiblePoints=world.learningPoints();const point=[...visiblePoints].sort((a,b)=>a.aim-b.aim)[0];if(point)openInspection(point);return;}
   if(inspected){
     if(e.code==='Escape'){closeInspection();return;}
     if(e.code==='Tab'){const list=[...$('object-card').querySelectorAll('button,a')];const index=list.indexOf(document.activeElement);e.preventDefault();list[(index+(e.shiftKey?-1:1)+list.length)%list.length].focus();}
@@ -201,14 +201,15 @@ window.addEventListener('keydown',e=>{
 });
 window.addEventListener('blur',()=>{if(running)pause();});
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&running)pause();});
-let last=performance.now();
+let last=performance.now(),lastLearning=0;
 function frame(now){
   const dt=Math.min((now-last)/1000,.05);last=now;
   if(world){
     if(running&&!transitioning&&!inspected&&!inspectMode)mission.advance(dt);
     const next=world.update(dt,running&&!transitioning&&!inspected&&!inspectMode&&$('mental').hidden&&$('task').hidden,mission.target,mission.stage);
     if(next!==null&&!transitioning)transitionTo(next);
-    updateLearning();
+    // Marker visibility requires scene raycasts; update at most 20 times per second.
+    if(now-lastLearning>=50){updateLearning();lastLearning=now;}
     const near=world.near(),door=world.door(mission.stage),seconds=Math.floor(mission.elapsed);
     $('clock').textContent=String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(seconds%60).padStart(2,'0');
     $('progress').textContent=mission.stage+' / '+SCENARIOS.length;$('errors').textContent=mission.errors;

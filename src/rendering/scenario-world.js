@@ -4,6 +4,8 @@ import { LEARNING_ROOMS } from '../core/learning-catalog.js';
 import { decorateRoom } from './room-identity.js';
 import { makeSurfaceTextures, drawTelemetry } from './surface-detail.js';
 import { buildCabinDetails } from './cabin-details.js';
+import { finishScenario } from './scenario-finish.js';
+import { RoundedBoxGeometry } from '../../node_modules/three/examples/jsm/geometries/RoundedBoxGeometry.js';
 
 export const STATIONS = [
   { id: 'suit', name: '01 / TRAJE', scene: 0, x: -3.7, z: -1.4, color: 0x91d9c2 },
@@ -41,14 +43,27 @@ export function createScenarioWorld(container) {
   const suitWhite = new THREE.MeshStandardMaterial({ color: 0xdce3df, map: playerTextures.fabric, roughness: .9 });
   const suitGray = new THREE.MeshStandardMaterial({ color: 0x829698, map: playerTextures.fabric, roughness: .88 });
   const arms = [];
+  const palmGeometry = new RoundedBoxGeometry(.19,.10,.22,3,.035);
+  const fingerGeometry = new THREE.CapsuleGeometry(.022,.065,3,8);
+  const cuffGeometry = new THREE.TorusGeometry(.106,.016,8,18);
+  const grip = new THREE.MeshStandardMaterial({ color: 0x475e64, roughness: .92 });
   for (const side of [-1, 1]) {
     const arm = new THREE.Group();
     const sleeve = new THREE.Mesh(new THREE.CylinderGeometry(.09, .14, .38, 10), suitWhite);
     sleeve.rotation.z = side * .55; sleeve.position.set(side * .64, -.74, -.94); arm.add(sleeve);
     const wrist = new THREE.Mesh(new THREE.CylinderGeometry(.11, .11, .09, 10), suitGray);
     wrist.rotation.z = side * .55; wrist.position.set(side * .57, -.56, -1); arm.add(wrist);
-    const hand = new THREE.Mesh(new THREE.BoxGeometry(.17, .11, .15), suitWhite);
-    hand.position.set(side * .54, -.49, -1.04); arm.add(hand);
+    const glove = new THREE.Group();glove.position.set(side * .54, -.49, -1.04);glove.rotation.z=side*.12;
+    glove.add(new THREE.Mesh(palmGeometry,suitWhite));
+    for(let i=0;i<4;i++){
+      const finger=new THREE.Mesh(fingerGeometry,suitWhite);
+      finger.rotation.x=Math.PI/2;finger.position.set((i-1.5)*.044,-.004,-.135-(i===1||i===2?.01:0));glove.add(finger);
+      const pad=new THREE.Mesh(new THREE.SphereGeometry(.018,8,6),grip);
+      pad.position.set((i-1.5)*.044,-.026,-.18-(i===1||i===2?.01:0));glove.add(pad);
+    }
+    const thumb=new THREE.Mesh(fingerGeometry,suitWhite);thumb.rotation.set(Math.PI/2,side*.7,side*.25);thumb.position.set(side*.12,-.005,-.03);glove.add(thumb);
+    const cuff=new THREE.Mesh(cuffGeometry,grip);cuff.position.set(0,0,.105);glove.add(cuff);
+    arm.add(glove);
     camera.add(arm); arms.push(arm);
   }
 
@@ -66,7 +81,7 @@ export function createScenarioWorld(container) {
     const accent = new THREE.PointLight(accents[index], index === 5 ? 22 : 12, 16, 2);
     accent.position.set(3, index === 5 ? 8 : 4, -2); scene.add(accent);
     const obstacles = [], materials = new Map(), textures = makeSurfaceTextures(index);
-    const animatedScreens = [], screenMaps = new Map(), bubbles = [], animatedParts = [];
+    const animatedScreens = [], screenMaps = new Map(), bubbles = [], animatedParts = [], staticBoxes = [];
     let ambientTime = 0, screenTime = 0, disposeCabin = null;
     function material(color, glow = false, kind = 'metal') {
       const key = `${color}-${glow}-${kind}`;
@@ -78,7 +93,7 @@ export function createScenarioWorld(container) {
       const rubbers = [0x1c2b30,0x243e48,0x26383f,0x313e40,0x34434c];
       const kind = surface ?? (color === 0x394b55 ? 'floor' : fabrics.includes(color) ? 'fabric' : rubbers.includes(color) ? 'rubber' : 'metal');
       const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material(color, glow, kind));
-      mesh.position.set(x, y, z); scene.add(mesh); return mesh;
+      mesh.position.set(x, y, z); scene.add(mesh); staticBoxes.push(mesh); return mesh;
     }
     function cylinder(x, y, z, top, bottom, height, color) {
       const mesh = new THREE.Mesh(new THREE.CylinderGeometry(top, bottom, height, 16), material(color));
@@ -204,7 +219,15 @@ export function createScenarioWorld(container) {
     for (let z = -9; z <= 9; z += 2) box(0, .02, z, halfWidth*2-.5, .016, .025, 0x646e6a);
     const roomHeight = [5.4,5.8,6,7,4.9,17,6][index];
     const wallColor = [0xc1d1ce,0xa4b8b2,0x77949b,0x397f93,0xd8d4bd,0x8fa3a4,0x617881][index];
-    box(-halfWidth, roomHeight / 2, 0, .35, roomHeight, 20, wallColor, false, 'wall'); box(halfWidth, roomHeight / 2, 0, .35, roomHeight, 20, wallColor, false, 'wall');
+    if(index===6){
+      for(const side of [-1,1]){
+        box(side*halfWidth,.9,0,.35,1.8,20,wallColor,false,'wall');
+        box(side*halfWidth,5.25,0,.35,1.5,20,wallColor,false,'wall');
+        for(const z of [-6.5,7.5])box(side*halfWidth,3.15,z,.35,2.7,6,wallColor,false,'wall');
+      }
+    }else{
+      box(-halfWidth, roomHeight / 2, 0, .35, roomHeight, 20, wallColor, false, 'wall'); box(halfWidth, roomHeight / 2, 0, .35, roomHeight, 20, wallColor, false, 'wall');
+    }
     for (const side of [-1, 1]) {
       box(side * (halfWidth+1.2)/2, roomHeight / 2, -9.9, halfWidth-1.2, roomHeight, .3, wallColor, false, 'wall');
       box(side * (halfWidth+1.2)/2, roomHeight / 2, 9.9, halfWidth-1.2, roomHeight, .3, wallColor, false, 'wall');
@@ -350,7 +373,8 @@ export function createScenarioWorld(container) {
     } else {
       // Spacecraft cabin: instrument bays, restrained seats and a framed Earth view.
       for(const x of [-8.4,8.4]){
-        box(x,3,0,.55,5.6,16,0x66767b);
+        box(x,.9,0,.55,1.8,16,0x66767b);box(x,5.2,0,.55,1.6,16,0x66767b);
+        for(const z of [-6.5,7.5])box(x,3.15,z,.55,2.7,6,0x66767b);
         for(const z of [-6,-2,2,6]){
           box(x+(x<0?.32:-.32),3,z,.08,4.7,.13,0xb7c4c3);
           box(x+(x<0?.33:-.33),4.6,z, .1,.08,3.5,0xb7c4c3);
@@ -399,6 +423,26 @@ export function createScenarioWorld(container) {
       animatedParts.push({type:'ship-model',mesh:model});
     }
     decorateRoom(index,{box,cylinder,display,textPanel,obstacles});
+    finishScenario(index,{box,display});
+    // Group static boxes by material. Moving doors, lamps and exercise parts stay separate.
+    const dynamic=new Set([...forwardLeaves,...backLeaves,doorLamp,...animatedParts.map(part=>part.mesh)]);
+    const groups=new Map();
+    for(const item of staticBoxes){
+      if(dynamic.has(item))continue;
+      if(!groups.has(item.material))groups.set(item.material,[]);
+      groups.get(item.material).push(item);
+    }
+    for(const [mat,items] of groups){
+      if(items.length<4)continue;
+      const batch=new THREE.InstancedMesh(new THREE.BoxGeometry(1,1,1),mat,items.length);
+      const size=new THREE.Vector3(),matrix=new THREE.Matrix4();
+      items.forEach((item,i)=>{
+        const p=item.geometry.parameters;size.set(p.width,p.height,p.depth).multiply(item.scale);
+        matrix.compose(item.position,item.quaternion,size);batch.setMatrixAt(i,matrix);
+        scene.remove(item);item.geometry.dispose();
+      });
+      batch.instanceMatrix.needsUpdate=true;scene.add(batch);
+    }
     scene.add(camera);
     function animate(dt, active) {
       if(!active || reducedMotion.matches)return;

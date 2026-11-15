@@ -39,15 +39,16 @@ function panoramicTexture(path, alive) {
 }
 
 function curvedWindow(map, side) {
-  const geometry=new THREE.PlaneGeometry(7.8,2.5,28,1);
+  const scale=3;
+  const geometry=new THREE.PlaneGeometry(7.8*scale,2.5*scale,28,1);
   const points=geometry.attributes.position;
   for(let i=0;i<points.count;i++){
     const x=points.getX(i);
-    points.setZ(i,.13*(1-(x*x)/(3.9*3.9)));
+    points.setZ(i,.3*(1-(x*x)/(11.7*11.7)));
   }
   geometry.computeVertexNormals();
-  const mesh=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({map}));
-  mesh.position.set(side*7.68,3.15,1);mesh.rotation.y=-side*Math.PI/2;
+  const mesh=new THREE.Mesh(geometry,new THREE.MeshBasicMaterial({map,fog:false,side:THREE.DoubleSide}));
+  mesh.position.set(side*23.4,5.7,1);mesh.rotation.y=-side*Math.PI/2;
   return mesh;
 }
 
@@ -58,6 +59,23 @@ export function buildCabinDetails({scene,box,display,obstacles}) {
   const leftWindow=curvedWindow(left,-1),rightWindow=curvedWindow(right,1);
   leftWindow.name='cabin-left-panorama';rightWindow.name='cabin-right-panorama';
   scene.add(leftWindow,rightWindow);
+
+  // A separate 3D spacecraft sits beyond the right-hand window. Its near layer
+  // moves against the distant panorama as the player changes position.
+  const satellite=new THREE.Group();satellite.name='cabin-exterior-satellite';
+  satellite.position.set(13.2,3.8,-1.1);satellite.rotation.set(.14,.32,.08);
+  const shellMat=new THREE.MeshStandardMaterial({color:0xcbd4cf,metalness:.75,roughness:.38});
+  const panelMat=new THREE.MeshStandardMaterial({color:0x1e426e,metalness:.42,roughness:.34});
+  const frameMat=new THREE.MeshStandardMaterial({color:0xa4b7ba,metalness:.7,roughness:.4});
+  const part=(geometry,material,x,y,z)=>{const mesh=new THREE.Mesh(geometry,material);mesh.position.set(x,y,z);satellite.add(mesh);return mesh;};
+  part(new THREE.BoxGeometry(.65,.65,.9),shellMat,0,0,0);
+  for(const side of [-1,1]){
+    part(new THREE.BoxGeometry(.08,.05,.42),frameMat,0,0,side*.66);
+    part(new THREE.BoxGeometry(.82,.05,.95),panelMat,0,0,side*1.25);
+    for(const x of [-.26,0,.26])part(new THREE.BoxGeometry(.012,.015,.9),frameMat,x,.034,side*1.25);
+  }
+  const dish=part(new THREE.ConeGeometry(.27,.16,16,1,true),frameMat,.42,.25,0);dish.rotation.z=-Math.PI/2;
+  satellite.traverse(o=>{o.frustumCulled=true;o.raycast=()=>{};if(o.material)o.material.fog=false;});scene.add(satellite);
 
   // Separate, subtle foreground glass catches light without blocking the learning ray.
   for(const side of [-1,1]){
@@ -98,9 +116,13 @@ export function buildCabinDetails({scene,box,display,obstacles}) {
     box(side*1.4,2.3,-9.27,.19,4.5,.18,0x71909b);
     box(side*1.54,1.4,-9.12,.08,.5,.06,0xb1e7df,true);
   }
-  for(const z of [-7,-5,-3,-1,1,3,5,7]){
-    for(const x of [-5,-2.5,0,2.5,5])box(x,5.58,z,2.3,.06,1.8,0x3a4e59);
+  // Share geometry and one draw call for the ceiling panels.
+  const ceiling=new THREE.InstancedMesh(new THREE.BoxGeometry(2.3,.06,1.8),shell,40);
+  const matrix=new THREE.Matrix4();let panelIndex=0;
+  for(const z of [-7,-5,-3,-1,1,3,5,7])for(const x of [-5,-2.5,0,2.5,5]){
+    matrix.makeTranslation(x,5.58,z);ceiling.setMatrixAt(panelIndex++,matrix);
   }
+  ceiling.instanceMatrix.needsUpdate=true;scene.add(ceiling);
   box(0,4.55,-9.2,3,.15,.2,0x718f97);
   for(const x of [-5.7,-4.5,-3.3,3,4.2,5.4])box(x,.12,-7.9,.65,.04,.1,0xe8bc85,true);
   const blue=new THREE.PointLight(0x89c8f2,8,11,2);blue.position.set(-4,3.7,0);scene.add(blue);
