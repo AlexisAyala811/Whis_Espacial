@@ -8,7 +8,7 @@ let learning=new LearningProgress(), inspectMode=false, inspected=null, visibleP
 const $=id=>document.getElementById(id);
 let mission=new FieldTraining(),running=false,started=false,transitioning=false,pauseAfterTransition=false,selectedCable=null,world;
 const titles=['Verifica tu traje','Controla cada repetición','Prioriza el soporte vital','Conecta el módulo EVA','Equilibra los recursos','Restablece la energía','Dirige el puesto marciano'];
-const details=['Acércate a la consola 01. Confirma presión, agua y telemetría con E.','Completa seis repeticiones en ARED pulsando E en la zona verde.','Resuelve los avisos de la consola ECLSS.','En NBL, une cada línea con su puerto. Espacio y Ctrl ajustan la altura.','Ajusta oxígeno, agua y energía del hábitat.','Activa los tres buses eléctricos del cohete.','En la cabina, toma cinco decisiones sobre un puesto marciano y observa sus consecuencias.'];
+const details=['Acércate a la consola 01. Confirma presión, agua y telemetría con E.','Completa seis repeticiones en ARED pulsando E en la zona verde.','Resuelve los avisos de la consola ECLSS.','En NBL, une cada línea con su puerto. Espacio sube; Ctrl sin W baja. Ctrl + W avanza más rápido.','Ajusta oxígeno, agua y energía del hábitat.','Activa los tres buses eléctricos del cohete.','En la cabina, toma cinco decisiones sobre un puesto marciano y observa sus consecuencias.'];
 try { world=createScenarioWorld($('world')); }
 catch { $('fatal').hidden=false;$('fatal').textContent='No se pudo iniciar la escena 3D. Activa WebGL o abre esta página en un navegador de escritorio compatible.'; }
 function closeInspection(recapture=true){

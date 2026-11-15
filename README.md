@@ -1,5 +1,11 @@
 # Lunar Command 3D
 
+## Controles y vista desde la nave
+
+Mantén Ctrl + W para correr hacia delante; Shift también permite correr.
+La cabina tiene una ventana panorámica con un paisaje interestelar ficticio
+generado mediante gráficos originales. La visión es una representación artística.
+
 ## Materiales y movimiento ambiental
 
 Los equipos incorporan superficies metálicas, indicadores de colores y detalles de
@@ -32,7 +38,7 @@ la pantalla de carga y las actividades principales del recorrido siguen disponib
 
 La página inicial ahora abre una base 3D a pantalla completa inspirada en la interacción
 de NightOps/GENIE, con geometría original. Pulsa **Entrar en la base**.
-Usa WASD para caminar, Shift para correr, ratón capturado o arrastre para mirar
+Usa WASD para caminar, Ctrl + W o Shift para correr, ratón capturado o arrastre para mirar
 (flechas como alternativa), E para interactuar y Esc para abrir el menú.
 Recorre siete escenarios: preparación de traje → acondicionamiento físico (ARED y T2)
 → control de misión (ECLSS) → entrenamiento EVA en NBL → hábitat de investigación
@@ -48,7 +54,7 @@ Los errores reducen
 la puntuación. El informe final se guarda
 localmente cuando el navegador lo permite. Reiniciar restaura la partida.
 Esta versión requiere teclado y está diseñada para escritorio; no incluye controles táctiles.
-En NBL, Espacio y Ctrl permiten ajustar la altura en el agua simulada.
+En NBL, Espacio sube y Ctrl sin W baja en el agua simulada; Ctrl + W permite avanzar más rápido sin descender.
 La coordinación ARED es una mecánica de juego, no un modelo fisiológico.
 
 Cada sala se construye al entrar y libera los recursos de la anterior. La base usa

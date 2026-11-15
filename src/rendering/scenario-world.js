@@ -3,6 +3,7 @@ import { SCENARIOS, canEnterScenario } from '../core/scenario-route.js';
 import { LEARNING_ROOMS } from '../core/learning-catalog.js';
 import { decorateRoom } from './room-identity.js';
 import { makeSurfaceTextures, drawTelemetry } from './surface-detail.js';
+import { makeStarfield } from './starfield.js';
 
 export const STATIONS = [
   { id: 'suit', name: '01 / TRAJE', scene: 0, x: -3.7, z: -1.4, color: 0x91d9c2 },
@@ -29,7 +30,7 @@ export function createScenarioWorld(container) {
   camera.position.set(0, 1.7, arrivalZ);
   const canvas = renderer.domElement;
   canvas.tabIndex = 0;
-  canvas.setAttribute('aria-label', 'Escenario 3D. WASD para caminar, ratón o flechas para mirar. Cruza la puerta iluminada para avanzar.');
+  canvas.setAttribute('aria-label', 'Escenario 3D. WASD para caminar; Ctrl más W o Shift para correr. Ratón o flechas para mirar. Cruza la puerta iluminada para avanzar.');
   const keys = new Set();
   const velocity = new THREE.Vector2();
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
@@ -58,6 +59,10 @@ export function createScenarioWorld(container) {
     scene.add(new THREE.HemisphereLight(index === 3 ? 0xa8e8f5 : 0xf2f4ec, index === 3 ? 0x24516b : 0x6d7774, index === 3 ? 2 : 1.55));
     const light = new THREE.DirectionalLight(0xf5f2e8, 1.25);
     light.position.set(-4, 8, 6); scene.add(light);
+    // Gentle accent lighting separates training spaces while keeping signs readable.
+    const accents = [0xb6dce6,0xe4c891,0x75bdde,0x59c7e7,0xe8c998,0xf0b46d,0x83b7ed];
+    const accent = new THREE.PointLight(accents[index], index === 5 ? 22 : 12, 16, 2);
+    accent.position.set(3, index === 5 ? 8 : 4, -2); scene.add(accent);
     const obstacles = [], materials = new Map(), textures = makeSurfaceTextures(index);
     const animatedScreens = [], screenMaps = new Map(), bubbles = [], animatedParts = [];
     let ambientTime = 0, screenTime = 0;
@@ -357,19 +362,20 @@ export function createScenarioWorld(container) {
         box(x,2.03,-2.68,1.22,.15,.11,0x394b52);
         obstacles.push({x,z:-2.1,w:1.5,d:2});
       }
-      for(const x of [2.4,5.5]) display(x,3.05,-9.35,2.5,1.2,6);
       box(4.1,1.03,-5.8,5.8,1.6,1.1,0x586a71);
       box(4.1,1.82,-5.23,5.75,.12,.52,0x9caeaa);
       for(const x of [2.5,4.1,5.7]) display(x,2.45,-6.31,1.35,.64,6);
       obstacles.push({x:4.1,z:-5.8,w:6,d:1.4});
-      const windowRing=new THREE.Mesh(new THREE.TorusGeometry(1.35,.18,12,40),material(0xc1d2d0));
-      windowRing.position.set(5.4,3.65,-9.15);scene.add(windowRing);
-      const voidDisc=new THREE.Mesh(new THREE.CircleGeometry(1.18,40),new THREE.MeshBasicMaterial({color:0x06142b}));
-      voidDisc.position.set(5.4,3.65,-9.22);scene.add(voidDisc);
-      const earth=new THREE.Mesh(new THREE.SphereGeometry(.68,32,20),new THREE.MeshStandardMaterial({color:0x3479a0,emissive:0x183a5a,emissiveIntensity:.5,roughness:.9}));
-      earth.position.set(5.65,3.43,-9.08);scene.add(earth);animatedParts.push({type:'earth',mesh:earth});
-      for(const x of [-.23,.12,.33]) box(5.65+x,3.55,-8.5,.06,.26,.025,0xd9e5e0);
-      textPanel('CABIN / MARS OUTPOST SIM',2.5,4.55,-9.28,6.3);
+      // A wide observation window behind the flight deck. The view is fictional.
+      const panorama = new THREE.Mesh(new THREE.PlaneGeometry(5.8, 2.75),
+        new THREE.MeshBasicMaterial({ map: makeStarfield() }));
+      panorama.position.set(4.15,3.65,-9.25);scene.add(panorama);
+      for(const x of [1.2,7.1]) box(x,3.65,-9.08,.18,3.08,.2,0x48636d);
+      for(const y of [2.2,5.1]) box(4.15,y,-9.08,6.1,.16,.2,0x48636d);
+      for(const x of [3.15,5.15]) box(x,3.65,-9.05,.09,2.75,.12,0x6a8791);
+      box(4.15,2.17,-8.98,6.2,.09,.13,0x82c6d5,true);
+      const starlight=new THREE.PointLight(0x80b9e6,14,12,2);
+      starlight.position.set(4.1,4.1,-7.9);scene.add(starlight);
     }
     decorateRoom(index,{box,cylinder,display,textPanel,obstacles});
     scene.add(camera);
@@ -393,7 +399,7 @@ export function createScenarioWorld(container) {
   const clear = () => { keys.clear(); velocity.set(0, 0); dragging = false; };
   const down = event => {
     if (event.target.closest('input,textarea,button,select')) return;
-    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(event.code)) event.preventDefault();
+    if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Space'].includes(event.code) || (controlsActive && event.code === 'KeyW' && event.ctrlKey)) event.preventDefault();
     keys.add(event.code);
   };
   const up = event => keys.delete(event.code);
@@ -461,7 +467,9 @@ export function createScenarioWorld(container) {
         const forward = Number(keys.has('KeyW')) - Number(keys.has('KeyS'));
         const right = Number(keys.has('KeyD')) - Number(keys.has('KeyA'));
         const length = Math.hypot(forward, right) || 1;
-        const pace = sceneIndex === 3 ? 1.7 : keys.has('ShiftLeft') ? 4.1 : 2.7;
+        const control = keys.has('ControlLeft') || keys.has('ControlRight');
+        const sprint = keys.has('ShiftLeft') || keys.has('ShiftRight') || (control && forward > 0);
+        const pace = sceneIndex === 3 ? (sprint ? 2.4 : 1.7) : sprint ? 4.1 : 2.7;
         const desiredX = (right * Math.cos(camera.rotation.y) - forward * Math.sin(camera.rotation.y)) * pace / length;
         const desiredZ = (-forward * Math.cos(camera.rotation.y) - right * Math.sin(camera.rotation.y)) * pace / length;
         const blend = 1 - Math.exp(-(forward || right ? 9 : 12) * dt);
@@ -471,9 +479,9 @@ export function createScenarioWorld(container) {
         if (!blocked(x, camera.position.z, stage)) camera.position.x = x; else velocity.x = 0;
         if (!blocked(camera.position.x, z, stage)) camera.position.z = z; else velocity.y = 0;
         const motion = Math.min(1, velocity.length() / 4.1);
-        if (motion > .02) stride += dt * (keys.has('ShiftLeft') ? 11 : 8);
+        if (motion > .02) stride += dt * (sprint ? 11 : 8);
         const bob = reducedMotion.matches ? 0 : Math.sin(stride) * .018 * motion;
-        if (sceneIndex === 3) hoverY = THREE.MathUtils.clamp(hoverY + (Number(keys.has('Space')) - Number(keys.has('ControlLeft'))) * dt * .8, 1.4, 3.25);
+        if (sceneIndex === 3) hoverY = THREE.MathUtils.clamp(hoverY + (Number(keys.has('Space')) - Number(control && forward <= 0)) * dt * .8, 1.4, 3.25);
         camera.position.y = THREE.MathUtils.lerp(camera.position.y, hoverY + bob, Math.min(1, dt * (sceneIndex === 3 ? 5 : 12)));
         arms.forEach((arm, i) => { arm.position.y = reducedMotion.matches ? 0 : Math.sin(stride + (i ? Math.PI : 0)) * .012 * motion; });
         if (z < exitZ && Math.abs(x) < 1.08 && open) return sceneIndex + 1;
