@@ -73,13 +73,33 @@ Los objetivos y los siete recursos del reto
 están enlazados en [resources.html](resources.html), accesible desde la pantalla de
 inicio y el informe final. La página oficial no respondió a la lectura automatizada;
 el desglose se cotejó con la [página del evento local HackAthlone](https://hackathlone.com/challenges/junior-astronaut-mission-trainer),
-que reproduce el reto y sus enlaces. El juego atribuye cada pregunta a una fuente,
-pero todavía no consume sus datos.
+que reproduce el reto y sus enlaces. El juego atribuye cada pregunta a una fuente
+y consulta DONKI y APOD como se explica más abajo.
 
 Demo jugable de navegador para entrenamiento ASCAN terrestre, construida con HTML,
 CSS, JavaScript y Three.js. La fase actual se rige por la
 [Constitución](.specify/memory/constitution.md) y mantiene separadas la simulación,
 la interfaz y el adaptador futuro de voz de LUMINE/A.R.E.S.
+
+## Datos reales de NASA
+
+La primera decisión de la misión marciana consulta erupciones solares de los
+últimos 30 días mediante [DONKI](https://ccmc.gsfc.nasa.gov/tools/DONKI/).
+La página **Fuentes** también muestra la última erupción, un gráfico con los días
+que registraron erupciones y la imagen astronómica del día (APOD), cuando NASA
+proporciona una imagen alojada en su dominio; otros formatos se enlazan a NASA.
+Las fechas son UTC y se muestra la fecha
+de consulta; las erupciones son observaciones, no pronósticos de riesgo.
+El evento de la partida y los porcentajes de recursos son simulados.
+Si NASA no responde, se indica y la simulación sigue disponible.
+
+DONKI usa el servicio público directo de NASA, sin clave. APOD usa DEMO_KEY
+si no configuras una clave. Para una clave propia, solicítala en
+[NASA Open APIs](https://api.nasa.gov/), copia `.env.example` a `.env` si no
+existe y coloca `NASA_API_KEY=tu_clave` en ese archivo local. Reinicia el servidor.
+El archivo `.env` no debe subirse a Git ni compartirse. El servidor mantiene
+la clave en el servidor; la página nunca la recibe. Las otras fuentes OSDR,
+RadLab y CSA están enlazadas como consulta, aún no alimentan la simulación.
 
 ## Ejecución local
 
@@ -87,7 +107,7 @@ Requiere Node.js 22+:
 
 ```powershell
 npm ci
-Copy-Item .env.example .env
+if (!(Test-Path .env)) { Copy-Item .env.example .env }
 npm start
 ```
 

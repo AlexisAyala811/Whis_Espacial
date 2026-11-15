@@ -1,3 +1,4 @@
+import { showSolar } from './nasa-panel.js';
 import { FieldTraining } from './core/field-training.js';
 import { createScenarioWorld, STATIONS } from './rendering/scenario-world.js';
 import { SCENARIOS } from './core/scenario-route.js';
@@ -108,6 +109,7 @@ function renderTask(){
       const value=document.createElement('strong');value.textContent=sim.resources[key]+' %';row.append(name,meter,value);section.append(row);
     }
     if(sim.failed){controls.append(taskButton('Reintentar misión marciana',()=>act({retry:true}),'task-confirm'));return;}
+    if(sim.sol===0){const facts=document.createElement('section');facts.className='nasa-data';facts.setAttribute('aria-live','polite');controls.append(facts);showSolar(facts);}
     const choices=taskSection('ELIGE UNA ACCIÓN · CADA OPCIÓN TIENE COSTO');choices.classList.add('outpost-options');
     question.options.forEach((option,index)=>{
       const costs=Object.entries(option.delta).map(([key,value])=>`${{air:'aire',power:'energía',shield:'protección',food:'alimentos'}[key]} ${value>0?'+':''}${value}`).join(' · ');

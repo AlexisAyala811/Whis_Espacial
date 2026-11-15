@@ -1,6 +1,7 @@
 <!doctype html>
 <html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fuentes y objetivos · Lunar Command 3D</title><style>
 :root{color-scheme:dark;font-family:system-ui,Arial,sans-serif;background:#0b1b23;color:#e4efeb}body{max-width:940px;margin:auto;padding:38px 22px 70px;line-height:1.65}a{color:#b9e8b2;text-underline-offset:3px}h1{font-size:clamp(32px,6vw,58px);line-height:1.08}h2{margin-top:42px;color:#b9e8b2}p,li{color:#c9d9d7}.eyebrow{font:11px monospace;letter-spacing:2px;color:#b9e8b2}.note{padding:18px 22px;background:#18323a;border-left:3px solid #b9e8b2}.resources{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}.resources a{display:block;padding:18px;background:#142a32;border:1px solid #57746f;text-decoration:none}.resources small{display:block;color:#a9c0bf;margin-top:5px}a:focus-visible{outline:3px solid white;outline-offset:3px}
+.nasa-apod-image{display:block;width:100%;max-height:520px;object-fit:contain;margin:16px 0;background:#071019}.solar-chart{display:flex;align-items:end;gap:5px;height:100px;padding:8px;border-bottom:1px solid #81cbd1}.solar-chart span{flex:1;min-width:2px;background:linear-gradient(#aadfd5,#438aa3);border-radius:3px 3px 0 0}
 </style></head><body>
 <a href="./">← Volver al juego</a><p class="eyebrow">LUNAR COMMAND 3D / FUENTES Y OBJETIVOS</p>
 <h1>Entrena decisiones de misión</h1>
@@ -9,6 +10,11 @@
 <ul><li>Soporte vital: recuperar el aire consume energía.</li><li>Radiación: proteger a la tripulación limita las actividades y cuesta recursos.</li><li>Energía: repartirla entre sistemas esenciales, comunicaciones, cultivos y ciencia.</li><li>Alimentos: mantener el cultivo consume energía.</li><li>Demora de comunicación: la tripulación toma decisiones locales mientras llega la respuesta de la Tierra.</li></ul>
 <p>Estos conceptos aparecen en cinco soles jugables de un puesto marciano, simulados desde la cabina de la nave. Cada decisión muestra sus costos y consecuencias. Los seis escenarios anteriores son entrenamiento terrestre previo.</p>
 <p class="note"><strong>Alcance de la simulación.</strong> Los porcentajes de recursos, umbrales y eventos son mecánicas educativas inventadas. Ningún valor del juego se presenta como telemetría NASA ni como dato en vivo. Los enlaces siguientes permiten ampliar y verificar los conceptos. La demo es ficticia y no está afiliada con NASA.</p>
+<h2>Datos recientes de NASA</h2>
+<div class="note" id="nasa-solar" role="status">Consultando actividad solar…</div>
+<div class="note" id="nasa-apod" role="status">Consultando imagen astronómica…</div>
+<p>Los datos se consultan desde el servidor al abrir esta página. Los valores del juego siguen siendo simulados.</p>
+<script type="module">import {showSolar,showApod} from './src/nasa-panel.js';showSolar(document.getElementById('nasa-solar'));showApod(document.getElementById('nasa-apod'));</script>
 <h2>Los siete recursos enlazados por el reto</h2>
 <div class="resources">
 <a href="https://api.nasa.gov/" target="_blank" rel="noopener noreferrer">NASA Open APIs<small>Portal de datos y APIs públicas.</small></a>
