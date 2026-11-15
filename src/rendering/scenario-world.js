@@ -367,13 +367,13 @@ export function createScenarioWorld(container) {
       for(const x of [2.5,4.1,5.7]) display(x,2.45,-6.31,1.35,.64,6);
       obstacles.push({x:4.1,z:-5.8,w:6,d:1.4});
       // A wide observation window behind the flight deck. The view is fictional.
-      const panorama = new THREE.Mesh(new THREE.PlaneGeometry(5.8, 2.75),
+      const panorama = new THREE.Mesh(new THREE.PlaneGeometry(5.9, 3.1),
         new THREE.MeshBasicMaterial({ map: makeStarfield() }));
       panorama.position.set(4.15,3.65,-9.25);scene.add(panorama);
-      for(const x of [1.2,7.1]) box(x,3.65,-9.08,.18,3.08,.2,0x48636d);
-      for(const y of [2.2,5.1]) box(4.15,y,-9.08,6.1,.16,.2,0x48636d);
-      for(const x of [3.15,5.15]) box(x,3.65,-9.05,.09,2.75,.12,0x6a8791);
-      box(4.15,2.17,-8.98,6.2,.09,.13,0x82c6d5,true);
+      for(const x of [1.15,7.15]) box(x,3.65,-9.08,.18,3.35,.2,0x48636d);
+      for(const y of [2.02,5.28]) box(4.15,y,-9.08,6.2,.16,.2,0x48636d);
+      for(const x of [3.15,5.15]) box(x,3.65,-9.05,.06,3.1,.12,0x6a8791);
+      box(4.15,1.99,-8.98,6.2,.09,.13,0x82c6d5,true);
       const starlight=new THREE.PointLight(0x80b9e6,14,12,2);
       starlight.position.set(4.1,4.1,-7.9);scene.add(starlight);
     }

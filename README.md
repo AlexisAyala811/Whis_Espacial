@@ -3,8 +3,9 @@
 ## Controles y vista desde la nave
 
 Mantén Ctrl + W para correr hacia delante; Shift también permite correr.
-La cabina tiene una ventana panorámica con un paisaje interestelar ficticio
-generado mediante gráficos originales. La visión es una representación artística.
+La cabina tiene una ventana panorámica con la Tierra, la Luna, el Sol, estrellas
+y representaciones de Orión y la Osa Mayor. Es una composición artística: las
+distancias, posiciones y tamaños no corresponden a una vista astronómica real.
 
 ## Materiales y movimiento ambiental
 
