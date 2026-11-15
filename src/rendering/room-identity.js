@@ -11,7 +11,6 @@ export function decorateRoom(index,{box,cylinder,display,textPanel,obstacles}) {
     box(4.8,.48,3.5,2.8,.15,1,0xadb8b5);for(const x of [3.6,6])box(x,.24,3.5,.12,.5,.7,0x647575);
     obstacles.push({x:4.8,z:3.5,w:2.8,d:1});
     for(const x of [3.4,6.1]){box(x,.07,-2.8,1.8,.13,1.8,0x687e86);box(x,.14,-2.8,1.5,.04,1.5,0xc9d8d5);}
-    textPanel('01 / PREPARACION Y EQUIPO',0,3.4,-8.6,4.8);
   }else if(index===1){
     // Gym: continuous rubber floor, lanes, exposed beams and equipment islands.
     for(const x of [-3.8,4]){

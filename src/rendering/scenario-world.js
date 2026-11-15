@@ -36,8 +36,10 @@ export function createScenarioWorld(container) {
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
   let dragging = false, controlsActive = false, stride = 0, sceneIndex = 0, hoverY = 1.7;
 
-  const suitWhite = new THREE.MeshStandardMaterial({ color: 0xdce3df, roughness: .68 });
-  const suitGray = new THREE.MeshStandardMaterial({ color: 0x829698, roughness: .7 });
+  const playerTextures = makeSurfaceTextures(0);
+  for (const kind of ['metal','floor','wall','rubber']) playerTextures[kind].dispose();
+  const suitWhite = new THREE.MeshStandardMaterial({ color: 0xdce3df, map: playerTextures.fabric, roughness: .9 });
+  const suitGray = new THREE.MeshStandardMaterial({ color: 0x829698, map: playerTextures.fabric, roughness: .88 });
   const arms = [];
   for (const side of [-1, 1]) {
     const arm = new THREE.Group();
@@ -66,13 +68,16 @@ export function createScenarioWorld(container) {
     const obstacles = [], materials = new Map(), textures = makeSurfaceTextures(index);
     const animatedScreens = [], screenMaps = new Map(), bubbles = [], animatedParts = [];
     let ambientTime = 0, screenTime = 0;
-    function material(color, glow = false) {
-      const key = `${color}-${glow}`;
-      if (!materials.has(key)) materials.set(key, new THREE.MeshStandardMaterial({ color, map: glow ? null : textures.metal, roughness: glow ? .4 : .68, metalness: glow ? .05 : .32, emissive: glow ? color : 0, emissiveIntensity: glow ? 1.1 : 0 }));
+    function material(color, glow = false, kind = 'metal') {
+      const key = `${color}-${glow}-${kind}`;
+      if (!materials.has(key)) materials.set(key, new THREE.MeshStandardMaterial({ color, map: glow ? null : textures[kind], roughness: glow ? .4 : kind==='metal' ? .68 : .92, metalness: glow ? .05 : kind==='metal' ? .32 : .03, emissive: glow ? color : 0, emissiveIntensity: glow ? 1.1 : 0 }));
       return materials.get(key);
     }
-    function box(x, y, z, w, h, d, color, glow = false) {
-      const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material(color, glow));
+    function box(x, y, z, w, h, d, color, glow = false, surface = null) {
+      const fabrics = [0xe5e8df,0xdfe5df,0x3e6474,0x9daaa9,0xd8dad2];
+      const rubbers = [0x1c2b30,0x243e48,0x26383f,0x313e40,0x34434c];
+      const kind = surface ?? (color === 0x394b55 ? 'floor' : fabrics.includes(color) ? 'fabric' : rubbers.includes(color) ? 'rubber' : 'metal');
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), material(color, glow, kind));
       mesh.position.set(x, y, z); scene.add(mesh); return mesh;
     }
     function cylinder(x, y, z, top, bottom, height, color) {
@@ -199,12 +204,12 @@ export function createScenarioWorld(container) {
     for (let z = -9; z <= 9; z += 2) box(0, .02, z, halfWidth*2-.5, .016, .025, 0x646e6a);
     const roomHeight = [5.4,5.8,6,7,4.9,17,6][index];
     const wallColor = [0xc1d1ce,0xa4b8b2,0x77949b,0x397f93,0xd8d4bd,0x8fa3a4,0x9fb8ba][index];
-    box(-halfWidth, roomHeight / 2, 0, .35, roomHeight, 20, wallColor); box(halfWidth, roomHeight / 2, 0, .35, roomHeight, 20, wallColor);
+    box(-halfWidth, roomHeight / 2, 0, .35, roomHeight, 20, wallColor, false, 'wall'); box(halfWidth, roomHeight / 2, 0, .35, roomHeight, 20, wallColor, false, 'wall');
     for (const side of [-1, 1]) {
-      box(side * (halfWidth+1.2)/2, roomHeight / 2, -9.9, halfWidth-1.2, roomHeight, .3, wallColor);
-      box(side * (halfWidth+1.2)/2, roomHeight / 2, 9.9, halfWidth-1.2, roomHeight, .3, wallColor);
+      box(side * (halfWidth+1.2)/2, roomHeight / 2, -9.9, halfWidth-1.2, roomHeight, .3, wallColor, false, 'wall');
+      box(side * (halfWidth+1.2)/2, roomHeight / 2, 9.9, halfWidth-1.2, roomHeight, .3, wallColor, false, 'wall');
     }
-    box(0, roomHeight, 0, halfWidth*2, .2, 20, index === 5 ? 0x66716e : 0xc5cac2);
+    box(0, roomHeight, 0, halfWidth*2, .2, 20, index === 5 ? 0x66716e : 0xc5cac2, false, 'wall');
     if ([0,2].includes(index)) for (let x = -halfWidth+1; x < halfWidth; x += 2) for (let z = -9; z < 10; z += 2) {
       box(x, roomHeight-.13, z, 1.94, .024, 1.94, index === 3 ? 0x427888 : 0xd0d3ca);
       if (((x + z) / 2) % 3 === 0) box(x, roomHeight-.17, z, 1.3, .02, .42, index === 3 ? 0x8cd7ec : 0xf4f3e8, true);

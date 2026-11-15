@@ -1,38 +1,59 @@
 import * as THREE from 'three';
 
-// Small, deterministic textures are shared within a room and released with it.
+// Room-local procedural textures: deterministic, lightweight and original.
 export function makeSurfaceTextures(room) {
   function texture(kind) {
-    const canvas = document.createElement('canvas');
-    canvas.width = canvas.height = 256;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, 256, 256);
-    let state = 1843 + room * 1009 + kind.length * 73;
-    const rnd = () => ((state = (state * 1664525 + 1013904223) >>> 0) / 4294967296);
-    for (let i = 0; i < (kind === 'metal' ? 1700 : 900); i++) {
-      const shade = Math.floor(195 + rnd() * 60);
-      ctx.fillStyle = `rgba(${shade},${shade},${shade},${.05 + rnd() * .16})`;
-      const x = rnd() * 256, y = rnd() * 256;
-      ctx.fillRect(x, y, kind === 'metal' ? 3 + rnd() * 24 : 1 + rnd() * 2, .5 + rnd());
-    }
-    if (kind === 'floor') {
-      ctx.strokeStyle = 'rgba(80,95,100,.24)'; ctx.lineWidth = 1;
-      for (let i = 0; i <= 256; i += 64) {
-        ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, 256); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(256, i); ctx.stroke();
-      }
-      for (let x = 6; x < 256; x += 64) for (let y = 6; y < 256; y += 64) {
-        ctx.fillStyle = 'rgba(65,75,80,.38)';ctx.beginPath();ctx.arc(x,y,1.5,0,Math.PI*2);ctx.fill();
+    const canvas=document.createElement('canvas');canvas.width=canvas.height=512;
+    const ctx=canvas.getContext('2d'), size=512;
+    let seed=1843+room*1009+kind.length*73;
+    const rnd=()=>((seed=(seed*1664525+1013904223)>>>0)/4294967296);
+    ctx.fillStyle='#eceeed';ctx.fillRect(0,0,size,size);
+    function noise(count,alpha,span=1){
+      for(let i=0;i<count;i++){
+        const v=Math.floor(120+rnd()*135);ctx.fillStyle=`rgba(${v},${v},${v},${rnd()*alpha})`;
+        ctx.fillRect(rnd()*size,rnd()*size,1+rnd()*span,1+rnd()*1.4);
       }
     }
-    const map = new THREE.CanvasTexture(canvas);
-    map.colorSpace = THREE.SRGBColorSpace;
-    map.wrapS = map.wrapT = THREE.RepeatWrapping;
-    if (kind === 'floor') map.repeat.set(4, 5);
-    map.anisotropy = 2;
-    return map;
+    if(kind==='metal'){
+      const g=ctx.createLinearGradient(0,0,0,size);g.addColorStop(0,'#f3f5f4');g.addColorStop(.48,'#d9dedd');g.addColorStop(1,'#f1f3f1');
+      ctx.fillStyle=g;ctx.fillRect(0,0,size,size);
+      noise(3000,.13,20);
+      for(let y=0;y<size;y+=4){ctx.fillStyle=y%8?'rgba(90,102,102,.025)':'rgba(255,255,255,.10)';ctx.fillRect(0,y,size,1);}
+    }else if(kind==='wall'){
+      ctx.fillStyle=room===3?'#dbe9e9':room===4?'#f1f0e5':'#e2e9e7';ctx.fillRect(0,0,size,size);
+      noise(2500,.12,3);
+      ctx.strokeStyle='rgba(75,94,98,.19)';ctx.lineWidth=2;ctx.strokeRect(2,2,508,508);
+      ctx.strokeStyle='rgba(255,255,255,.34)';ctx.lineWidth=2;ctx.strokeRect(5,5,502,502);
+      for(const x of [14,498])for(const y of [14,498]){ctx.fillStyle='rgba(65,78,80,.45)';ctx.beginPath();ctx.arc(x,y,3,0,Math.PI*2);ctx.fill();ctx.fillStyle='rgba(255,255,255,.5)';ctx.fillRect(x-1,y-1,2,2);}
+    }else if(kind==='fabric'){
+      ctx.fillStyle='#f0f1ed';ctx.fillRect(0,0,size,size);
+      for(let i=0;i<size;i+=4){ctx.fillStyle='rgba(65,80,85,.10)';ctx.fillRect(0,i,size,1);ctx.fillRect(i,0,1,size);}
+      noise(2000,.12,2);
+      ctx.strokeStyle='rgba(95,110,110,.20)';ctx.lineWidth=3;ctx.strokeRect(7,7,498,498);
+      ctx.setLineDash([5,6]);ctx.strokeStyle='rgba(120,135,135,.32)';ctx.lineWidth=1;ctx.strokeRect(12,12,488,488);ctx.setLineDash([]);
+    }else if(kind==='rubber'){
+      ctx.fillStyle='#cdd5d3';ctx.fillRect(0,0,size,size);noise(5500,.26,2);
+      for(let y=0;y<size;y+=12){ctx.strokeStyle='rgba(80,92,95,.12)';ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(size,y);ctx.stroke();}
+    }else if(kind==='floor'){
+      const patterns=['panels','rubber','carpet','tile','vinyl','industrial','panels'];
+      const style=patterns[room];
+      ctx.fillStyle=style==='carpet'?'#cbd3d2':style==='rubber'?'#d1d9d5':style==='tile'?'#d9eeee':'#e4e9e6';ctx.fillRect(0,0,size,size);
+      noise(style==='carpet'?7000:3500,style==='industrial'?.24:.16,style==='industrial'?6:2);
+      if(style==='carpet')for(let y=0;y<size;y+=4){ctx.fillStyle='rgba(55,80,82,.05)';ctx.fillRect(0,y,size,1);}
+      if(style==='rubber')for(let y=0;y<size;y+=16)for(let x=0;x<size;x+=16){ctx.fillStyle='rgba(90,100,100,.13)';ctx.beginPath();ctx.arc(x+8,y+8,2,0,Math.PI*2);ctx.fill();}
+      if(style==='panels'||style==='tile'||style==='vinyl'){
+        const step=style==='tile'?64:128;ctx.strokeStyle='rgba(70,91,94,.27)';ctx.lineWidth=style==='tile'?3:2;
+        for(let i=0;i<=size;i+=step){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,size);ctx.moveTo(0,i);ctx.lineTo(size,i);ctx.stroke();}
+        if(style==='panels')for(let x=8;x<size;x+=128)for(let y=8;y<size;y+=128){ctx.fillStyle='rgba(65,75,80,.36)';ctx.beginPath();ctx.arc(x,y,2.4,0,Math.PI*2);ctx.fill();}
+      }
+      if(style==='industrial')for(let i=0;i<30;i++){ctx.strokeStyle='rgba(60,68,65,.10)';ctx.beginPath();let x=rnd()*size,y=rnd()*size;ctx.moveTo(x,y);ctx.lineTo(x+20+rnd()*60,y+rnd()*4);ctx.stroke();}
+    }
+    const map=new THREE.CanvasTexture(canvas);map.colorSpace=THREE.SRGBColorSpace;
+    map.wrapS=map.wrapT=THREE.RepeatWrapping;
+    if(kind==='floor')map.repeat.set(room===3?2:4,room===3?2:5);
+    map.anisotropy=2;return map;
   }
-  return { metal: texture('metal'), floor: texture('floor') };
+  return {metal:texture('metal'),floor:texture('floor'),wall:texture('wall'),fabric:texture('fabric'),rubber:texture('rubber')};
 }
 
 export function drawTelemetry(canvas, seed, time = 0) {

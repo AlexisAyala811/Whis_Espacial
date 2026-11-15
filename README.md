@@ -15,6 +15,14 @@ La cabina tiene una ventana panorámica con la Tierra, la Luna, el Sol, estrella
 y representaciones de Orión y la Osa Mayor. Es una composición artística: las
 distancias, posiciones y tamaños no corresponden a una vista astronómica real.
 
+## Texturas por espacio
+
+Las superficies usan texturas procedurales originales para metal cepillado,
+paneles de pared, tejido y goma. Cada sala recibe un suelo apropiado: paneles,
+goma de gimnasio, moqueta de control, baldosas de piscina, vinilo de hábitat o
+acabado industrial de ensamblaje. Los materiales y texturas se liberan al salir
+de cada sala. Las geometrías siguen siendo una base estilizada para mejorar.
+
 ## Materiales y movimiento ambiental
 
 Los equipos incorporan superficies metálicas, indicadores de colores y detalles de
