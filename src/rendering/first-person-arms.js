@@ -2,8 +2,8 @@ import * as THREE from 'three';
 import {GLTFLoader} from '../../node_modules/three/examples/jsm/loaders/GLTFLoader.js';
 import {createGloveCurl} from './glove-morph.js';
 
-// Provisional articulated suit arms. Each finger has independent pivot joints;
-// the game can replace this local rig with a licensed skinned GLB later.
+// Textured suit forearms and gloves share the same first-person motion rig.
+// Procedural components remain available when a model cannot be loaded.
 export function createFirstPersonArms(camera,fabric,reducedMotion){
  if(!fabric){const c=document.createElement('canvas');c.width=c.height=128;const ctx=c.getContext('2d');ctx.fillStyle='#e4e7e1';ctx.fillRect(0,0,128,128);ctx.strokeStyle='rgba(80,100,105,.12)';for(let i=0;i<128;i+=4){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,128);ctx.moveTo(0,i);ctx.lineTo(128,i);ctx.stroke();}fabric=new THREE.CanvasTexture(c);fabric.colorSpace=THREE.SRGBColorSpace;}
  const textileLoader=new THREE.TextureLoader(),textileMaps={};
@@ -32,14 +32,15 @@ export function createFirstPersonArms(camera,fabric,reducedMotion){
  function part(parent,geometry,mat,x,y,z,sx=1,sy=1,sz=1){const mesh=new THREE.Mesh(geometry,mat);mesh.position.set(x,y,z);mesh.scale.set(sx,sy,sz);parent.add(mesh);return mesh;}
  for(const side of [-1,1]){
   const rig=new THREE.Group();rig.name=side<0?'left-suit-arm':'right-suit-arm';rig.position.set(side*.55,-.5,-1.03);camera.add(rig);
-  const sleeve=part(rig,sleeveGeo,white,side*.10,-.28,.09);sleeve.rotation.z=side*.5;
-  const wrist=part(rig,sphere,white,0,-.08,.08,.095,.085,.105);
+  const armFallback=new THREE.Group();armFallback.name='procedural-forearm';rig.add(armFallback);
+  const sleeve=part(armFallback,sleeveGeo,white,side*.10,-.28,.09);sleeve.rotation.z=side*.5;
+  const wrist=part(armFallback,sphere,white,0,-.08,.08,.095,.085,.105);
   // A solid elliptical coupling bridges the glove and sleeve; fine seams
   // hug the coupling surface instead of appearing as suspended hoops.
-  const coupling=part(rig,cuffBandGeo,cuffBand,0,0,.077,1,1,.82);
+  const coupling=part(armFallback,cuffBandGeo,cuffBand,0,0,.077,1,1,.82);
   coupling.name='wrist-coupling';coupling.rotation.x=Math.PI/2;
   for(const z of [.032,.12]){
-   const joint=part(rig,cuffGeo,seam,0,0,z,1,.82,1);
+   const joint=part(armFallback,cuffGeo,seam,0,0,z,1,.82,1);
    joint.name='wrist-seam';
   }
   const gloveFallback=new THREE.Group();gloveFallback.name='procedural-glove';rig.add(gloveFallback);
@@ -69,8 +70,18 @@ export function createFirstPersonArms(camera,fabric,reducedMotion){
   const thumbBase=part(thumb,fingerSegment,shell,0,0,-.033,1.12,.9,1);thumbBase.rotation.x=Math.PI/2;
   const thumbTip=part(thumb,sphere,shell,0,0,-.074,.022,.019,.031);
   part(thumb,sphere,reinforcement,0,-.012,-.086,.018,.009,.02);
-  arms.push({side,rig,fingers,thumb,gloveFallback});
+  arms.push({side,rig,fingers,thumb,gloveFallback,armFallback});
  }
+ // Reuse a textured, lightweight forearm from the same suit as the glove.
+ // Its fallback stays visible if loading fails.
+ new GLTFLoader().load('./assets/models/ares-forearm/ares-forearm.glb',({scene:model})=>{
+   for(const arm of arms){
+     const forearm=model.clone(true);forearm.name='ares-textured-forearm';
+     if(arm.side<0)forearm.scale.x=-1;
+     forearm.traverse(mesh=>{if(mesh.isMesh){mesh.castShadow=false;mesh.receiveShadow=true;mesh.raycast=()=>{};}});
+     arm.rig.add(forearm);arm.armFallback.visible=false;
+   }
+ },undefined,()=>{});
  // Load a locally optimized, textured hand from the project's CC0 suit.
  // Keep the articulated procedural glove if the model cannot be loaded.
  new GLTFLoader().load('./assets/models/ares-glove/ares-glove.glb',({scene:model})=>{
