@@ -136,7 +136,7 @@ function closeTask(recapture=true){$('task').hidden=true;selectedCable=null;if(r
 function play(){
   if(!world)return;
   closeInspection(false);started=true;running=true;document.body.classList.add('playing');$('briefing').hidden=true;$('pause').hidden=true;$('game-hud').hidden=false;
-  if(!wali)wali=createWali({getContext:()=>({scene:SCENARIOS[world.currentIndex].id,sceneIndex:world.currentIndex,stage:mission.stage,completed:mission.complete,checks:mission.checks,reps:mission.reps,errors:mission.errors,buses:[...mission.powerBuses],active:running&&!transitioning&&!inspected&&$('task').hidden&&$('mental').hidden})});
+  if(!wali)wali=createWali({showAvatar:false,getContext:()=>({scene:SCENARIOS[world.currentIndex].id,sceneIndex:world.currentIndex,stage:mission.stage,completed:mission.complete,checks:mission.checks,reps:mission.reps,errors:mission.errors,buses:[...mission.powerBuses],active:running&&!transitioning&&!inspected&&$('task').hidden&&$('mental').hidden})});
   world.focus();if($('mental').hidden)world.capture();
 }
 function pause(){if(!started||mission.complete)return;if(transitioning){pauseAfterTransition=true;return;}closeInspection(false);running=false;$('task').hidden=true;$('mental').hidden=true;world.release();$('pause').hidden=false;$('resume').focus();}

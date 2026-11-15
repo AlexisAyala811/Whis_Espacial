@@ -1,12 +1,12 @@
 import {waliHint,WALI_FACTS} from './core/wali-policy.js';
 
 // Text-only companion with local rules; it neither sends data nor acts for the player.
-export function createWali({getContext}){
+export function createWali({getContext,showAvatar=true}){
   if(!document.head||!document.body||typeof document.querySelector!=='function')return null;
   if(document.querySelector('[data-wali]'))return;
   const stylesheet=document.createElement('link');stylesheet.rel='stylesheet';stylesheet.href='./src/wali.css';document.head.append(stylesheet);
   const root=document.createElement('aside');root.className='wali';root.dataset.wali='';root.setAttribute('aria-label','Wali, compañero de misión');
-  const avatar=document.createElement('img');avatar.src='./assets/wali/wali.png';avatar.alt='';avatar.className='wali-avatar';avatar.draggable=false;
+  const avatar=document.createElement('img');avatar.src='./assets/wali/wali.png';avatar.alt='';avatar.className='wali-avatar';avatar.draggable=false;avatar.hidden=!showAvatar;
   const bubble=document.createElement('section');bubble.className='wali-bubble';bubble.id='wali-bubble';
   const title=document.createElement('strong');title.textContent='WALI · COMPAÑERO';
   const message=document.createElement('p');message.className='wali-message';message.setAttribute('role','status');

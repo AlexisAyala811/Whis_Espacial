@@ -1,4 +1,5 @@
 import * as THREE from 'three';
+import { createWaliCompanion } from './wali-companion.js';
 import { SCENARIOS, canEnterScenario } from '../core/scenario-route.js';
 import { LEARNING_ROOMS } from '../core/learning-catalog.js';
 import { PREPARATION_SUIT_POSITIONS } from '../core/preparation-layout.js';
@@ -445,6 +446,7 @@ export function createScenarioWorld(container) {
   }
 
   let room = makeRoom(0);
+  const waliCompanion = createWaliCompanion(room.scene, camera, reducedMotion);
   const clear = () => { keys.clear(); velocity.set(0, 0); dragging = false; };
   const down = event => {
     if (event.target.closest('input,textarea,button,select')) return;
@@ -493,7 +495,7 @@ export function createScenarioWorld(container) {
     focus() { canvas.focus(); },
     async capture() { try { await canvas.requestPointerLock(); } catch { /* Drag and arrows remain available. */ } },
     release() { if (document.pointerLockElement === canvas) document.exitPointerLock(); clear(); },
-    reset() { disposeRoom(room); sceneIndex = 0; room = makeRoom(0); camera.position.set(0, 1.7, arrivalZ); camera.rotation.set(0, 0, 0); hoverY = 1.7; stride = 0; clear(); },
+    reset() { room.scene.remove(waliCompanion.group); disposeRoom(room); sceneIndex = 0; room = makeRoom(0); waliCompanion.attach(room.scene); camera.position.set(0, 1.7, arrivalZ); camera.rotation.set(0, 0, 0); waliCompanion.snap(); hoverY = 1.7; stride = 0; clear(); },
     async load(index) {
       if (index === sceneIndex || index < 0 || index >= SCENARIOS.length) return;
       const backwards = index < sceneIndex;
@@ -501,9 +503,9 @@ export function createScenarioWorld(container) {
       await new Promise(resolve => requestAnimationFrame(resolve));
       const nextRoom = makeRoom(index);
       await new Promise(resolve => setTimeout(resolve, Math.max(0, 650 - (performance.now() - start))));
-      disposeRoom(room); room = nextRoom; sceneIndex = index;
+      room.scene.remove(waliCompanion.group); disposeRoom(room); room = nextRoom; sceneIndex = index; waliCompanion.attach(room.scene);
       camera.position.set(0, 1.7, backwards ? -arrivalZ : arrivalZ);
-      camera.rotation.set(0, backwards ? Math.PI : 0, 0); hoverY = 1.7; stride = 0; clear();
+      camera.rotation.set(0, backwards ? Math.PI : 0, 0); waliCompanion.snap(); hoverY = 1.7; stride = 0; clear();
     },
     update(dt, active, target, stage) {
       controlsActive = active;
@@ -543,6 +545,7 @@ export function createScenarioWorld(container) {
         camera.position.y = THREE.MathUtils.lerp(camera.position.y, hoverY, Math.min(1, dt * 12));
         arms.forEach(arm => { arm.position.y = THREE.MathUtils.lerp(arm.position.y, 0, Math.min(1, dt * 12)); });
       }
+      waliCompanion.update(dt, active, (x,z) => blocked(x,z,stage));
       renderer.render(room.scene, camera);
       return null;
     },
