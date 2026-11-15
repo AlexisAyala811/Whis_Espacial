@@ -72,7 +72,7 @@ export function createScenarioWorld(container) {
     let ambientTime = 0, screenTime = 0, disposeCabin = null;
     function material(color, glow = false, kind = 'metal') {
       const key = `${color}-${glow}-${kind}`;
-      if (!materials.has(key)) materials.set(key, new THREE.MeshStandardMaterial({ color, map: glow ? null : textures[kind], roughness: glow ? .4 : kind==='metal' ? .68 : .92, metalness: glow ? .05 : kind==='metal' ? .32 : .03, emissive: glow ? color : 0, emissiveIntensity: glow ? 1.1 : 0 }));
+      if (!materials.has(key)) materials.set(key, new THREE.MeshStandardMaterial({ color, map: glow ? null : textures[kind], normalMap: !glow && kind==='metal' ? textures.metalNormal : null, normalScale: new THREE.Vector2(.32,.32), roughnessMap: !glow && kind==='metal' ? textures.metalRoughness : null, roughness: glow ? .4 : kind==='metal' ? .68 : .92, metalness: glow ? .05 : kind==='metal' ? .32 : .03, emissive: glow ? color : 0, emissiveIntensity: glow ? 1.1 : 0 }));
       return materials.get(key);
     }
     function box(x, y, z, w, h, d, color, glow = false, surface = null) {
@@ -410,7 +410,15 @@ export function createScenarioWorld(container) {
     const disposeElectrical=addElectricalEquipment(scene,index);
     const disposePlants=index===4?loadRoomProp(scene,'nettle_plant',[1.1,2.8,4.5].flatMap(z=>[5.9,6.2,6.5].map(x=>({x,y:1.79,z,height:.53}))),plantFallbacks):()=>{};
     const disposeLaptop=index===2?loadRoomProp(scene,'classic_laptop',[{x:-4.3,y:1.24,z:3.95,height:.36}]):()=>{};
-    const disposeEquipment=()=>{disposeElectrical();disposePlants();disposeLaptop();};
+    // Detailed fixtures and equipment remain outside the navigable aisle.
+    const fixtureHeights=[4.75,5.05,5.35,0,4.38,0,5.18];
+    const suitFallbacks=[];if(index===0)scene.traverse(o=>{if(o.name==='preparation-suit')suitFallbacks.push(o)});
+    const disposeSuit=index===0?loadRoomProp(scene,'astronaut-suit',PREPARATION_SUIT_POSITIONS.map(({x,z})=>({x,y:.28,z,height:2.05,detail:1,shadows:false,url:'./assets/models/astronaut-suit/astronaut-in-spacesuit-light.glb'})),suitFallbacks):()=>{};
+    const disposeFixtures=fixtureHeights[index]?loadRoomProp(scene,'mounted_fluorescent_lights',[{x:0,y:fixtureHeights[index],z:-3,width:2.3,detail:1,shadows:false}]):()=>{};
+    const cartPositions={0:{x:5.8,y:0,z:-6.9,height:.8},1:{x:-7.8,y:0,z:6.8,height:.8},5:{x:-8.7,y:0,z:6.9,height:.85}};
+    const disposeCart=cartPositions[index]?loadRoomProp(scene,'tool_cart',[{...cartPositions[index],detail:1,shadows:false}]):()=>{};
+    const disposeMedical=index===4?loadRoomProp(scene,'medical_box',[{x:-5.6,y:.05,z:7.7,height:.4,detail:1,shadows:false}]):()=>{};
+    const disposeEquipment=()=>{disposeElectrical();disposePlants();disposeLaptop();disposeFixtures();disposeCart();disposeMedical();disposeSuit();};
     // Group static boxes by material. Moving doors, lamps and exercise parts stay separate.
     const dynamic=new Set([...forwardLeaves,...backLeaves,doorLamp,...animatedParts.map(part=>part.mesh)]);
     const groups=new Map();

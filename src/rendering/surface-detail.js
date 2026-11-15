@@ -67,6 +67,10 @@ export function makeSurfaceTextures(room, {pbr=false}={}) {
     return map;
   }
   const result={metal:texture('metal'),floor:texture('floor'),wall:texture('wall'),fabric:texture('fabric'),rubber:texture('rubber')};
+  if(pbr)for(const [key,file] of [['metalNormal','NormalGL'],['metalRoughness','Roughness']]){
+    let alive=true;const map=new THREE.TextureLoader().load(`./assets/interiors/pbr/Metal032/${file}.jpg`,loaded=>{if(!alive)loaded.dispose();},undefined,()=>{if(!alive)return;const c=document.createElement('canvas');c.width=c.height=1;const x=c.getContext('2d');x.fillStyle=key==='metalNormal'?'#8080ff':'#ffffff';x.fillRect(0,0,1,1);map.image=c;map.needsUpdate=true;});
+    map.wrapS=map.wrapT=THREE.RepeatWrapping;map.repeat.set(2,2);map.addEventListener('dispose',()=>{alive=false});result[key]=map;
+  }
   if(pbr && [0,5,6].includes(room))for(const [key,file] of [['floorNormal','NormalGL'],['floorRoughness','Roughness'],['floorMetalness','Metalness']]){
     let alive=true;const map=new THREE.TextureLoader().load('./assets/interiors/pbr/metal-plates-002/'+file+'.jpg',loaded=>{if(!alive)loaded.dispose();},undefined,()=>{if(!alive)return;const fallback=document.createElement('canvas');fallback.width=fallback.height=1;const c=fallback.getContext('2d');c.fillStyle=key==='floorNormal'?'#8080ff':'#ffffff';c.fillRect(0,0,1,1);map.image=fallback;map.needsUpdate=true;});
     map.wrapS=map.wrapT=THREE.RepeatWrapping;map.repeat.set(4,5);map.anisotropy=2;map.addEventListener('dispose',()=>{alive=false;});result[key]=map;

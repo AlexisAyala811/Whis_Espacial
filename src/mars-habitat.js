@@ -21,8 +21,8 @@ try{
   const wali=createWali({showAvatar:false,getContext:()=>({scene:'mars-habitat',active:!loading,near:nearAction?.id})});
   scene.add(new THREE.HemisphereLight(0xe8f4f0,0x63767b,1.5));const light=new THREE.DirectionalLight(0xf4ede2,1.45);light.position.set(-3,7,5);light.castShadow=true;light.shadow.mapSize.set(1024,1024);light.shadow.camera.left=-12;light.shadow.camera.right=12;light.shadow.camera.top=12;light.shadow.camera.bottom=-12;light.shadow.bias=-.0003;scene.add(light);
   for(const z of [-5,5]){const lamp=new THREE.PointLight(0xf4e9d7,4,9,2);lamp.position.set(0,4.7,z);lamp.userData.graphicsDetail=1;scene.add(lamp);}
-  const textures=makeSurfaceTextures(4);
-  const wall=new THREE.MeshStandardMaterial({color:0xc1ccca,map:textures.wall,roughness:.85}),floor=new THREE.MeshStandardMaterial({color:0x83999c,map:textures.floor,roughness:.7,metalness:.18}),metal=new THREE.MeshStandardMaterial({color:0x718a90,map:textures.metal,roughness:.58,metalness:.36}),dark=new THREE.MeshStandardMaterial({color:0x233c48,roughness:.72,metalness:.2}),fabric=new THREE.MeshStandardMaterial({color:0x385e70,map:textures.fabric,roughness:.9}),leaf=new THREE.MeshStandardMaterial({color:0x6d9e66,roughness:.9}),glow=new THREE.MeshBasicMaterial({color:0xccebdc});
+  const textures=makeSurfaceTextures(4,{pbr:true});
+  const wall=new THREE.MeshStandardMaterial({color:0xc1ccca,map:textures.wall,roughness:.85}),floor=new THREE.MeshStandardMaterial({color:0x83999c,map:textures.floor,roughness:.7,metalness:.18}),metal=new THREE.MeshStandardMaterial({color:0x718a90,map:textures.metal,normalMap:textures.metalNormal,normalScale:new THREE.Vector2(.32,.32),roughnessMap:textures.metalRoughness,roughness:.58,metalness:.36}),dark=new THREE.MeshStandardMaterial({color:0x233c48,roughness:.72,metalness:.2}),fabric=new THREE.MeshStandardMaterial({color:0x385e70,map:textures.fabric,roughness:.9}),leaf=new THREE.MeshStandardMaterial({color:0x6d9e66,roughness:.9}),glow=new THREE.MeshBasicMaterial({color:0xccebdc});
   const box=(x,y,z,w,h,d,mat)=>{const mesh=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),mat);mesh.position.set(x,y,z);mesh.castShadow=mat!==glow;mesh.receiveShadow=true;scene.add(mesh);return mesh;};
   const rounded=(x,y,z,w,h,d,mat,r=.08)=>{const mesh=new THREE.Mesh(new RoundedBoxGeometry(w,h,d,3,r),mat);mesh.position.set(x,y,z);mesh.castShadow=true;mesh.receiveShadow=true;scene.add(mesh);return mesh;};
   const sign=(text,x,y,z,w)=>{const c=document.createElement('canvas');c.width=512;c.height=96;const context=c.getContext('2d');context.fillStyle='#142f38';context.fillRect(0,0,512,96);context.fillStyle='#c7e8d5';context.font='bold 30px monospace';context.textAlign='center';context.fillText(text,256,58);const map=new THREE.CanvasTexture(c);map.colorSpace=THREE.SRGBColorSpace;const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,w*96/512),new THREE.MeshBasicMaterial({map}));mesh.position.set(x,y,z);scene.add(mesh);};
@@ -54,6 +54,7 @@ try{
     const foliage=new THREE.Mesh(new THREE.SphereGeometry(.15,10,8),leaf);foliage.position.y=.32;group.add(foliage);plantPositions.push({x,y:1.21,z,height:.42});
   }
   loadRoomProp(scene,'nettle_plant',plantPositions,plantFallbacks);
+  loadRoomProp(scene,'medical_box',[{x:-5.4,y:.06,z:6.9,height:.38,detail:1,shadows:false}]);
   box(4.45,2.25,-2.4,2,.08,.35,glow);for(const x of [3.4,5.5])box(x,1.7,-2.4,.08,2.4,.08,metal);
   obstacles.push({x:4.45,z:-2.4,w:2.5,d:1.8});sign("CROPS",4.45,2.8,-3.24,2.4);
   // Environmental rack and storage on right side.

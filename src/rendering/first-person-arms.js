@@ -5,7 +5,12 @@ import {RoundedBoxGeometry} from '../../node_modules/three/examples/jsm/geometri
 // the game can replace this local rig with a licensed skinned GLB later.
 export function createFirstPersonArms(camera,fabric,reducedMotion){
  if(!fabric){const c=document.createElement('canvas');c.width=c.height=128;const ctx=c.getContext('2d');ctx.fillStyle='#e4e7e1';ctx.fillRect(0,0,128,128);ctx.strokeStyle='rgba(80,100,105,.12)';for(let i=0;i<128;i+=4){ctx.beginPath();ctx.moveTo(i,0);ctx.lineTo(i,128);ctx.moveTo(0,i);ctx.lineTo(128,i);ctx.stroke();}fabric=new THREE.CanvasTexture(c);fabric.colorSpace=THREE.SRGBColorSpace;}
- const white=new THREE.MeshStandardMaterial({color:0xd6dfdc,map:fabric,roughness:.88});
+ const textileLoader=new THREE.TextureLoader(),textileMaps={};
+ for(const [key,file] of [['normal','NormalGL'],['roughness','Roughness']]){
+   const map=textileLoader.load(`./assets/interiors/pbr/Fabric034/${file}.jpg`,undefined,undefined,()=>{white[key==='normal'?'normalMap':'roughnessMap']=null;white.needsUpdate=true;});
+   map.wrapS=map.wrapT=THREE.RepeatWrapping;map.repeat.set(2,2);textileMaps[key]=map;
+ }
+ const white=new THREE.MeshStandardMaterial({color:0xd6dfdc,map:fabric,normalMap:textileMaps.normal,normalScale:new THREE.Vector2(.38,.38),roughnessMap:textileMaps.roughness,roughness:.9});
  const seam=new THREE.MeshStandardMaterial({color:0x71878b,roughness:.72,metalness:.22});
  const rubber=new THREE.MeshStandardMaterial({color:0x394f55,roughness:.85});
  const palmGeo=new RoundedBoxGeometry(.19,.105,.22,3,.038),segmentGeo=new THREE.CapsuleGeometry(.022,.045,4,10);
@@ -23,6 +28,8 @@ export function createFirstPersonArms(camera,fabric,reducedMotion){
   for(const z of [-.04,.025,.075]){const stitch=new THREE.Mesh(stitchGeo,seam);stitch.position.set(0,.058,z);rig.add(stitch);}
   for(const x of [-.065,.065]){const rivet=new THREE.Mesh(rivetGeo,rubber);rivet.position.set(x,.073,-.075);rig.add(rivet);}
   const innerCuff=new THREE.Mesh(cuffGeo,seam);innerCuff.scale.set(.83,.83,1);innerCuff.position.set(0,0,.13);rig.add(innerCuff);
+  for(const offset of [-.025,.025]){const band=new THREE.Mesh(cuffGeo,seam);band.scale.set(.9,.9,.5);band.position.set(0,offset,.14);rig.add(band);}
+  for(const x of [-.055,-.02,.02,.055]){const stitch=new THREE.Mesh(new THREE.BoxGeometry(.003,.005,.045),seam);stitch.position.set(x,.07,.03);rig.add(stitch);}
   const fingers=[];
   for(let i=0;i<4;i++){
     const pivot=new THREE.Group();pivot.position.set((i-1.5)*.044,0,-.105);pivot.rotation.y=(i-1.5)*.035;pivot.scale.z=[.87,1,.96,.78][i];rig.add(pivot);

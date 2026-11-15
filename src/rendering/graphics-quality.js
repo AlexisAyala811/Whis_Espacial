@@ -31,6 +31,7 @@ export function applySceneQuality(scene,preset,renderer,light){
   const textures=new Set();
   scene.traverse(object=>{
     if(object.userData.graphicsDetail) object.visible=preset.detail>=object.userData.graphicsDetail;
+    if(object.userData.graphicsMaxDetail!==undefined) object.visible=preset.detail<=object.userData.graphicsMaxDetail;
     if(!object.isMesh)return;
     const materials=Array.isArray(object.material)?object.material:[object.material];
     for(const material of materials)if(material)for(const v of Object.values(material))if(v?.isTexture)textures.add(v);

@@ -1,12 +1,15 @@
 import * as THREE from 'three';
 import { GLTFLoader } from '../../node_modules/three/examples/jsm/loaders/GLTFLoader.js';
 import { RoundedBoxGeometry } from '../../node_modules/three/examples/jsm/geometries/RoundedBoxGeometry.js';
+import {QUALITY_KEY,QUALITY_PRESETS,qualityName} from '../core/graphics-quality.js';
 export function loadRoomProp(scene,name,placements,fallback=[]){
  let active=true;
- new GLTFLoader().load(`./assets/models/${name}/${name}_1k.gltf`,({scene:model})=>{
+ new GLTFLoader().load(placements[0]?.url || `./assets/models/${name}/${name}_1k.gltf`,({scene:model})=>{
   if(!active){const geo=new Set(),mat=new Set(),tex=new Set();model.traverse(o=>{if(o.geometry)geo.add(o.geometry);for(const m of Array.isArray(o.material)?o.material:[o.material])if(m)mat.add(m)});mat.forEach(m=>{for(const t of Object.values(m))if(t?.isTexture)tex.add(t);m.dispose()});geo.forEach(g=>g.dispose());tex.forEach(t=>{t.image?.close?.();t.dispose()});return;}
   model.updateMatrixWorld(true);const bounds=new THREE.Box3().setFromObject(model),size=bounds.getSize(new THREE.Vector3()),center=bounds.getCenter(new THREE.Vector3());if(!size.y)return;
-  placements.forEach((p,i)=>{const root=new THREE.Group(),object=model.clone(true),scale=p.height/size.y;object.scale.multiplyScalar(scale);object.position.set(-center.x*scale,-bounds.min.y*scale,-center.z*scale);root.position.set(p.x,p.y,p.z);root.rotation.y=p.rotation||0;root.name=`detail-${name}`;object.traverse(o=>{if(o.isMesh){o.castShadow=true;o.receiveShadow=true;o.raycast=()=>{};}});root.add(object);scene.add(root)});fallback.forEach(o=>o.visible=false);
+  placements.forEach((p,i)=>{const root=new THREE.Group(),object=model.clone(true),scale=p.width?p.width/Math.max(size.x,size.z):p.height/size.y;object.scale.multiplyScalar(scale);object.position.set(-center.x*scale,-bounds.min.y*scale,-center.z*scale);root.position.set(p.x,p.y,p.z);root.rotation.y=p.rotation||0;root.name=`detail-${name}`;
+   if(p.detail){root.userData.graphicsDetail=p.detail;let saved;try{saved=localStorage.getItem(QUALITY_KEY)}catch{}root.visible=QUALITY_PRESETS[qualityName(saved)].detail>=p.detail;}
+   object.traverse(o=>{if(o.isMesh){o.castShadow=p.shadows!==false;o.receiveShadow=true;o.raycast=()=>{};}});root.add(object);scene.add(root)});fallback.forEach(o=>{if(placements[0]?.detail){o.userData.graphicsMaxDetail=placements[0].detail-1;let saved;try{saved=localStorage.getItem(QUALITY_KEY)}catch{}o.visible=QUALITY_PRESETS[qualityName(saved)].detail<placements[0].detail;}else o.visible=false;});
  },undefined,()=>{});return ()=>{active=false};
 }
 export function addOfficeChair(scene,x,z){
