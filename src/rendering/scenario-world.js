@@ -3,6 +3,7 @@ import {HDRLoader} from '../../node_modules/three/examples/jsm/loaders/HDRLoader
 import {createGraphicsQuality,applySceneQuality} from './graphics-quality.js';
 import {createFirstPersonArms} from './first-person-arms.js';
 import {addElectricalEquipment} from './equipment-props.js';
+import {loadRoomProp,addOfficeChair} from './scene-props.js';
 import { addRoomFidelity } from './environment-fidelity.js';
 import { createWaliCompanion } from './wali-companion.js';
 import { SCENARIOS, canEnterScenario } from '../core/scenario-route.js';
@@ -65,8 +66,9 @@ export function createScenarioWorld(container) {
     const accents = [0xb6dce6,0xe4c891,0x75bdde,0x59c7e7,0xe8c998,0xf0b46d,0x83b7ed];
     const accent = new THREE.PointLight(accents[index], index === 5 ? 22 : 12, 16, 2);
     accent.position.set(3, index === 5 ? 8 : 4, -2); scene.add(accent);
+    for(const z of [-5,5]){const lamp=new THREE.PointLight(index===3?0x99dcea:0xeaf2ea,index===5?18:5,index===5?18:9,2);lamp.position.set(0,index===5?14:4.2,z);lamp.userData.graphicsDetail=1;scene.add(lamp);}
     const obstacles = [], materials = new Map(), textures = makeSurfaceTextures(index,{pbr:true});
-    const animatedScreens = [], screenMaps = new Map(), bubbles = [], animatedParts = [], staticBoxes = [];
+    const animatedScreens = [], screenMaps = new Map(), bubbles = [], animatedParts = [], staticBoxes = [], plantFallbacks = [];
     let ambientTime = 0, screenTime = 0, disposeCabin = null;
     function material(color, glow = false, kind = 'metal') {
       const key = `${color}-${glow}-${kind}`;
@@ -134,6 +136,9 @@ export function createScenarioWorld(container) {
         screenMaps.set(seed, map); animatedScreens.push({ surface, map, seed });
       }
       const map = screenMaps.get(seed);
+      for(const side of [-1,1])box(x+side*(width/2+.045),y,z+.025,.045,height+.1,.04,0x1a2a30);
+      box(x,y-height/2-.045,z+.025,width+.12,.055,.04,0x1a2a30);
+      box(x+width*.42,y-height/2-.045,z+.05,.035,.016,.02,0x7dcfb3,true);
       const mesh = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshBasicMaterial({ map }));
       mesh.position.set(x, y, z + .02); scene.add(mesh);
     }
@@ -143,6 +148,9 @@ export function createScenarioWorld(container) {
       display(x, 1.78, z - .22, width - .35, .78, seed);
       const panel = new THREE.Mesh(new THREE.PlaneGeometry(width - .2, .85), new THREE.MeshStandardMaterial({ map: telemetryTexture(seed, true), roughness: .8, side: THREE.DoubleSide }));
       panel.rotation.x = -.55; panel.position.set(x, 1.28, z + .4); scene.add(panel);
+      const keys=new THREE.InstancedMesh(new THREE.BoxGeometry((width-.35)/19*.72,.04,.018),material(0xd2d9d1),76),transform=new THREE.Matrix4();
+      for(let row=0;row<4;row++)for(let col=0;col<19;col++){transform.makeTranslation(-((width-.35)/2)+(col+.5)*(width-.35)/19,-.30+row*.12,.026);keys.setMatrixAt(row*19+col,transform);}
+      keys.position.copy(panel.position);keys.rotation.copy(panel.rotation);keys.userData.graphicsDetail=1;scene.add(keys);
       for (const side of [-1, 1]) box(x + side * (width / 2 - .04), 1.47, z + .19, .07, .7, 1.03, 0xb4b9ae);
       // Separate colored indicators make controls legible from the aisle.
       for (let i=0; i<5; i++) {
@@ -261,8 +269,7 @@ export function createScenarioWorld(container) {
     } else if (index === 2) {
       for (const z of [-4, .6, 5.2]) {
         consoleUnit(4.6, z, 2, 2.7);
-        box(4.6, .57, z + 1.7, .8, .12, .65, 0x515d58);
-        box(4.6, 1.2, z + 2, .8, .85, .09, 0x626e68);
+        addOfficeChair(scene,4.6,z+1.7);
         obstacles.push({ x: 4.6, z: z + 1.75, w: .9, d: .8 });
       }
       for (const x of [-6.8, -3.6, 3.6, 6.8]) display(x, 3.35, -9.35, 2.3, 1.2, 2);
@@ -302,9 +309,9 @@ export function createScenarioWorld(container) {
         box(6.2, .92, z, 1.25, 1.65, .9, 0x8d9d92);
         box(6.2, 1.75, z, 1.25, .08, .9, 0xc4c9bb);
         for (const x of [5.9, 6.2, 6.5]) {
-          cylinder(x, 2, z, .05, .04, .5, 0x789865);
-          const leaf = new THREE.Mesh(new THREE.SphereGeometry(.13, 8, 6), material(0x78ad67));
-          leaf.position.set(x, 2.26, z); scene.add(leaf);
+          const group=new THREE.Group();group.position.set(x,1.8,z);scene.add(group);plantFallbacks.push(group);
+          const stem=new THREE.Mesh(new THREE.CylinderGeometry(.035,.04,.3,8),material(0x789865));stem.position.y=.15;group.add(stem);
+          const leaf=new THREE.Mesh(new THREE.SphereGeometry(.14,10,8),material(0x78ad67));leaf.position.y=.32;group.add(leaf);
         }
       }
       obstacles.push({ x: 4.8, z: -3.9, w: 4, d: 2.2 }, { x: 6.2, z: 2.8, w: 1.5, d: 4.5 });
@@ -397,10 +404,13 @@ export function createScenarioWorld(container) {
       obstacles.push({x:4.8,z:4.15,w:1.7,d:1.5});
       animatedParts.push({type:'ship-model',mesh:model});
     }
-    decorateRoom(index,{box,cylinder,display,textPanel,obstacles});
+    decorateRoom(index,{box,cylinder,display,textPanel,obstacles,scene});
     finishScenario(index,{box,display});
     addRoomFidelity(index,scene,box,halfWidth);
-    const disposeEquipment=addElectricalEquipment(scene,index);
+    const disposeElectrical=addElectricalEquipment(scene,index);
+    const disposePlants=index===4?loadRoomProp(scene,'nettle_plant',[1.1,2.8,4.5].flatMap(z=>[5.9,6.2,6.5].map(x=>({x,y:1.79,z,height:.53}))),plantFallbacks):()=>{};
+    const disposeLaptop=index===2?loadRoomProp(scene,'classic_laptop',[{x:-4.3,y:1.24,z:3.95,height:.36}]):()=>{};
+    const disposeEquipment=()=>{disposeElectrical();disposePlants();disposeLaptop();};
     // Group static boxes by material. Moving doors, lamps and exercise parts stay separate.
     const dynamic=new Set([...forwardLeaves,...backLeaves,doorLamp,...animatedParts.map(part=>part.mesh)]);
     const groups=new Map();

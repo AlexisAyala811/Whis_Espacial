@@ -1,7 +1,8 @@
 import { PREPARATION_SUIT_POSITIONS } from '../core/preparation-layout.js';
+import {addOfficeChair} from './scene-props.js';
 
 // Original blockout architecture. Every room has a different spatial identity.
-export function decorateRoom(index,{box,cylinder,display,textPanel,obstacles}) {
+export function decorateRoom(index,{box,cylinder,display,textPanel,obstacles,scene}) {
   if(index===0){
     // Clean preparation room: lockers, workbench, suit bays and an orange airlock.
     for(const x of [-6.5,6.5]) for(const z of [-6,-3,0,3,6]){
@@ -44,7 +45,7 @@ export function decorateRoom(index,{box,cylinder,display,textPanel,obstacles}) {
       box(-4.3,.6,z,4.7,1.2,1.25,0x5d7175);
       for(const x of [-5.5,-3.1])display(x,1.7,z-.15,1.6,.8,2);
       obstacles.push({x:-4.3,z,w:4.9,d:1.5});
-      for(const x of [-5.5,-3.1]){box(x,.6,z+1.4,.85,.16,.8,0x34434c);box(x,1.15,z+1.7,.85,1,.14,0x34434c);obstacles.push({x,z:z+1.4,w:.9,d:.9});}
+      for(const x of [-5.5,-3.1]){addOfficeChair(scene,x,z+1.4);obstacles.push({x,z:z+1.4,w:.9,d:.9});}
     }
     for(const x of [-6,-2,2,6])box(x,5.5,0,.1,.05,15,0x8cb4c5,true);
     textPanel("MISSION CONTROL / TELEMETRY",0,5,-9.05,8.8);

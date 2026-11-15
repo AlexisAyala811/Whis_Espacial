@@ -67,10 +67,6 @@ export function addRoomFidelity(index, scene, box, halfWidth) {
     }
   } else if(index===4){
     for(const z of [1.1,2.8,4.5]){
-      for(const x of [5.9,6.2,6.5])for(const side of [-1,1]){
-        const leaf=new THREE.Mesh(new THREE.SphereGeometry(.13,8,6),new THREE.MeshStandardMaterial({color:0x73a966,roughness:.9}));
-        leaf.position.set(x+side*.12,2.15,z);leaf.scale.set(1.4,.45,.7);leaf.rotation.z=side*.4;scene.add(leaf);
-      }
       box(6.2,2.75,z,1.15,.07,.18,0xe7f4df,true);
     }
   } else if(index===5){

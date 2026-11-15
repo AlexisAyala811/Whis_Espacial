@@ -9,7 +9,8 @@ export function createFirstPersonArms(camera,fabric,reducedMotion){
  const seam=new THREE.MeshStandardMaterial({color:0x71878b,roughness:.72,metalness:.22});
  const rubber=new THREE.MeshStandardMaterial({color:0x394f55,roughness:.85});
  const palmGeo=new RoundedBoxGeometry(.19,.105,.22,3,.038),segmentGeo=new THREE.CapsuleGeometry(.022,.045,4,10);
- const cuffGeo=new THREE.TorusGeometry(.094,.012,8,24),knuckleGeo=new THREE.SphereGeometry(.024,10,8);
+ const cuffGeo=new THREE.TorusGeometry(.094,.012,10,32),knuckleGeo=new THREE.SphereGeometry(.024,12,10);
+ const padGeo=new RoundedBoxGeometry(.155,.028,.065,3,.014),panelGeo=new RoundedBoxGeometry(.12,.018,.085,3,.008),stitchGeo=new THREE.BoxGeometry(.16,.004,.004),rivetGeo=new THREE.SphereGeometry(.006,8,6);
  const sleeveGeo=new THREE.CylinderGeometry(.105,.145,.42,16,1),jointGeo=new THREE.SphereGeometry(.095,16,12);
  const arms=[];let time=0,gesture='',gestureTime=0;
  for(const side of [-1,1]){
@@ -18,10 +19,13 @@ export function createFirstPersonArms(camera,fabric,reducedMotion){
   const wrist=new THREE.Mesh(jointGeo,seam);wrist.position.set(0,-.1,.08);wrist.scale.set(1,.8,1);rig.add(wrist);
   const cuff=new THREE.Mesh(cuffGeo,rubber);cuff.position.set(0,0,.11);rig.add(cuff);
   const palm=new THREE.Mesh(palmGeo,white);rig.add(palm);
-  for(const z of [-.06,.0,.06]){const stitch=new THREE.Mesh(new THREE.BoxGeometry(.16,.004,.004),seam);stitch.position.set(0,.054,z);rig.add(stitch);}
+  const pad=new THREE.Mesh(padGeo,seam);pad.position.set(0,.055,-.075);rig.add(pad);const panel=new THREE.Mesh(panelGeo,white);panel.position.set(0,.056,.035);rig.add(panel);
+  for(const z of [-.04,.025,.075]){const stitch=new THREE.Mesh(stitchGeo,seam);stitch.position.set(0,.058,z);rig.add(stitch);}
+  for(const x of [-.065,.065]){const rivet=new THREE.Mesh(rivetGeo,rubber);rivet.position.set(x,.073,-.075);rig.add(rivet);}
+  const innerCuff=new THREE.Mesh(cuffGeo,seam);innerCuff.scale.set(.83,.83,1);innerCuff.position.set(0,0,.13);rig.add(innerCuff);
   const fingers=[];
   for(let i=0;i<4;i++){
-    const pivot=new THREE.Group();pivot.position.set((i-1.5)*.044,0,-.105);rig.add(pivot);
+    const pivot=new THREE.Group();pivot.position.set((i-1.5)*.044,0,-.105);pivot.rotation.y=(i-1.5)*.035;pivot.scale.z=[.87,1,.96,.78][i];rig.add(pivot);
     const proximal=new THREE.Mesh(segmentGeo,white);proximal.rotation.x=Math.PI/2;proximal.position.z=-.042;pivot.add(proximal);
     const joint=new THREE.Mesh(knuckleGeo,seam);joint.scale.set(.8,.35,.5);joint.position.set(0,.015,-.072);pivot.add(joint);
     const distal=new THREE.Group();distal.position.z=-.075;pivot.add(distal);
