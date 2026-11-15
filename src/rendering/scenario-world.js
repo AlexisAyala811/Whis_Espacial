@@ -1,6 +1,7 @@
 import * as THREE from 'three';
 import { SCENARIOS, canEnterScenario } from '../core/scenario-route.js';
 import { LEARNING_ROOMS } from '../core/learning-catalog.js';
+import { PREPARATION_SUIT_POSITIONS } from '../core/preparation-layout.js';
 import { decorateRoom } from './room-identity.js';
 import { makeSurfaceTextures, drawTelemetry } from './surface-detail.js';
 import { buildCabinDetails } from './cabin-details.js';
@@ -257,7 +258,7 @@ export function createScenarioWorld(container) {
     const beacon = stationUnit(station, index);
     if (index === 0) {
       const mannequin=makePreparationSuits(scene,textures,obstacles);
-      mannequin(3.4, -2.8); mannequin(6.1, -2.8);
+      for(const {x,z} of PREPARATION_SUIT_POSITIONS)mannequin(x,z);
       for (const x of [3.2, 6]) display(x, 3.1, -9.4, 2.3, 1.15, 0);
     } else if (index === 1) {
       for (const x of [-5.2, -2.2]) box(x, 1.85, -3.4, .16, 3.7, .2, 0xaebbb7);

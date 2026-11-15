@@ -1,3 +1,5 @@
+import { PREPARATION_SUIT_POSITIONS } from './preparation-layout.js';
+
 const sources = {
   suit: 'https://www.nasa.gov/directorates/esdmd/hhp/space-suits-and-exploration-operations/',
   exercise: 'https://www.esa.int/media/staying-strong-in-orbit-with-ared',
@@ -11,7 +13,7 @@ const object = (id, name, position, purpose, question, options, answer, explanat
 export const LEARNING_ROOMS = [
   { name:'Vestuario y esclusa de preparación', purpose:'Inspecciona el equipo que protege al astronauta antes de salir.', objects:[
     object('suit-console','Banco de verificación',[-3.7,2.2,-1.4],'Compara las lecturas del traje antes de autorizar una actividad.','¿Qué haces si una lectura no coincide con la lista?',['Ignorar la lectura','Detener la revisión y comprobarla'],1,'Una lista de comprobación sirve para detectar diferencias antes de continuar.',sources.training),
-    object('suit-display','Traje de entrenamiento',[3.4,2.4,-2.8],'Permite practicar el uso de guantes, casco y conexiones en un entorno controlado.','¿Para qué se ensayan los movimientos con el traje?',['Para reconocer sus límites de movimiento','Para aprender a respirar sin aire'],0,'El traje cambia el alcance y la destreza; practicar ayuda a planificar cada tarea.',sources.suit),
+    object('suit-display','Traje de entrenamiento',[PREPARATION_SUIT_POSITIONS[0].x,2.4,PREPARATION_SUIT_POSITIONS[0].z],'Permite practicar el uso de guantes, casco y conexiones en un entorno controlado.','¿Para qué se ensayan los movimientos con el traje?',['Para reconocer sus límites de movimiento','Para aprender a respirar sin aire'],0,'El traje cambia el alcance y la destreza; practicar ayuda a planificar cada tarea.',sources.suit),
     object('suit-locker','Armario de equipo',[6.1,2,3],'Guarda herramientas identificadas para encontrarlas durante una comprobación.','¿Cómo reduces errores al preparar el equipo?',['Mezclando todas las piezas','Identificando y contando las herramientas'],1,'El inventario ayuda a detectar herramientas faltantes y evita confundir conexiones.',sources.training),
   ]},
   { name:'Gimnasio de acondicionamiento', purpose:'Relaciona resistencia, actividad cardiovascular y control de movimiento.', objects:[

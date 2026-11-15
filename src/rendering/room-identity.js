@@ -1,3 +1,5 @@
+import { PREPARATION_SUIT_POSITIONS } from '../core/preparation-layout.js';
+
 // Original blockout architecture. Every room has a different spatial identity.
 export function decorateRoom(index,{box,cylinder,display,textPanel,obstacles}) {
   if(index===0){
@@ -19,7 +21,7 @@ export function decorateRoom(index,{box,cylinder,display,textPanel,obstacles}) {
     for(const x of [3.85,4.45,5.05,5.65])box(x,.57,3.5,.53,.045,.8,0x879d9d);
     box(4.8,.11,3.5,2.45,.08,.7,0x566d70);
     obstacles.push({x:4.8,z:3.5,w:2.8,d:1});
-    for(const x of [3.4,6.1]){box(x,.07,-2.8,1.8,.13,1.8,0x687e86);box(x,.14,-2.8,1.5,.04,1.5,0xc9d8d5);}
+    for(const {x,z} of PREPARATION_SUIT_POSITIONS){box(x,.07,z,1.8,.13,1.8,0x687e86);box(x,.14,z,1.5,.04,1.5,0xc9d8d5);}
   }else if(index===1){
     // Gym: continuous rubber floor, lanes, exposed beams and equipment islands.
     for(const x of [-3.8,4]){
