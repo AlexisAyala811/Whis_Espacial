@@ -157,3 +157,7 @@ Después de completar el entrenamiento y la simulación de cabina, pulsa **Desce
 La puerta muestra una pantalla de carga y abre un panel para administrar cinco soles. Reparte diez unidades de energía entre aire, cultivo, refugio y comunicaciones; consulta la previsión y la bitácora. Las decisiones guardadas se recuperan en la misma pestaña al volver a la superficie y entrar otra vez. La simulación funciona si no hay conexión a NASA. Si existe un registro DONKI válido, una regla del juego ajusta el ejercicio solar según su clase; el panel aclara que el umbral es ficticio, no una predicción ni una dosis real. Se enlaza el estudio NASA OSD-684 como contexto, sin convertirlo en valores de salud. La fotografía estelar se acredita en `assets/cabin/CREDITS.md`.
 
 El escenario exterior y el planeta ilustrado son estilizados, no recreaciones fotográficas ni datos de ubicación en Marte. No se ha validado la experiencia con estudiantes de 7 a 12 años.
+
+## Mejoras visuales de Marte
+
+La superficie utiliza una panorámica histórica recortada del rover Spirit como fondo artístico, y textura 1K de suelo con mapas de normales y rugosidad. El hábitat incorpora sombras, detalles metálicos y paneles solares. Si no se cargan los recursos, permanece disponible el terreno procedural. No representa una vista en directo ni el lugar exacto de una misión real. Consulta fuentes y licencias en [créditos de Marte](assets/mars/CREDITS.md).

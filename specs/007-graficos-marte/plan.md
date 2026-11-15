@@ -1,0 +1,3 @@
+# Mejora visual del exterior de Marte
+
+Objetivo: usar la GPU disponible para mejorar el terreno y la profundidad visual de la superficie, conservando controles, puerta, rendimiento y modo sin conexión. Incorporar texturas 1K CC0 de Poly Haven (color, normales y rugosidad) y una panorámica NASA/JPL del rover Spirit como fondo histórico; no se presenta la escena como un lugar exacto ni imagen en directo. Si las imágenes no cargan, conservar el paisaje procedural. Añadir detalles de la base y sombras con un presupuesto medido. Verificar pantalla, interacción, alternativa sin recursos, consola y rendimiento en Edge con NVIDIA y anotar las limitaciones.
