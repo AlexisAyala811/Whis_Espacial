@@ -15,6 +15,7 @@ import { makeSurfaceTextures, drawTelemetry } from './surface-detail.js';
 import { buildCabinDetails } from './cabin-details.js';
 import { finishScenario } from './scenario-finish.js';
 import { makePreparationSuits } from './preparation-suits.js';
+import { addAssemblyRocket, addRocketReference } from './assembly-rocket.js';
 
 export const STATIONS = [
   { id: 'suit', name: "01 / SUIT", scene: 0, x: -3.7, z: -1.4, color: 0x91d9c2 },
@@ -334,18 +335,12 @@ export function createScenarioWorld(container) {
       for (const x of [-8.5, 8.5]) for (const y of [6, 11, 16]) box(x, y, -1, .35, .26, 17, 0xe2b266);
       for (const z of [-7, -2, 3, 8]) for (const x of [-8.5, 8.5]) box(x, 8.5, z, .22, 17, .22, 0x657576);
       for (const y of [4.5, 8.5, 12.5]) {
-        box(4.1, y, -2.8, 6.3, .18, .48, 0xdfad58);
-        box(4.1, y, -2.8, .48, .18, 6.3, 0xdfad58);
+        // Access structures stay beside the vehicle and its boosters.
+        for (const x of [1.05, 7.15]) box(x, y, -2.8, .45, .18, 6.3, 0xdfad58);
       }
-      cylinder(4.1, 6, -2.8, 1.25, 1.25, 11, 0xc47b3c);
-      for (const y of [2.2,4.4,7.4,10.2]) cylinder(4.1, y, -2.8, 1.27, 1.27, .045, 0x9e683c);
-      for (const y of [2.4, 6.8, 10.8]) cylinder(4.1, y, -2.8, 1.27, 1.27, .16, 0xe2e5da);
-      const nose = new THREE.Mesh(new THREE.ConeGeometry(1.25, 2.5, 24), material(0xe5e9df));
-      nose.position.set(4.1, 12.75, -2.8); scene.add(nose);
-      for (const x of [2.3, 5.9]) {
-        cylinder(x, 3.2, -2.8, .44, .44, 6.2, 0xe3e7df);
-        const cap = new THREE.Mesh(new THREE.ConeGeometry(.44,.9,16),material(0xe3e7df));cap.position.set(x,6.65,-2.8);scene.add(cap);
-      }
+      addAssemblyRocket(scene);
+      addRocketReference(scene);
+      textPanel('ARTEMIS I / NASA - FRANK MICHAUX', -6.5, 1.22, -9.16, 2.25);
       for(const y of [3.5,7,10.5]) {
         box(4.1,y,-5.6,5.1,.18,.6,0xb68c3e);
         for(const x of [1.6,6.6]) box(x,y+.52,-5.6,.08,1.04,.08,0xe2bc66);
