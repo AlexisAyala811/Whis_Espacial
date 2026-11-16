@@ -17,6 +17,7 @@ import { finishScenario } from './scenario-finish.js';
 import { makePreparationSuits } from './preparation-suits.js';
 import { addAssemblyRocket, addRocketReference } from './assembly-rocket.js';
 import { loadNasaRocket } from './nasa-rocket.js';
+import { addSceneBackground } from './room-backgrounds.js';
 
 export const STATIONS = [
   { id: 'suit', name: "01 / SUIT", scene: 0, x: -3.7, z: -1.4, color: 0x91d9c2 },
@@ -36,7 +37,7 @@ export function createScenarioWorld(container) {
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.22;
+  renderer.toneMappingExposure = 1.08;
   container.append(renderer.domElement);
   const camera = new THREE.PerspectiveCamera(72, 1, .08, 100);
   camera.rotation.order = 'YXZ';
@@ -59,7 +60,7 @@ export function createScenarioWorld(container) {
     const colors = [0x626e70, 0x666b68, 0x575f5e, 0x164e65, 0x747c79, 0x4c5658, 0x36444d];
     scene.background = new THREE.Color(colors[index]);
     scene.fog = new THREE.FogExp2(colors[index], index === 3 ? .035 : .008);
-    scene.add(new THREE.HemisphereLight(index === 3 ? 0xa8e8f5 : 0xf2f4ec, index === 3 ? 0x24516b : 0x6d7774, index === 3 ? 2 : index === 6 ? .95 : 1.55));
+    scene.add(new THREE.HemisphereLight(index === 3 ? 0xa8e8f5 : 0xf2f4ec, index === 3 ? 0x24516b : 0x6d7774, index === 3 ? 1.7 : index === 6 ? .95 : 1.15));
     const light = new THREE.DirectionalLight(0xf5f2e8, index === 6 ? .8 : 1.25);
     light.position.set(-4, 8, 6);light.shadow.camera.left=-11;light.shadow.camera.right=11;light.shadow.camera.top=11;light.shadow.camera.bottom=-11;light.shadow.camera.near=.5;light.shadow.camera.far=45;light.shadow.bias=-.0003;scene.add(light);
     let roomAlive=true,roomEnvironment=null;
@@ -404,6 +405,7 @@ export function createScenarioWorld(container) {
     decorateRoom(index,{box,cylinder,display,textPanel,obstacles,scene});
     finishScenario(index,{box,display});
     addRoomFidelity(index,scene,box,halfWidth);
+    addSceneBackground(scene,index,halfWidth,roomHeight);
     const disposeElectrical=addElectricalEquipment(scene,index);
     const disposePlants=index===4?loadRoomProp(scene,'nettle_plant',[1.1,2.8,4.5].flatMap(z=>[5.9,6.2,6.5].map(x=>({x,y:1.79,z,height:.53}))),plantFallbacks):()=>{};
     const disposeLaptop=index===2?loadRoomProp(scene,'classic_laptop',[{x:-4.3,y:1.24,z:3.95,height:.36}]):()=>{};

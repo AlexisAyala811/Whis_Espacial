@@ -7,6 +7,7 @@ import { createWaliCompanion } from './rendering/wali-companion.js';
 import { RoundedBoxGeometry } from '../../node_modules/three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import { makeSurfaceTextures, drawTelemetry } from './rendering/surface-detail.js';
 import { createWali } from './wali.js';
+import { addSceneBackground } from './rendering/room-backgrounds.js';
 
 const audio=createMissionAudio({scene:'mars-habitat',active:true});
 const $=id=>document.getElementById(id),reduced=matchMedia('(prefers-reduced-motion: reduce)'),returned=new URLSearchParams(location.search).get('regreso')==='panel';
@@ -34,6 +35,7 @@ try{
   for(const x of [-5,-3,-1,1,3,5])box(x,.015,0,.025,.02,18.5,dark);
   for(const z of [-8,-6,-4,-2,0,2,4,6,8])box(0,.018,z,11.6,.02,.025,dark);
   box(0,.025,0,.06,.025,17.7,glow);
+  addSceneBackground(scene,7,6,5.4,-9.25);
   // Airlock and the return door.
   for(const side of [-1,1]){box(side*1.25,2.1,9.18,.22,4.2,.22,metal);box(side*.55,2.05,9.12,1.05,3.9,.12,dark);}box(0,4.28,9.18,2.7,.16,.22,metal);box(0,4.05,9.02,1.8,.08,.08,glow);
   // Recessed rails, utility indicators and wall seams add detail without narrowing the aisle.

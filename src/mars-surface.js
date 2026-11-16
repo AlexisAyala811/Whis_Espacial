@@ -49,7 +49,17 @@ try{
   for(let i=0;i<6000;i++){const light=random()>.5;ctx.fillStyle=light?'rgba(255,215,171,.09)':'rgba(56,31,27,.10)';ctx.fillRect(random()*512,random()*512,1+random()*5,1+random()*3);}
   const groundMap=new THREE.CanvasTexture(surface);groundMap.colorSpace=THREE.SRGBColorSpace;groundMap.wrapS=groundMap.wrapT=THREE.RepeatWrapping;groundMap.repeat.set(24,24);
   const terrainMaterial=new THREE.MeshStandardMaterial({map:groundMap,color:0xd09a79,roughness:1});
-  const terrain=new THREE.Mesh(new THREE.PlaneGeometry(120,120),terrainMaterial);terrain.name='mars-terrain';terrain.rotation.x=-Math.PI/2;terrain.receiveShadow=true;scene.add(terrain);
+  const groundGeometry=new THREE.PlaneGeometry(120,120,64,64);
+  const groundPositions=groundGeometry.attributes.position;
+  for(let i=0;i<groundPositions.count;i++){
+    const x=groundPositions.getX(i), z=groundPositions.getY(i);
+    // Keep the central path, landing vehicle and habitat flat and walkable.
+    const edge=Math.min(1,Math.max(0,(Math.abs(x)-7)/8));
+    const height=edge*(.12*Math.sin(x*.32)*Math.cos(z*.21)+.08*Math.sin(x*.59+z*.37));
+    groundPositions.setZ(i,height);
+  }
+  groundGeometry.computeVertexNormals();
+  const terrain=new THREE.Mesh(groundGeometry,terrainMaterial);terrain.name='mars-terrain';terrain.rotation.x=-Math.PI/2;terrain.receiveShadow=true;scene.add(terrain);
   // PBR maps are optional: the procedural ground stays usable if any download fails.
   const loader=new THREE.TextureLoader();
   function loadTerrainMap(file,kind){loader.load('./assets/mars/'+file,texture=>{
