@@ -39,7 +39,7 @@ export class VoiceClient {
       this.player.interrupt();
       this.onInterrupt();
     }
-    if (content?.inputTranscription?.text) this.onTranscript('COMANDANTE', content.inputTranscription.text);
+    if (content?.inputTranscription?.text) this.onTranscript('COMMANDER', content.inputTranscription.text);
     if (content?.outputTranscription?.text) this.onTranscript('LUMINE', content.outputTranscription.text);
     for (const part of content?.modelTurn?.parts ?? []) {
       if (part.inlineData?.data) this.onAudio(part.inlineData.data);
