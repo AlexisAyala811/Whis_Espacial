@@ -18,6 +18,7 @@ import { makePreparationSuits } from './preparation-suits.js';
 import { addAssemblyRocket, addRocketReference } from './assembly-rocket.js';
 import { loadNasaRocket } from './nasa-rocket.js';
 import { addSceneBackground } from './room-backgrounds.js';
+import { addExerciseMachines } from './exercise-machines.js';
 
 export const STATIONS = [
   { id: 'suit', name: "01 / SUIT", scene: 0, x: -3.7, z: -1.4, color: 0x91d9c2 },
@@ -141,14 +142,21 @@ export function createScenarioWorld(container) {
       const map = screenMaps.get(seed);
       for(const side of [-1,1])box(x+side*(width/2+.045),y,z+.025,.045,height+.1,.04,0x1a2a30);
       box(x,y-height/2-.045,z+.025,width+.12,.055,.04,0x1a2a30);
+      box(x,y+height/2+.045,z+.025,width+.12,.055,.04,0x1a2a30);
+      for(const side of [-1,1]) box(x+side*(width/2-.04),y+height/2-.04,z+.045,.018,.018,.012,0x9eaaa5);
+      box(x-width*.43,y-height/2-.045,z+.05,.09,.012,.014,0x7d9999);
       box(x+width*.42,y-height/2-.045,z+.05,.035,.016,.02,0x7dcfb3,true);
       const mesh = new THREE.Mesh(new THREE.PlaneGeometry(width, height), new THREE.MeshBasicMaterial({ map }));
       mesh.position.set(x, y, z + .02); scene.add(mesh);
+      const reflection=new THREE.Mesh(new THREE.PlaneGeometry(width*.94,height*.10),new THREE.MeshBasicMaterial({color:0xc8e3e7,transparent:true,opacity:.07,depthWrite:false}));
+      reflection.position.set(x,y+height*.4,z+.031);reflection.raycast=()=>{};scene.add(reflection);
     }
     function consoleUnit(x, z, seed, width = 2.45) {
       box(x, .57, z, width, 1.1, 1.4, index===6 ? 0x536870 : 0x858e87);
       box(x, 1.15, z + .55, width + .05, .1, .45, index===6 ? 0x809ca0 : 0xb3bab0);
       display(x, 1.78, z - .22, width - .35, .78, seed);
+      for(const side of [-1,1]){box(x+side*width*.36,1.26,z-.22,.09,.27,.12,0x465b5d);box(x+side*width*.36,1.13,z-.22,.26,.035,.26,0x465b5d);}
+      for(let row=0;row<4;row++)box(x+width*.38,.42+row*.105,z+.711,width*.13,.024,.018,0x354b4c);
       const panel = new THREE.Mesh(new THREE.PlaneGeometry(width - .2, .85), new THREE.MeshStandardMaterial({ map: telemetryTexture(seed, true), roughness: .8, side: THREE.DoubleSide }));
       panel.rotation.x = -.55; panel.position.set(x, 1.28, z + .4); scene.add(panel);
       const keys=new THREE.InstancedMesh(new THREE.BoxGeometry((width-.35)/19*.72,.04,.018),material(0xd2d9d1),76),transform=new THREE.Matrix4();
@@ -255,20 +263,11 @@ export function createScenarioWorld(container) {
       for(const {x,z} of PREPARATION_SUIT_POSITIONS)mannequin(x,z);
       for (const x of [3.2, 6]) display(x, 3.1, -9.4, 2.3, 1.15, 0);
     } else if (index === 1) {
-      for (const x of [-5.2, -2.2]) box(x, 1.85, -3.4, .16, 3.7, .2, 0xaebbb7);
-      box(-3.7, 3.5, -3.4, 3.1, .15, .2, 0xcbd2c9);
-      box(-3.7, .19, -3.8, 3.2, .15, 2.4, 0x424f4c);
-      box(4, .22, -2.4, 2, .26, 3.15, 0x313e40);
-      box(4, .38, -2.4, 1.6, .06, 2.7, 0x1c2b30);
-      for(let i=0;i<5;i++){
-        const stripe=box(4,.42,-3.45+i*.54,1.5,.018,.035,0x859b9c);
-        animatedParts.push({type:'belt',mesh:stripe,base:stripe.position.z});
-      }
-      for (const x of [3.05, 4.95]) box(x, 1.1, -3.3, .09, 1.7, .12, 0xb5c7c3);
-      display(4, 2.12, -3.5, 1, .55, 1);
+      const machines=addExerciseMachines(scene);
+      for(const stripe of machines.stripes)animatedParts.push({type:'belt-new',mesh:stripe.mesh,base:stripe.base});
+      animatedParts.push({type:'bike-wheel',mesh:machines.wheel},{type:'bike-crank',mesh:machines.crank});
       textPanel('T2 / CARDIO', 4, 3.1, -3.7, 2.3);
-      obstacles.push({ x: 4, z: -2.4, w: 2, d: 3.2 });
-      for (const x of [3.5, 5.7]) cylinder(x, .3, 2.2, .28, .28, .18, 0x718787);
+      obstacles.push({ x: 4, z: -2.4, w: 2, d: 3.2 }, { x: -3.7, z: -3.55, w: 3, d: 1.8 });
     } else if (index === 2) {
       for (const z of [-4, .6, 5.2]) {
         consoleUnit(4.6, z, 2, 2.7);
@@ -448,7 +447,8 @@ export function createScenarioWorld(container) {
       for(const bubble of bubbles){bubble.mesh.position.y=.2+((bubble.base+ambientTime*.24+bubble.phase)%4.5);bubble.mesh.position.x+=Math.sin(ambientTime+bubble.phase)*dt*.015;}
       for(const part of animatedParts){
         if(part.type==='caustics')part.mesh.material.map.offset.set(ambientTime*.008,ambientTime*.005);
-        if(part.type==='belt')part.mesh.position.z=-3.45+(((part.base+3.45+ambientTime*.25)%2.7)+2.7)%2.7;
+        if(part.type==='belt-new')part.mesh.position.z=-3.48+(((part.base+3.48+ambientTime*.25)%2.52)+2.52)%2.52;
+        if(part.type==='bike-wheel'||part.type==='bike-crank')part.mesh.rotation.x=ambientTime*(part.type==='bike-wheel'?2.3:1.2);
         if(part.type==='earth')part.mesh.rotation.y=ambientTime*.08;
         if(part.type==='ship-model')part.mesh.rotation.y=ambientTime*.3;
       }

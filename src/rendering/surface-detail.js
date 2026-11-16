@@ -79,24 +79,17 @@ export function makeSurfaceTextures(room, {pbr=false}={}) {
 }
 
 export function drawTelemetry(canvas, seed, time = 0) {
-  const ctx = canvas.getContext('2d'), w = canvas.width, h = canvas.height;
-  ctx.fillStyle = '#071a27';ctx.fillRect(0,0,w,h);
-  ctx.fillStyle = '#12394c';ctx.fillRect(0,0,w,38);
-  ctx.fillStyle = '#b7e9ef';ctx.font = 'bold 19px monospace';
-  ctx.fillText(['SUIT / BIOPLOT','ARED / LOAD','ECLSS / AIR','EVA / UMBILICAL','HERA / RESOURCES','VAB / POWER','OUTPOST / SOL 01'][seed % 7],16,26);
-  ctx.strokeStyle = '#214756';ctx.lineWidth = 1;
-  for(let x=16;x<w;x+=32){ctx.beginPath();ctx.moveTo(x,48);ctx.lineTo(x,215);ctx.stroke();}
-  for(let y=55;y<220;y+=28){ctx.beginPath();ctx.moveTo(16,y);ctx.lineTo(w-16,y);ctx.stroke();}
-  for(let line=0;line<2;line++){
-    ctx.strokeStyle=line?'#e3bd70':'#72dfd1';ctx.lineWidth=3;ctx.beginPath();
-    for(let x=18;x<370;x+=4){
-      const y=105+line*50+Math.sin(x*.035+seed+time*(line?.8:1.2))*18+Math.sin(x*.11-time)*5;
-      x===18?ctx.moveTo(x,y):ctx.lineTo(x,y);
-    }ctx.stroke();
-  }
-  for(let i=0;i<3;i++){
-    ctx.fillStyle='#1d4151';ctx.fillRect(390,60+i*48,100,27);
-    ctx.fillStyle=['#80e6c3','#eac978','#87bde4'][i];ctx.fillRect(395,65+i*48,35+((seed*17+i*19)%55),17);
-  }
-  ctx.fillStyle='#c1d8dc';ctx.font='14px monospace';ctx.fillText("TRAINING  /  SIMULATED DATA",16,242);
+  const c=canvas.getContext('2d'),w=canvas.width,h=canvas.height,sx=w/512,sy=h/256;
+  c.save();c.scale(sx,sy);
+  const bg=c.createLinearGradient(0,0,0,256);bg.addColorStop(0,'#102532');bg.addColorStop(1,'#071117');c.fillStyle=bg;c.fillRect(0,0,512,256);
+  c.fillStyle='#1b3a45';c.fillRect(0,0,512,34);
+  c.fillStyle='#d9eeec';c.font='bold 15px sans-serif';c.fillText(['SUIT SYSTEMS','EXERCISE MONITOR','ENVIRONMENT CONTROL','EVA CONNECTIONS','HABITAT RESOURCES','LAUNCH SYSTEMS','MISSION OPERATIONS'][seed%7],14,22);
+  c.fillStyle='#83c9b8';c.font='bold 10px monospace';c.textAlign='right';c.fillText('SIMULATION  •  ONLINE',498,22);c.textAlign='left';
+  c.fillStyle='#0d202a';c.fillRect(12,44,319,152);c.fillRect(339,44,161,152);
+  c.strokeStyle='#24424b';c.lineWidth=1;for(let x=20;x<330;x+=31){c.beginPath();c.moveTo(x,65);c.lineTo(x,186);c.stroke()}for(let y=65;y<190;y+=24){c.beginPath();c.moveTo(20,y);c.lineTo(321,y);c.stroke()}
+  c.fillStyle='#b4cdca';c.font='bold 10px sans-serif';c.fillText('SYSTEM TREND  /  TRAINING DATA',20,57);
+  for(let line=0;line<2;line++){c.strokeStyle=line?'#eac582':'#6dd8c0';c.lineWidth=2.3;c.beginPath();for(let x=21;x<322;x+=3){const y=99+line*45+Math.sin(x*.032+seed+time*(line?.7:1))*12+Math.sin(x*.11-time*.3)*3;x===21?c.moveTo(x,y):c.lineTo(x,y)}c.stroke()}
+  c.fillStyle='#a7c5c2';c.font='bold 10px sans-serif';c.fillText('SYSTEM STATUS',350,59);
+  const labels=['POWER','SENSORS','LINK'];for(let i=0;i<3;i++){const y=78+i*36;c.fillStyle='#a9c6c1';c.font='10px sans-serif';c.fillText(labels[i],350,y);c.fillStyle='#29434a';c.fillRect(350,y+7,132,7);c.fillStyle=['#70d8b7','#80bfe1','#d9bd80'][i];c.fillRect(350,y+7,80+((seed*17+i*23)%48),7)}
+  c.fillStyle='#15323c';c.fillRect(12,207,488,36);c.fillStyle='#c9e0da';c.font='10px monospace';c.fillText('TRAINING ONLY',22,229);c.textAlign='right';c.fillText('TELEMETRY  /  NOT LIVE',490,229);c.restore();
 }

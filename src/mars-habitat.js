@@ -67,7 +67,12 @@ try{
   rounded(0,.65,-5.1,3.1,1.3,1.15,metal);box(0,1.35,-5.1,3.15,.12,1.2,dark);
   const screenCanvas=document.createElement('canvas');screenCanvas.width=512;screenCanvas.height=256;drawTelemetry(screenCanvas,4,0);const screenMap=new THREE.CanvasTexture(screenCanvas);screenMap.colorSpace=THREE.SRGBColorSpace;
   box(0,2.15,-5.67,2.7,1.2,.14,dark);const screen=new THREE.Mesh(new THREE.PlaneGeometry(2.48,1.02),new THREE.MeshBasicMaterial({map:screenMap}));screen.position.set(0,2.15,-5.58);scene.add(screen);
-  for(const x of [-1,-.6,-.2,.2,.6,1])box(x,1.43,-4.8,.22,.025,.17,glow);
+  // Physical bezel, indicator lights and tactile controls around the monitor.
+  for(const side of [-1,1])box(side*1.32,2.15,-5.52,.06,1.18,.06,metal);
+  for(const y of [1.58,2.72])box(0,y,-5.52,2.7,.06,.06,metal);
+  for(const x of [-1.1,-.88,-.66,.66,.88,1.1])box(x,1.59,-5.47,.06,.025,.02,glow);
+  for(const x of [-1,-.6,-.2,.2,.6,1]){box(x,1.45,-4.73,.24,.035,.16,dark);box(x,1.47,-4.71,.14,.012,.08,glow);}
+  for(const side of [-1,1])for(const y of [.35,.47,.59])box(side*1.18,y,-4.51,.24,.025,.015,dark);
   sign("MISSION CONTROL",0,3.2,-5.63,3.4);obstacles.push({x:0,z:-5.1,w:3.2,d:1.35});
   const ring=new THREE.Mesh(new THREE.TorusGeometry(1.7,.025,8,48),glow);ring.rotation.x=-Math.PI/2;ring.position.set(0,.055,-5.1);scene.add(ring);
   // Photographic Mars view is a wall display, not an accurate live window.

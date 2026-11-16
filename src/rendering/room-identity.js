@@ -30,10 +30,6 @@ export function decorateRoom(index,{box,cylinder,display,textPanel,obstacles,sce
       for(const side of [-1,1]) box(x+side*1.7,.06,-1.5,.07,.02,8.8,0xd2b47a);
     }
     for(const z of [-7,-3,1,5]){box(0,5.2,z,18,.2,.2,0x647375);box(0,5.05,z,8,.05,.15,0xf3e5be,true);}
-    box(4.3,.35,3.8,1.4,.15,2.1,0x42535a);
-    cylinder(4.3,.72,3.8,.46,.46,.2,0x779299).rotation.z=Math.PI/2;
-    box(4.3,1.2,3.3,.12,1.6,.12,0xa4b4b6);box(4.3,1.75,3.3,.8,.12,.14,0x4d6369);
-    box(4.3,1.35,4.1,.65,.16,.48,0x26383f);
     obstacles.push({x:4.3,z:3.8,w:1.6,d:2.2});
     textPanel("STRENGTH / ENDURANCE / CONTROL",0,3.9,-9.3,7);
   }else if(index===2){
