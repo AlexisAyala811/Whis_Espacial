@@ -1,5 +1,11 @@
 # Project Ares 3D
 
+La entrada presenta Mars Journal · First Flight, proporcionada para el proyecto.
+Al final, **Try the Demo** inicia el entrenamiento existente. Para abrir el
+juego con su pantalla de bienvenida, visita `/game.html`. El diario incluye
+recursos compilados y medios entregados por el usuario; el paquete no incluye
+el código fuente editable de la página.
+
 ## Secuencia de despegue
 
 La primera vez que cruces del VAB a la cabina aparece una animación sin voz que

@@ -286,3 +286,6 @@ function frame(now){
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
+
+// The journal starts the existing training directly after its demo button.
+if (new URLSearchParams(window.location.search).get("autostart") === "1") play();
