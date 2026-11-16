@@ -1,5 +1,6 @@
 import * as THREE from 'three';
 import {HDRLoader} from '../../node_modules/three/examples/jsm/loaders/HDRLoader.js';
+import {RoundedBoxGeometry} from '../../node_modules/three/examples/jsm/geometries/RoundedBoxGeometry.js';
 import {createGraphicsQuality,applySceneQuality} from './graphics-quality.js';
 import {createFirstPersonArms} from './first-person-arms.js';
 import {addElectricalEquipment} from './equipment-props.js';
@@ -19,6 +20,7 @@ import { addAssemblyRocket, addRocketReference } from './assembly-rocket.js';
 import { loadNasaRocket } from './nasa-rocket.js';
 import { addSceneBackground } from './room-backgrounds.js';
 import { addExerciseMachines } from './exercise-machines.js';
+import { loadDetailedExerciseMachines } from './detailed-exercise-machines.js';
 
 export const STATIONS = [
   { id: 'suit', name: "01 / SUIT", scene: 0, x: -3.7, z: -1.4, color: 0x91d9c2 },
@@ -72,8 +74,8 @@ export function createScenarioWorld(container) {
     accent.position.set(3, index === 5 ? 8 : 4, -2); scene.add(accent);
     for(const z of [-5,5]){const lamp=new THREE.PointLight(index===3?0x99dcea:0xeaf2ea,index===5?18:5,index===5?18:9,2);lamp.position.set(0,index===5?14:4.2,z);lamp.userData.graphicsDetail=1;scene.add(lamp);}
     const obstacles = [], materials = new Map(), textures = makeSurfaceTextures(index,{pbr:true});
-    const animatedScreens = [], screenMaps = new Map(), bubbles = [], animatedParts = [], staticBoxes = [], plantFallbacks = [];
-    let ambientTime = 0, screenTime = 0, disposeCabin = null, disposeRocket = () => {};
+    const animatedScreens = [], screenMaps = new Map(), bubbles = [], animatedParts = [], staticBoxes = [], plantFallbacks = [], consoleKeyboards = [];
+    let ambientTime = 0, screenTime = 0, disposeCabin = null, disposeRocket = () => {}, disposeExerciseModels = () => {};
     function material(color, glow = false, kind = 'metal') {
       const key = `${color}-${glow}-${kind}`;
       if (!materials.has(key)) materials.set(key, new THREE.MeshStandardMaterial({ color, map: glow ? null : textures[kind], normalMap: !glow && kind==='metal' ? textures.metalNormal : null, normalScale: new THREE.Vector2(.32,.32), roughnessMap: !glow && kind==='metal' ? textures.metalRoughness : null, roughness: glow ? .4 : kind==='metal' ? .68 : .92, metalness: glow ? .05 : kind==='metal' ? .32 : .03, emissive: glow ? color : 0, emissiveIntensity: glow ? 1.1 : 0 }));
@@ -132,7 +134,8 @@ export function createScenarioWorld(container) {
       return texture;
     }
     function display(x, y, z, width, height, seed) {
-      box(x, y, z - .08, width + .15, height + .16, .17, 0x34434a);
+      const casing=new THREE.Mesh(new RoundedBoxGeometry(width+.15,height+.16,.17,3,.045),material(0x34434a));
+      casing.position.set(x,y,z-.08);casing.raycast=()=>{};scene.add(casing);
       if (!screenMaps.has(seed)) {
         const surface = document.createElement('canvas'); surface.width = 512; surface.height = 256;
         drawTelemetry(surface, seed);
@@ -152,6 +155,7 @@ export function createScenarioWorld(container) {
       reflection.position.set(x,y+height*.4,z+.031);reflection.raycast=()=>{};scene.add(reflection);
     }
     function consoleUnit(x, z, seed, width = 2.45) {
+      consoleKeyboards.push({x:x-width*.22,y:1.17,z:z+.62,width:.68,detail:1,shadows:false,url:'./assets/models/exercise/keyboard.glb'});
       box(x, .57, z, width, 1.1, 1.4, index===6 ? 0x536870 : 0x858e87);
       box(x, 1.15, z + .55, width + .05, .1, .45, index===6 ? 0x809ca0 : 0xb3bab0);
       display(x, 1.78, z - .22, width - .35, .78, seed);
@@ -264,6 +268,7 @@ export function createScenarioWorld(container) {
       for (const x of [3.2, 6]) display(x, 3.1, -9.4, 2.3, 1.15, 0);
     } else if (index === 1) {
       const machines=addExerciseMachines(scene);
+      disposeExerciseModels=loadDetailedExerciseMachines(scene,machines,animatedParts);
       for(const stripe of machines.stripes)animatedParts.push({type:'belt-new',mesh:stripe.mesh,base:stripe.base});
       animatedParts.push({type:'bike-wheel',mesh:machines.wheel},{type:'bike-crank',mesh:machines.crank});
       textPanel('T2 / CARDIO', 4, 3.1, -3.7, 2.3);
@@ -407,6 +412,7 @@ export function createScenarioWorld(container) {
     addSceneBackground(scene,index,halfWidth,roomHeight);
     const disposeElectrical=addElectricalEquipment(scene,index);
     const disposePlants=index===4?loadRoomProp(scene,'nettle_plant',[1.1,2.8,4.5].flatMap(z=>[5.9,6.2,6.5].map(x=>({x,y:1.79,z,height:.53}))),plantFallbacks):()=>{};
+    const disposeKeyboards=consoleKeyboards.length?loadRoomProp(scene,'console-keyboard',consoleKeyboards):()=>{};
     const disposeLaptop=index===2?loadRoomProp(scene,'classic_laptop',[{x:-4.3,y:1.24,z:3.95,height:.36}]):()=>{};
     // Detailed fixtures and equipment remain outside the navigable aisle.
     const fixtureHeights=[4.75,5.05,5.35,0,4.38,0,5.18];
@@ -416,7 +422,7 @@ export function createScenarioWorld(container) {
     const cartPositions={0:{x:5.8,y:0,z:-6.9,height:.8},1:{x:-7.8,y:0,z:6.8,height:.8},5:{x:-8.7,y:0,z:6.9,height:.85}};
     const disposeCart=cartPositions[index]?loadRoomProp(scene,'tool_cart',[{...cartPositions[index],detail:1,shadows:false}]):()=>{};
     const disposeMedical=index===4?loadRoomProp(scene,'medical_box',[{x:-5.6,y:.05,z:7.7,height:.4,detail:1,shadows:false}]):()=>{};
-    const disposeEquipment=()=>{disposeRocket();disposeElectrical();disposePlants();disposeLaptop();disposeFixtures();disposeCart();disposeMedical();disposeSuit();};
+    const disposeEquipment=()=>{disposeExerciseModels();disposeKeyboards();disposeRocket();disposeElectrical();disposePlants();disposeLaptop();disposeFixtures();disposeCart();disposeMedical();disposeSuit();};
     // Group static boxes by material. Moving doors, lamps and exercise parts stay separate.
     const dynamic=new Set([...forwardLeaves,...backLeaves,doorLamp,...animatedParts.map(part=>part.mesh)]);
     const groups=new Map();
@@ -448,7 +454,8 @@ export function createScenarioWorld(container) {
       for(const part of animatedParts){
         if(part.type==='caustics')part.mesh.material.map.offset.set(ambientTime*.008,ambientTime*.005);
         if(part.type==='belt-new')part.mesh.position.z=-3.48+(((part.base+3.48+ambientTime*.25)%2.52)+2.52)%2.52;
-        if(part.type==='bike-wheel'||part.type==='bike-crank')part.mesh.rotation.x=ambientTime*(part.type==='bike-wheel'?2.3:1.2);
+        if(part.type==='detailed-belt')part.mesh.position.x=-.35+(((part.base+.35+ambientTime*.22)%1.2)+1.2)%1.2;
+        if(part.type==='bike-wheel'||part.type==='bike-crank'||part.type==='detailed-bike-wheel'||part.type==='detailed-bike-crank')part.mesh.rotation.x=ambientTime*(part.type.includes('wheel')?2.3:1.2);
         if(part.type==='earth')part.mesh.rotation.y=ambientTime*.08;
         if(part.type==='ship-model')part.mesh.rotation.y=ambientTime*.3;
       }

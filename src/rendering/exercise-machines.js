@@ -4,6 +4,7 @@ import { RoundedBoxGeometry } from '../../node_modules/three/examples/jsm/geomet
 // Fictional exercise hardware inspired by real training machines; no medical simulation.
 export function addExerciseMachines(scene) {
   const root=new THREE.Group();root.name='conditioning-equipment';scene.add(root);
+  const resistance=new THREE.Group(),treadmill=new THREE.Group(),cycle=new THREE.Group();treadmill.name='fallback-treadmill';cycle.name='fallback-cycle';root.add(resistance,treadmill,cycle);let target=resistance;
   const frame=new THREE.MeshStandardMaterial({color:0x8c9996,roughness:.48,metalness:.62});
   const pale=new THREE.MeshStandardMaterial({color:0xc5ceca,roughness:.62,metalness:.3});
   const dark=new THREE.MeshStandardMaterial({color:0x26363b,roughness:.83,metalness:.12});
@@ -21,10 +22,10 @@ export function addExerciseMachines(scene) {
     return new THREE.MeshBasicMaterial({map});
   }
   const treadmillScreen=screenMaterial('T2 / CARDIO'),bikeScreen=screenMaterial('CYCLE / CARDIO');
-  function rounded(x,y,z,w,h,d,mat,r=.04){const o=new THREE.Mesh(new RoundedBoxGeometry(w,h,d,3,Math.min(r,w/4,h/4,d/4)),mat);o.position.set(x,y,z);root.add(o);return o;}
-  function cyl(x,y,z,r1,r2,h,mat,segments=18){const o=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,segments),mat);o.position.set(x,y,z);root.add(o);return o;}
+  function rounded(x,y,z,w,h,d,mat,r=.04){const o=new THREE.Mesh(new RoundedBoxGeometry(w,h,d,3,Math.min(r,w/4,h/4,d/4)),mat);o.position.set(x,y,z);target.add(o);return o;}
+  function cyl(x,y,z,r1,r2,h,mat,segments=18){const o=new THREE.Mesh(new THREE.CylinderGeometry(r1,r2,h,segments),mat);o.position.set(x,y,z);target.add(o);return o;}
   function tube(a,b,r,mat){const v=new THREE.Vector3(...a),end=new THREE.Vector3(...b),dir=end.clone().sub(v);const o=cyl(0,0,0,r,r,dir.length(),mat,12);o.position.copy(v.add(end).multiplyScalar(.5));o.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir.normalize());return o;}
-  function torus(x,y,z,r,t,mat){const o=new THREE.Mesh(new THREE.TorusGeometry(r,t,10,32),mat);o.position.set(x,y,z);root.add(o);return o;}
+  function torus(x,y,z,r,t,mat){const o=new THREE.Mesh(new THREE.TorusGeometry(r,t,10,32),mat);o.position.set(x,y,z);target.add(o);return o;}
   // Resistive machine, located at the existing ARED station.
   rounded(-3.7,.2,-3.4,3.0,.22,2.1,dark);
   for(const x of [-5.0,-2.4]){
@@ -42,6 +43,7 @@ export function addExerciseMachines(scene) {
   rounded(-3.7,.38,-3.25,1.7,.08,1.3,rubber);
   for(const x of [-4.2,-3.2])rounded(x,.43,-3.0,.36,.04,.7,pale);
   // Treadmill with continuous belt, safety rails and mounted controls.
+  target=treadmill;
   rounded(4,.27,-2.4,1.9,.36,3.0,frame,.09);
   rounded(4,.48,-2.4,1.52,.055,2.62,rubber,.015);
   for(const x of [3.13,4.87]){
@@ -57,6 +59,7 @@ export function addExerciseMachines(scene) {
   const stripes=[];
   for(let i=0;i<7;i++){const stripe=rounded(4,.515,-3.48+i*.36,1.44,.012,.025,pale,.003);stripes.push({mesh:stripe,base:stripe.position.z});}
   // Cycle ergometer: flywheel, drive, pedals, seat and handlebars.
+  target=cycle;
   rounded(4.3,.14,3.8,1.3,.18,2.1,dark);
   tube([4.3,.28,3.1],[4.3,.92,4.15],.07,frame);
   tube([4.3,.28,4.52],[4.3,.92,4.15],.07,frame);
@@ -66,12 +69,12 @@ export function addExerciseMachines(scene) {
   tube([3.96,1.46,3.02],[4.64,1.46,3.02],.055,rubber);
   rounded(4.3,1.64,3.08,.58,.4,.09,dark);
   rounded(4.3,1.66,3.13,.46,.25,.02,bikeScreen,.005);
-  const wheel=new THREE.Group();wheel.position.set(4.3,.57,3.35);root.add(wheel);
+  const wheel=new THREE.Group();wheel.position.set(4.3,.57,3.35);target.add(wheel);
   const rim=new THREE.Mesh(new THREE.TorusGeometry(.38,.055,12,36),rubber);rim.rotation.y=Math.PI/2;wheel.add(rim);
   const disc=new THREE.Mesh(new THREE.CylinderGeometry(.31,.31,.12,32),pale);disc.rotation.z=Math.PI/2;wheel.add(disc);
-  const crank=new THREE.Group();crank.position.set(4.3,.55,3.9);root.add(crank);
+  const crank=new THREE.Group();crank.position.set(4.3,.55,3.9);target.add(crank);
   for(const side of [-1,1]){const arm=new THREE.Mesh(new THREE.BoxGeometry(.05,.52,.05),frame);arm.position.set(side*.18,side*.15,0);crank.add(arm);const pedal=new THREE.Mesh(new THREE.BoxGeometry(.24,.06,.12),rubber);pedal.position.set(side*.24,side*.4,0);crank.add(pedal);}
   // Display supports and subtle warning details.
   for(const x of [3.34,4.66])rounded(x,.53,-1.08,.12,.025,.12,accent,.004);
-  return { stripes, wheel, crank };
+  return { stripes, wheel, crank, treadmill, cycle };
 }

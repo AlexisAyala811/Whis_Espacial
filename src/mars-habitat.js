@@ -73,6 +73,7 @@ try{
   for(const x of [-1.1,-.88,-.66,.66,.88,1.1])box(x,1.59,-5.47,.06,.025,.02,glow);
   for(const x of [-1,-.6,-.2,.2,.6,1]){box(x,1.45,-4.73,.24,.035,.16,dark);box(x,1.47,-4.71,.14,.012,.08,glow);}
   for(const side of [-1,1])for(const y of [.35,.47,.59])box(side*1.18,y,-4.51,.24,.025,.015,dark);
+  loadRoomProp(scene,'console-keyboard',[{x:-.7,y:1.48,z:-4.68,width:.58,detail:1,shadows:false,url:'./assets/models/exercise/keyboard.glb'}]);
   sign("MISSION CONTROL",0,3.2,-5.63,3.4);obstacles.push({x:0,z:-5.1,w:3.2,d:1.35});
   const ring=new THREE.Mesh(new THREE.TorusGeometry(1.7,.025,8,48),glow);ring.rotation.x=-Math.PI/2;ring.position.set(0,.055,-5.1);scene.add(ring);
   // Photographic Mars view is a wall display, not an accurate live window.
