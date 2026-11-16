@@ -8,11 +8,11 @@ el código fuente editable de la página.
 
 ## Secuencia de despegue
 
-La primera vez que cruces del VAB a la cabina aparece una animación sin voz que
-representa la verificación, cuenta regresiva, despegue y ascenso. Puedes omitirla
-con el botón o Esc; se reproduce de nuevo al reiniciar el entrenamiento. Es una
-representación original del juego, no un video de un lanzamiento real. Con la
-opción de movimiento reducido se muestra una versión corta.
+La primera vez que cruces del VAB a la cabina se reproduce el video de
+despegue proporcionado por el usuario, sin voz. Puedes omitirlo con el botón
+o Esc; vuelve a reproducirse al reiniciar el entrenamiento. Con movimiento
+reducido se muestra una transición breve. Si el video no está disponible,
+el juego continúa hacia la cabina.
 
 ## Controles y vista desde la nave
 

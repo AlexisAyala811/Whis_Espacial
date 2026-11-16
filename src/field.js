@@ -177,7 +177,7 @@ async function transitionTo(index){
   try{
     if(index===6 && world.currentIndex===5 && !launchSeen){
       world.release();audio.setScene('launch');audio.cue('launch');
-      await playLaunchSequence({container:$('launch-sequence'),canvas:$('launch-canvas'),phase:$('launch-phase'),skip:$('launch-skip')});
+      await playLaunchSequence({container:$('launch-sequence'),video:$('launch-video'),phase:$('launch-phase'),skip:$('launch-skip')});
       launchSeen=true;
     }
     $('loading-title').textContent=SCENARIOS[index].title;

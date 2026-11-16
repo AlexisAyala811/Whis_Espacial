@@ -42,8 +42,8 @@
 <div class="coordinates" id="position"></div>
 </section>
 <section id="launch-sequence" class="launch-sequence" hidden role="dialog" aria-modal="true" aria-labelledby="launch-title">
-<canvas id="launch-canvas" width="1280" height="720" aria-label="Fictional rocket launch animation"></canvas>
-<div class="launch-overlay"><div><small>MISSION CONTROL / SIMULATED SEQUENCE</small><h2 id="launch-title">LIFTOFF</h2><p id="launch-phase" role="status">SYSTEMS CHECK</p></div><p class="launch-caption">Visual simulation · No voice</p><button id="launch-skip">Skip sequence and enter the spacecraft</button></div>
+<video id="launch-video" src="./assets/launch/launch.mp4" preload="metadata" muted playsinline aria-label="Rocket launch footage"></video>
+<div class="launch-overlay"><div><small>MISSION CONTROL / SIMULATED SEQUENCE</small><h2 id="launch-title">LIFTOFF</h2><p id="launch-phase" role="status">SYSTEMS CHECK</p></div><p class="launch-caption">Launch footage · No voice</p><button id="launch-skip">Skip sequence and enter the spacecraft</button></div>
 </section>
 <section id="loading" class="loading" hidden role="status" aria-live="polite"><div class="loading-content"><small>SCENE TRANSITION // EARTH BASE</small><h2 id="loading-title">Loading scene</h2><p>Preparing the next room and its systems.</p><div class="loading-track" aria-hidden="true"><span></span></div><small>Remain in the transfer area</small></div></section>
 <section id="pause" class="modal" hidden><small>MISSION CONTROL</small><h2>Exploration paused</h2><p>Use WASD to move, Ctrl + W or Shift to run, and the mouse or arrow keys to look around. Press E to interact or cross an open door. In the NBL, Space moves up and Ctrl without W moves down.</p><button id="resume" class="primary">Continue</button><button id="restart">Restart training</button></section>
