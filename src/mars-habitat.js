@@ -8,6 +8,7 @@ import { RoundedBoxGeometry } from '../../node_modules/three/examples/jsm/geomet
 import { makeSurfaceTextures, drawTelemetry } from './rendering/surface-detail.js';
 import { createWali } from './wali.js';
 import { addSceneBackground } from './rendering/room-backgrounds.js';
+import { addCrewBunks } from './rendering/crew-bunks.js';
 
 const audio=createMissionAudio({scene:'mars-habitat',active:true});
 const $=id=>document.getElementById(id),reduced=matchMedia('(prefers-reduced-motion: reduce)'),returned=new URLSearchParams(location.search).get('regreso')==='panel';
@@ -46,8 +47,7 @@ try{
   }
   for(const z of [-7,-3,1,5]){box(-5.72,4.62,z,.06,.04,1.4,glow);box(5.72,4.62,z,.06,.04,1.4,glow);}
   // Sleeping berths on the left.
-  for(const y of [.65,2.15]){rounded(-4.35,y,-1.2,2.8,.25,1.6,metal);rounded(-4.35,y+.18,-1.2,2.55,.18,1.4,fabric);rounded(-5.1,y+.3,-1.2,.65,.12,1.15,wall,.05);}
-  for(const x of [-5.7,-3])for(const z of [-1.95,-.45])box(x,1.6,z,.09,3.2,.09,metal);
+  addCrewBunks(scene,{x:-4.35,z:-1.2,width:2.8,depth:1.6,levels:[.65,2.15],textures});
   obstacles.push({x:-4.35,z:-1.2,w:3,d:1.85});sign("SLEEP",-4.3,3.45,-2.13,2.7);
   // Plant rack with individual leaves; the model is decorative, not a crop simulator.
   box(4.45,.55,-2.4,2.25,1.1,1.55,metal);box(4.45,1.15,-2.4,2.1,.12,1.4,dark);

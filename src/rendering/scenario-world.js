@@ -21,6 +21,8 @@ import { loadNasaRocket } from './nasa-rocket.js';
 import { addSceneBackground } from './room-backgrounds.js';
 import { addExerciseMachines } from './exercise-machines.js';
 import { loadDetailedExerciseMachines } from './detailed-exercise-machines.js';
+import { addCrewBunks } from './crew-bunks.js';
+import { addUnderwaterSurface } from './underwater-surface.js';
 
 export const STATIONS = [
   { id: 'suit', name: "01 / SUIT", scene: 0, x: -3.7, z: -1.4, color: 0x91d9c2 },
@@ -281,6 +283,8 @@ export function createScenarioWorld(container) {
       }
       for (const x of [-6.8, -3.6, 3.6, 6.8]) display(x, 3.35, -9.35, 2.3, 1.2, 2);
     } else if (index === 3) {
+      const water=addUnderwaterSurface(scene);
+      animatedParts.push({type:'water-surface',mesh:water.water,update:water.update});
       // Lightweight simulated caustics, visible only on the training-pool floor.
       const causticCanvas=document.createElement('canvas');causticCanvas.width=causticCanvas.height=256;
       const causticContext=causticCanvas.getContext('2d');causticContext.clearRect(0,0,256,256);causticContext.lineWidth=2;
@@ -302,16 +306,12 @@ export function createScenarioWorld(container) {
       box(4.2, .38, -2.4, 4.2, .5, 5.1, 0x3b626d);
       for (const x of [2.3, 6.1]) for (const z of [-5, .2]) box(x, 1.4, z, .1, 2.8, .12, 0xb0bdba);
       for (let i = 0; i < 26; i++) {
-        const bubble = new THREE.Mesh(new THREE.SphereGeometry(.025 + (i % 3) * .018, 8, 6), new THREE.MeshBasicMaterial({ color: 0xbdebf3, transparent: true, opacity: .35 }));
+        const bubble = new THREE.Mesh(new THREE.SphereGeometry(.025 + (i % 3) * .018, 12, 8), new THREE.MeshPhysicalMaterial({ color: 0xc7eef4, transparent: true, opacity: .3, roughness:.16, metalness:.12, clearcoat:1, depthWrite:false }));
         bubble.position.set((i % 7) * 2.25 - 7.1, .65 + (i % 5) * .72, -6 + Math.floor(i / 7) * 3.3); scene.add(bubble); bubbles.push({mesh:bubble,base:bubble.position.y,phase:i*.47});
       }
       obstacles.push({ x: 4.2, z: -2.4, w: 4.4, d: 5.3 });
     } else if (index === 4) {
-      for (const y of [.55, 2.15]) {
-        box(4.8, y, -3.9, 3.8, .22, 1.9, 0x9ba59b);
-        box(4.8, y + .15, -3.9, 3.5, .14, 1.65, 0x3e6474);
-        box(4.8, y + .17, -4.65, .9, .14, .5, 0xd8dad2);
-      }
+      addCrewBunks(scene,{x:4.8,z:-3.9,width:3.8,depth:1.9,levels:[.55,2.15],textures});
       for (const z of [1.1, 2.8, 4.5]) {
         box(6.2, .92, z, 1.25, 1.65, .9, 0x8d9d92);
         box(6.2, 1.75, z, 1.25, .08, .9, 0xc4c9bb);
@@ -453,6 +453,7 @@ export function createScenarioWorld(container) {
       for(const bubble of bubbles){bubble.mesh.position.y=.2+((bubble.base+ambientTime*.24+bubble.phase)%4.5);bubble.mesh.position.x+=Math.sin(ambientTime+bubble.phase)*dt*.015;}
       for(const part of animatedParts){
         if(part.type==='caustics')part.mesh.material.map.offset.set(ambientTime*.008,ambientTime*.005);
+        if(part.type==='water-surface'&&part.mesh.visible)part.update(ambientTime,dt);
         if(part.type==='belt-new')part.mesh.position.z=-3.48+(((part.base+3.48+ambientTime*.25)%2.52)+2.52)%2.52;
         if(part.type==='detailed-belt')part.mesh.position.x=-.35+(((part.base+.35+ambientTime*.22)%1.2)+1.2)%1.2;
         if(part.type==='bike-wheel'||part.type==='bike-crank'||part.type==='detailed-bike-wheel'||part.type==='detailed-bike-crank')part.mesh.rotation.x=ambientTime*(part.type.includes('wheel')?2.3:1.2);
