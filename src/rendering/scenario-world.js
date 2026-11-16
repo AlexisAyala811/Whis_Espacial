@@ -16,6 +16,7 @@ import { buildCabinDetails } from './cabin-details.js';
 import { finishScenario } from './scenario-finish.js';
 import { makePreparationSuits } from './preparation-suits.js';
 import { addAssemblyRocket, addRocketReference } from './assembly-rocket.js';
+import { loadNasaRocket } from './nasa-rocket.js';
 
 export const STATIONS = [
   { id: 'suit', name: "01 / SUIT", scene: 0, x: -3.7, z: -1.4, color: 0x91d9c2 },
@@ -70,7 +71,7 @@ export function createScenarioWorld(container) {
     for(const z of [-5,5]){const lamp=new THREE.PointLight(index===3?0x99dcea:0xeaf2ea,index===5?18:5,index===5?18:9,2);lamp.position.set(0,index===5?14:4.2,z);lamp.userData.graphicsDetail=1;scene.add(lamp);}
     const obstacles = [], materials = new Map(), textures = makeSurfaceTextures(index,{pbr:true});
     const animatedScreens = [], screenMaps = new Map(), bubbles = [], animatedParts = [], staticBoxes = [], plantFallbacks = [];
-    let ambientTime = 0, screenTime = 0, disposeCabin = null;
+    let ambientTime = 0, screenTime = 0, disposeCabin = null, disposeRocket = () => {};
     function material(color, glow = false, kind = 'metal') {
       const key = `${color}-${glow}-${kind}`;
       if (!materials.has(key)) materials.set(key, new THREE.MeshStandardMaterial({ color, map: glow ? null : textures[kind], normalMap: !glow && kind==='metal' ? textures.metalNormal : null, normalScale: new THREE.Vector2(.32,.32), roughnessMap: !glow && kind==='metal' ? textures.metalRoughness : null, roughness: glow ? .4 : kind==='metal' ? .68 : .92, metalness: glow ? .05 : kind==='metal' ? .32 : .03, emissive: glow ? color : 0, emissiveIntensity: glow ? 1.1 : 0 }));
@@ -338,7 +339,8 @@ export function createScenarioWorld(container) {
         // Access structures stay beside the vehicle and its boosters.
         for (const x of [1.05, 7.15]) box(x, y, -2.8, .45, .18, 6.3, 0xdfad58);
       }
-      addAssemblyRocket(scene);
+      const rocketFallback = addAssemblyRocket(scene);
+      disposeRocket = loadNasaRocket(scene, rocketFallback);
       addRocketReference(scene);
       textPanel('ARTEMIS I / NASA - FRANK MICHAUX', -6.5, 1.22, -9.16, 2.25);
       for(const y of [3.5,7,10.5]) {
@@ -413,7 +415,7 @@ export function createScenarioWorld(container) {
     const cartPositions={0:{x:5.8,y:0,z:-6.9,height:.8},1:{x:-7.8,y:0,z:6.8,height:.8},5:{x:-8.7,y:0,z:6.9,height:.85}};
     const disposeCart=cartPositions[index]?loadRoomProp(scene,'tool_cart',[{...cartPositions[index],detail:1,shadows:false}]):()=>{};
     const disposeMedical=index===4?loadRoomProp(scene,'medical_box',[{x:-5.6,y:.05,z:7.7,height:.4,detail:1,shadows:false}]):()=>{};
-    const disposeEquipment=()=>{disposeElectrical();disposePlants();disposeLaptop();disposeFixtures();disposeCart();disposeMedical();disposeSuit();};
+    const disposeEquipment=()=>{disposeRocket();disposeElectrical();disposePlants();disposeLaptop();disposeFixtures();disposeCart();disposeMedical();disposeSuit();};
     // Group static boxes by material. Moving doors, lamps and exercise parts stay separate.
     const dynamic=new Set([...forwardLeaves,...backLeaves,doorLamp,...animatedParts.map(part=>part.mesh)]);
     const groups=new Map();
