@@ -13,3 +13,11 @@ test('all player-facing pages request English without automatic translation', as
   assert.match(game, /SCENE TRANSITION/);
   assert.match(game, /Restart training/);
 });
+
+test('training station and checklist labels are in English', async () => {
+  const { createPhysicalScenario, createMentalScenario } = await import('../../src/core/training-scenarios.js');
+  assert.deepEqual(createPhysicalScenario().stations.map(station => station.name), [
+    'ARED · Axial strength', 'T2 · Cardiorespiratory endurance',
+  ]);
+  assert.equal(createMentalScenario().checklist.title, 'Response to concurrent alerts');
+});

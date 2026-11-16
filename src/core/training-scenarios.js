@@ -7,7 +7,7 @@ export function createPhysicalScenario() {
     stations: [
       {
         id: 'ared-strength',
-        name: 'ARED · Fuerza axial',
+        name: 'ARED · Axial strength',
         durationMs: 180000,
         load: 0.55,
         fatigue: 0.12,
@@ -18,7 +18,7 @@ export function createPhysicalScenario() {
       },
       {
         id: 't2-cardio',
-        name: 'T2 · Resistencia cardiorrespiratoria',
+        name: 'T2 · Cardiorespiratory endurance',
         durationMs: 180000,
         load: 0.65,
         fatigue: 0.18,
@@ -70,7 +70,7 @@ export function createMentalScenario() {
     ],
     checklist: createChecklist({
       id: 'mental-response',
-      title: 'Respuesta a avisos concurrentes',
+      title: 'Response to concurrent alerts',
       steps: [
         { id: 'acknowledge-alerts', label: 'Acknowledge alerts', description: "Confirm receipt of both alerts." },
         { id: 'prioritize-atmosphere', label: "Prioritize atmosphere", description: "Select the system at immediate risk." },
